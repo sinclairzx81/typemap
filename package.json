@@ -1,9 +1,13 @@
 {
-  "name": "@sinclair/typebox-remix",
+  "name": "@sinclair/typebox-adapter",
   "version": "0.8.0",
   "description": "Integrate Valibot and Zod with TypeBox",
   "author": "sinclairzx81",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sinclairzx81/typebox-adapter"
+  },
   "scripts": {
     "benchmark": "hammer task benchmark",
     "clean": "hammer task clean",

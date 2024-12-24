@@ -38,7 +38,7 @@ export async function test(filter = '') {
 // ------------------------------------------------------------------
 export async function build_check(target = 'target/build') {
   const { version } = JSON.parse(Fs.readFileSync('package.json', 'utf8'))
-  await shell(`cd ${target} && attw sinclair-typebox-remix-${version}.tgz --ignore-rules unexpected-module-syntax`)
+  await shell(`cd ${target} && attw sinclair-typebox-adapter-${version}.tgz --ignore-rules unexpected-module-syntax`)
 }
 export async function build(target = 'target/build') {
   await test()
@@ -56,7 +56,7 @@ export async function build(target = 'target/build') {
 export async function publish(otp, target = 'target/build') {
   const { version } = JSON.parse(Fs.readFileSync('package.json', 'utf8'))
   if(version.includes('-dev')) throw Error(`package version should not include -dev specifier`)
-  await shell(`cd ${target} && npm publish sinclair-typebox-remix-${version}.tgz --access=public --otp ${otp}`)
+  await shell(`cd ${target} && npm publish sinclair-typebox-adapter-${version}.tgz --access=public --otp ${otp}`)
   await shell(`git tag ${version}`)
   await shell(`git push origin ${version}`)
 }
@@ -66,5 +66,5 @@ export async function publish(otp, target = 'target/build') {
 export async function publish_dev(otp, target = 'target/build') {
   const { version } = JSON.parse(Fs.readFileSync(`${target}/package.json`, 'utf8'))
   if(!version.includes('-dev')) throw Error(`development package version should include -dev specifier`)
-  await shell(`cd ${target} && npm publish sinclair-typebox-remix-${version}.tgz --access=public --otp ${otp} --tag dev`)
+  await shell(`cd ${target} && npm publish sinclair-typebox-adapter-${version}.tgz --access=public --otp ${otp} --tag dev`)
 }

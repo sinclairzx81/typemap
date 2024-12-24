@@ -1,4 +1,4 @@
-import { Box } from '@sinclair/typebox-remix'
+import { Box } from '@sinclair/typebox-adapter'
 import * as Types from '@sinclair/typebox'
 import { TypeGuard } from '@sinclair/typebox'
 import { Assert } from './assert'

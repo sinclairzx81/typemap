@@ -1,6 +1,6 @@
 import { TypeCompiler } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
-import { Box } from '@sinclair/typebox-remix'
+import { Box } from '@sinclair/typebox-adapter'
 
 import * as v from 'valibot'
 import * as z from 'zod'

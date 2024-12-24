@@ -3,7 +3,7 @@ on:
   schedule:
     - cron: '0 18 * * *' # 6pm Daily
 jobs:
-  TypeBox-Remix-Nightly:
+  TypeBox-Adapter-Nightly:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

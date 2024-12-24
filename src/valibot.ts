@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-@sinclair/typebox-remix
+@sinclair/typebox-adapter
 
 The MIT License (MIT)
 

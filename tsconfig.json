@@ -5,10 +5,10 @@
     "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {
-      "@sinclair/typebox-remix/typebox": ["src/typebox.ts"],
-      "@sinclair/typebox-remix/valibot": ["src/valibot.ts"],
-      "@sinclair/typebox-remix/zod": ["src/zod.ts"],
-      "@sinclair/typebox-remix": ["src/index.ts"]
+      "@sinclair/typebox-adapter/typebox": ["src/typebox.ts"],
+      "@sinclair/typebox-adapter/valibot": ["src/valibot.ts"],
+      "@sinclair/typebox-adapter/zod": ["src/zod.ts"],
+      "@sinclair/typebox-adapter": ["src/index.ts"]
     }
   }
 }
