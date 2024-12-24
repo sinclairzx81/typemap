@@ -1,0 +1,52 @@
+{
+  "name": "@sinclair/typebox-remix",
+  "version": "0.8.0",
+  "description": "Integrate Valibot and Zod with TypeBox",
+  "author": "sinclairzx81",
+  "license": "MIT",
+  "scripts": {
+    "benchmark": "hammer task benchmark",
+    "clean": "hammer task clean",
+    "start": "hammer task start",
+    "format": "hammer task format",
+    "test": "hammer task test",
+    "build": "hammer task build",
+    "publish": "hammer task publish"
+  },
+  "main": "index.js",
+  "module": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "types": "./index.d.ts"
+    },
+    "./typebox": {
+      "import": "./typebox.js",
+      "types": "./typebox.d.ts"
+    },
+    "./zod": {
+      "import": "./zod.js",
+      "types": "./zod.d.ts"
+    },
+    "./valibot": {
+      "import": "./valibot.js",
+      "types": "./valibot.d.ts"
+    }
+  },
+  "peerDependencies": {
+    "@sinclair/typebox": ">=0.34.13"
+  },
+  "optionalDependencies": {
+    "valibot": ">=1.0.0-beta.9",
+    "zod": ">=3.24.1"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.17.2",
+    "@sinclair/hammer": "^0.18.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.10.2",
+    "mocha": "^11.0.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,24 @@
+name: Build
+on: [push, pull_request]
+jobs:
+  TypeBox-Remix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node: [16.x, 18.x, 20.x]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install Packages
+        run: npm install
+
+      - name: Build Library
+        run: npm run build
+
+      - name: Test Library
+        run: npm run test

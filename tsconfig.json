@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2020",
+    "moduleResolution": "Node",
+    "baseUrl": ".",
+    "paths": {
+      "@sinclair/typebox-remix/typebox": ["src/typebox.ts"],
+      "@sinclair/typebox-remix/valibot": ["src/valibot.ts"],
+      "@sinclair/typebox-remix/zod": ["src/zod.ts"],
+      "@sinclair/typebox-remix": ["src/index.ts"]
+    }
+  }
+}
