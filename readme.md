@@ -9,7 +9,7 @@
 <br />
 <br />
 
-[![npm version](https://badge.fury.io/js/%40sinclair%2Ftypebox-adapter.svg)](https://badge.fury.io/js/%40sinclair%2Ftypebox-adapter)
+[![npm version](https://badge.fury.io/js/%40sinclair%2Ftypebox-adapter.svg?1)](https://badge.fury.io/js/%40sinclair%2Ftypebox-adapter)
 [![Downloads](https://img.shields.io/npm/dm/%40sinclair%2Ftypebox-adapter.svg)](https://www.npmjs.com/package/%40sinclair%2Ftypebox-adapter)
 [![Build](https://github.com/sinclairzx81/typebox-adapter/actions/workflows/build.yml/badge.svg)](https://github.com/sinclairzx81/typebox-adapter/actions/workflows/build.yml)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -55,7 +55,7 @@ const Z = Box(z.object({                            // const Z: TObject<{
 
 ## Overview
 
-TypeBox Adapter is a library that transforms Zod and Valibot types into TypeBox compatiable schematics. It works by structurally remapping the types provided by these libraries both statically and at runtime, enabling them to integrate with TypeBox infrastructure as well as making them compatible with industry standard Json Schema validators like Ajv.
+TypeBox Adapter converts Zod and Valibot types into TypeBox schematics (Json Schema). It performs a deep structural remapping of the types provided by these libraries into TypeScript-aligned Json Schema, enabling integration with industry-standard validators like Ajv and OpenAPI-related technologies, while also facilitating interoperability and acceleration via the TypeBox validation infrastructure.
 
 License MIT
 
@@ -75,59 +75,58 @@ TypeBox Adapter provides a singular Box function to transform Valibot and Zod ty
 
 ### Valibot
 
-Use the `/valibot` submodule if you only have Valibot installed.
+Use the `/valibot` submodule if you only have Valibot installed. Refer to the Valibot [documentation](https://valibot.dev/) for more information on this type library.
 
 ```typescript
 import { Box } from '@sinclair/typebox-adapter/valibot' // Transform Valibot Only
 
 import * as v from 'valibot'
 
-const T = Box(v.string())                             // const T = { type: 'string' }
+const T = Box(v.string())                               // const T = { type: 'string' }
 ```
-
-Refer to the Valibot [documentation](https://valibot.dev/) for more information on this type library.
 
 ### Zod
 
-Use the `/zod` submodule if you only have Zod installed.
+Use the `/zod` submodule if you only have Zod installed. Refer to the Zod [documentation](https://zod.dev/) for more information on this type library.
 
 ```typescript
 import { Box } from '@sinclair/typebox-adapter/zod'     // Transform Zod Only
 
 import * as z from 'zod'
 
-const T = Box(z.string())                             // const T = { type: 'string' }
+const T = Box(z.string())                               // const T = { type: 'string' }
 ```
-
-Refer to the Zod [documentation](https://zod.dev/) for more information on this type library.
-
-
 
 ## Benchmark
 
-This project manages a benchmark that runs type check performance using Zod, Valibot and TypeBox validators. The benchmark is setup to run 1 million check operations per library and validator pairing and reports the elapsed time taken to complete.
+This project manages a benchmark that evaluates type-check performance using Zod, Valibot, and TypeBox validators. The benchmark is set up to run 10 million check operations per library-validator pairing and reports the elapsed time taken to complete.
 
 ### Type
 
+Benchmarks are run for the following type.
+
 ```typescript
-const T = { x: number, y: number, z: number }
+type T = { x: number, y: string, z: boolean }
 ```
 
 ### Results
+
+Results show validate performance for the type.
+
 ```typescript
 ┌─────────┬────────────────┬────────────────────┬────────────┬────────────┐
 │ (index) │ library        │ using              │ iterations │ elapsed    │
 ├─────────┼────────────────┼────────────────────┼────────────┼────────────┤
-│ 0       │ 'valibot     ' │ 'valibot         ' │ 1000000    │ '378 ms  ' │
-│ 1       │ 'valibot     ' │ 'typebox:value   ' │ 1000000    │ '125 ms  ' │
-│ 2       │ 'valibot     ' │ 'typebox:compile ' │ 1000000    │ '4 ms    ' │
+│ 0       │ 'valibot     ' │ 'valibot         ' │ 10000000   │ '1911 ms ' │
+│ 1       │ 'valibot     ' │ 'typebox:value   ' │ 10000000   │ '1200 ms ' │
+│ 2       │ 'valibot     ' │ 'typebox:compile ' │ 10000000   │ '47 ms   ' │
 └─────────┴────────────────┴────────────────────┴────────────┴────────────┘
 ┌─────────┬────────────────┬────────────────────┬────────────┬────────────┐
 │ (index) │ library        │ using              │ iterations │ elapsed    │
 ├─────────┼────────────────┼────────────────────┼────────────┼────────────┤
-│ 0       │ 'zod         ' │ 'zod             ' │ 1000000    │ '444 ms  ' │
-│ 1       │ 'zod         ' │ 'typebox:value   ' │ 1000000    │ '127 ms  ' │
-│ 2       │ 'zod         ' │ 'typebox:compile ' │ 1000000    │ '5 ms    ' │
+│ 0       │ 'zod         ' │ 'zod             ' │ 10000000   │ '4429 ms ' │
+│ 1       │ 'zod         ' │ 'typebox:value   ' │ 10000000   │ '1170 ms ' │
+│ 2       │ 'zod         ' │ 'typebox:compile ' │ 10000000   │ '47 ms   ' │
 └─────────┴────────────────┴────────────────────┴────────────┴────────────┘
 ```
 
@@ -135,5 +134,5 @@ For community benchmarks, refer to the [runtime-type-benchmarks](https://github.
 
 ## Contribute
 
-This project is open to community contribution. Please ensure you submit an open issue before submitting your pull request. TypeBox and associated projects prefer open community discussion before accepting new features.
+This project is open to community contributions. Please ensure you submit an open issue before creating a pull request. TypeBox and its associated projects encourage open community discussion before accepting new features.
 
