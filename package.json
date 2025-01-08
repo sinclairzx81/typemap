@@ -1,6 +1,6 @@
 {
   "name": "@sinclair/typebox-adapter",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Integrate Valibot and Zod with TypeBox",
   "author": "sinclairzx81",
   "license": "MIT",

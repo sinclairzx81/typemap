@@ -108,6 +108,19 @@ function FromDefault<Def extends z.ZodDefaultDef>(def: Def): tb.TSchema {
   return tb.CloneType(FromType(def.innerType), { default: def.defaultValue() })
 }
 // ------------------------------------------------------------------
+// DiscriminatedUnion
+// ------------------------------------------------------------------
+// prettier-ignore
+type TFromDiscriminatedUnion<Discriminator extends string, Types extends readonly z.ZodObject<any>[], Result extends tb.TSchema[] = []> = (
+  Types extends [infer Left extends z.ZodObject<any>, ...infer Right extends z.ZodObject<any>[]] 
+    ? TFromDiscriminatedUnion<Discriminator, Right, [...Result, TFromType<Left>]>
+    : tb.TUnion<Result>
+)
+function FromDiscriminatedUnion<Def extends z.ZodDiscriminatedUnionDef<string, z.ZodDiscriminatedUnionOption<string>[]>>(def: Def): tb.TSchema {
+  const types = def.options.map((type) => FromType(type))
+  return tb.Union(types, { discriminator: def.discriminator })
+}
+// ------------------------------------------------------------------
 // Effects
 // ------------------------------------------------------------------
 type TFromEffects<Input extends z.ZodTypeAny, Output extends unknown> = tb.Ensure<tb.TTransform<TFromType<Input>, Output>>
@@ -322,6 +335,7 @@ type TFromType<Type extends z.ZodType> = (
   Type extends z.ZodBoolean ? TFromBoolean :
   Type extends z.ZodDate ? TFromDate :
   Type extends z.ZodDefault<infer Type> ? TFromDefault<Type> :
+  Type extends z.ZodDiscriminatedUnion<infer Discriminator, infer Types> ? TFromDiscriminatedUnion<Discriminator, Types> : 
   Type extends z.ZodEffects<infer Input, infer Output> ? TFromEffects<Input, Output> :
   Type extends z.ZodLiteral<infer Value> ? TFromLiteral<Value> :
   Type extends z.ZodNullable<infer Type> ? TFromNullable<Type> :
@@ -353,6 +367,7 @@ function FromType<Type extends z.ZodType>(type: Type): tb.TSchema {
     type instanceof z.ZodBoolean ? FromBoolean(type._def) :
     type instanceof z.ZodDate ? FromDate(type._def) :
     type instanceof z.ZodDefault ? FromDefault(type._def) :
+    type instanceof z.ZodDiscriminatedUnion ? FromDiscriminatedUnion(type._def) :
     type instanceof z.ZodEffects ? FromEffects(type) :
     type instanceof z.ZodLiteral ? FromLiteral(type._def) :
     type instanceof z.ZodNullable ? FromNullable(type._def) :

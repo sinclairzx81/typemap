@@ -46,6 +46,20 @@ describe('Zod', () => {
     Assert.IsTrue(TypeGuard.IsDate(T))
   })
   // ----------------------------------------------------------------
+  // DiscriminatedUnion
+  // ----------------------------------------------------------------
+  it('Should map DiscriminatedUnion', () => {
+    const A = z.object({ type: z.literal('A') })
+    const B = z.object({ type: z.literal('B') })
+    const C = z.object({ type: z.literal('C') })
+    const T = Box(z.discriminatedUnion('type', [A, B, C]))
+    Assert.IsTrue(TypeGuard.IsUnion(T))
+    Assert.IsEqual(T.discriminator, 'type')
+    Assert.IsTrue(T.anyOf[0].properties.type.const === 'A')
+    Assert.IsTrue(T.anyOf[1].properties.type.const === 'B')
+    Assert.IsTrue(T.anyOf[2].properties.type.const === 'C')
+  })
+  // ----------------------------------------------------------------
   // Effects
   // ----------------------------------------------------------------
   it('Should map Effects (Transform)', () => {
