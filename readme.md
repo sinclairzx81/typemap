@@ -26,6 +26,8 @@ $ npm install @sinclair/typebox-adapter --save
 
 TypeBox Adapter converts Valibot and Zod Types into TypeBox compatible schematics
 
+[TypeScript Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgIQgDzgXzgMyhEOAcgAEBnYAOwGMAbAQ2CgHoYBPMAUwCN0BaegBN6YGJyhEAUKEixEcAMox6MYNSy58hUhRoMmrDj3RSZ0eACo49MnABumgsTv1awXjFPhzcKzbgAXo7aARCCUpLMzHAAaq7uEPAwEHAAKkaoaJKS7FyxcAC8isqq1AA8uZwQOLEAfNnUEJRk8DGFKOgAFHYAdBDcAFac1DCdSHATk1PTMzNRcI3Nre0IkhNoAFz2PZQAriDc4p0AlAA0sxeXVxPzE5VbRP1DI0Sna3BsW717B0dn1wDAbc4FBOABHXZMTiCLYAbSIaFexDYSKIASIAF03hMAl8dvtDlAToCSVdgWB8FxYMBOGQtqtMMdjqSWay4MD1vS4PdiD9CUQsNi2cKSRyPlyeUQ+eIBZghSKFZcxbj5JLpRIsO9FdrpsDMFqdYb5vrItEAFphbkpdJcTLZSpwM3tJQqNQVIzVR31SSLFqO9qZToBPqDYajcaG9nRX3wM1bVIAeVDIzKqwm9C2wZaUCoAHMTudI0roun40oc5Rc0LuJmetm8wWi8XJjW0uW80LqLX65XiU2LsCu22YBXc5JGcz+8LjbUgA)
+
 ```typescript
 import { Box } from '@sinclair/typebox-adapter'
 
@@ -117,15 +119,15 @@ Results show validate performance for the type.
 ┌─────────┬────────────────┬────────────────────┬────────────┬────────────┐
 │ (index) │ library        │ using              │ iterations │ elapsed    │
 ├─────────┼────────────────┼────────────────────┼────────────┼────────────┤
-│ 0       │ 'valibot     ' │ 'valibot         ' │ 10000000   │ '1911 ms ' │
-│ 1       │ 'valibot     ' │ 'typebox:value   ' │ 10000000   │ '1200 ms ' │
-│ 2       │ 'valibot     ' │ 'typebox:compile ' │ 10000000   │ '47 ms   ' │
+│ 0       │ 'valibot     ' │ 'valibot         ' │ 10000000   │ '1534 ms ' │
+│ 1       │ 'valibot     ' │ 'typebox:value   ' │ 10000000   │ '1377 ms ' │
+│ 2       │ 'valibot     ' │ 'typebox:compile ' │ 10000000   │ '46 ms   ' │
 └─────────┴────────────────┴────────────────────┴────────────┴────────────┘
 ┌─────────┬────────────────┬────────────────────┬────────────┬────────────┐
 │ (index) │ library        │ using              │ iterations │ elapsed    │
 ├─────────┼────────────────┼────────────────────┼────────────┼────────────┤
-│ 0       │ 'zod         ' │ 'zod             ' │ 10000000   │ '4429 ms ' │
-│ 1       │ 'zod         ' │ 'typebox:value   ' │ 10000000   │ '1170 ms ' │
+│ 0       │ 'zod         ' │ 'zod             ' │ 10000000   │ '4669 ms ' │
+│ 1       │ 'zod         ' │ 'typebox:value   ' │ 10000000   │ '1359 ms ' │
 │ 2       │ 'zod         ' │ 'typebox:compile ' │ 10000000   │ '47 ms   ' │
 └─────────┴────────────────┴────────────────────┴────────────┴────────────┘
 ```

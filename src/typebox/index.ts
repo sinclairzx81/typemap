@@ -26,33 +26,4 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { TSchema, KindGuard, Unknown, type TUnknown } from '@sinclair/typebox'
-import * as TypeBox from './typebox/index'
-import * as Valibot from './valibot/index'
-import * as Zod from './zod/index'
-
-/** Converts a Zod, Valibot or TypeBox Type to a TypeBox Type */
-// prettier-ignore
-export type TBox<Type extends unknown> = (
-  TypeBox.TBox<Type> extends infer Schema extends TSchema ? Schema : 
-  Valibot.TBox<Type> extends infer Schema extends TSchema ? Schema :
-  Zod.TBox<Type> extends infer Schema extends TSchema ? Schema :
-  TUnknown
-)
-/** Converts a Zod, Valibot or TypeBox Type to a TypeBox Type */
-// prettier-ignore
-export function Box<Type extends unknown>(type: Type): TBox<Type> {
-  {
-    const result = TypeBox.Box(type)
-    if(KindGuard.IsSchema(result)) return result as never  
-  }
-  {
-    const result = Valibot.Box(type)
-    if(KindGuard.IsSchema(result)) return result as never
-  }
-  {
-    const result = Zod.Box(type)
-    if(KindGuard.IsSchema(result)) return result as never
-  }
-  return Unknown() as never
-}
+export * from './box'

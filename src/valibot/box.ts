@@ -418,12 +418,12 @@ export interface TNaN<Type extends v.NanSchema<any> = v.NanSchema<any>> extends 
   static: v.InferOutput<this['type']>
   type: Type
 }
-function NaN<Type extends v.NanSchema<any>>(type: Type, options?: tb.SchemaOptions): TNaN<Type> {
+function _NaN<Type extends v.NanSchema<any>>(type: Type, options?: tb.SchemaOptions): TNaN<Type> {
   return tb.CreateType({ [tb.Kind]: 'ValibotNaN', type }, options) as never
 }
 type TFromNaN<Type extends v.NanSchema<any>> = tb.Ensure<TNaN<Type>>
 function FromNaN(type: BaseSchema): tb.TSchema {
-  return NaN(type as v.NanSchema<any>, Options(type))
+  return _NaN(type as v.NanSchema<any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Never

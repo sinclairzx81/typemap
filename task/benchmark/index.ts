@@ -81,5 +81,7 @@ function valibot_using_compiler() {
   return benchmark('valibot', 'typebox:compile', () => T.Check({ x: 'hello', y: 42, z: true }))
 }
 
+console.log('running benchmark')
 console.table([valibot(), valibot_using_value(), valibot_using_compiler()])
 console.table([zod(), zod_using_value(), zod_using_compiler()])
+

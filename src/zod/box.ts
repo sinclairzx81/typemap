@@ -231,7 +231,7 @@ function FromReadonly<Def extends z.ZodReadonlyDef>(def: Def): tb.TSchema {
 // ------------------------------------------------------------------
 // Record
 // ------------------------------------------------------------------
-export type TFromRecord<Key extends z.ZodTypeAny, Value extends z.ZodTypeAny> = tb.Ensure<tb.TRecordOrObject<TFromType<Key>, TFromType<Value>>>
+type TFromRecord<Key extends z.ZodTypeAny, Value extends z.ZodTypeAny> = tb.Ensure<tb.TRecordOrObject<TFromType<Key>, TFromType<Value>>>
 function FromRecord<Def extends z.ZodRecordDef>(def: Def): tb.TSchema {
   return tb.Record(FromType(def.keyType), FromType(def.valueType))
 }

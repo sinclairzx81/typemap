@@ -1,10 +1,11 @@
+import * as Build from './task/build'
 import * as Fs from 'node:fs'
 
 // ------------------------------------------------------------------
 // Benchmark
 // ------------------------------------------------------------------
 export async function benchmark(target = 'target/benchmark') {
-  await shell(`hammer run benchmark/index.ts --dist ${target}`)
+  await shell(`hammer run task/benchmark/index.ts --dist ${target}`)
 }
 // ------------------------------------------------------------------
 // Clean
@@ -23,7 +24,7 @@ export async function start() {
 // Format
 // -------------------------------------------------------------------------------
 export async function format() {
-  await shell('prettier --no-semi --single-quote --print-width 240 --trailing-comma all --write test src benchmark example/index.ts')
+  await shell('prettier --no-semi --single-quote --print-width 240 --trailing-comma all --write test src example/index.ts')
 }
 
 // ------------------------------------------------------------------
@@ -38,13 +39,16 @@ export async function test(filter = '') {
 // ------------------------------------------------------------------
 export async function build_check(target = 'target/build') {
   const { version } = JSON.parse(Fs.readFileSync('package.json', 'utf8'))
-  await shell(`cd ${target} && attw sinclair-typebox-adapter-${version}.tgz --ignore-rules unexpected-module-syntax`)
+  await shell(`cd ${target} && attw sinclair-typebox-adapter-${version}.tgz`)
 }
 export async function build(target = 'target/build') {
   await test()
   await clean()
-  await shell(`tsc -p src/tsconfig.json --outDir ${target} --declaration`)
-  await folder(target).add('package.json')
+  await Promise.all([
+    Build.Package.build(target),
+    Build.Esm.build(target),
+    Build.Cjs.build(target),
+  ])
   await folder(target).add('readme.md')
   await folder(target).add('license')
   await shell(`cd ${target} && npm pack`)
