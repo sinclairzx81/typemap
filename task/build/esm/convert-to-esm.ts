@@ -32,7 +32,15 @@ import * as Fs from 'node:fs'
 // ------------------------------------------------------------------
 // Specifier Rewrite
 // ------------------------------------------------------------------
-
+function shouldSkipSpecifier(captured: string) {
+  const specifier = captured.slice(1, captured.length - 1)
+  return (
+    specifier.includes('.mjs') || // mitigate duplicate rewrite 
+    specifier.startsWith("@sinclair/typebox") || 
+    specifier.startsWith("valibot") || 
+    specifier.startsWith("zod")
+  )
+}
 // prettier-ignore
 function replaceInlineImportSpecifiers(content: string): string {
   const pattern = /import\((.*?)\)/g
@@ -40,7 +48,7 @@ function replaceInlineImportSpecifiers(content: string): string {
     const match = pattern.exec(content)
     if (match === null) return content
     const captured = match[1]
-    if(captured.includes('.mjs')) continue
+    if(shouldSkipSpecifier(captured)) continue
     const specifier = captured.slice(1, captured.length - 1)
     content = content.replace(captured, `"${specifier}.mjs"`)
   }
@@ -52,6 +60,7 @@ function replaceExportSpecifiers(content: string): string {
     const match = pattern.exec(content)
     if(match === null) return content
     const captured = match[3]
+    if(shouldSkipSpecifier(captured)) continue
     const specifier = captured.slice(1, captured.length - 1)
     content = content.replace(captured, `'${specifier}.mjs'`)
   }
