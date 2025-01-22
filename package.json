@@ -18,14 +18,15 @@
     "publish": "hammer task publish"
   },
   "peerDependencies": {
-    "@sinclair/typebox": "^0.34.13"
+    "@sinclair/typebox": "^0.34.14"
   },
   "optionalDependencies": {
-    "valibot": "^1.0.0-beta.11",
+    "valibot": "^1.0.0-beta.13",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.2",
+    "@effect/schema": "^0.75.5",
     "@sinclair/hammer": "^0.18.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.2",
