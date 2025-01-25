@@ -2,16 +2,16 @@
 
 <h1>TypeMap</h1>
 
-<p>Unified Syntax Frontend and Type Remapping System for TypeBox, Valibot and Zod</p>
+<p>Unified Syntax Frontend and Type Remapping Library for TypeBox, Valibot and Zod</p>
 
-<img src="typemap.png" />
+<img src="https://github.com/sinclairzx81/typemap/blob/main/typemap.png?raw=true" />
 
 <br />
 <br />
 
-[![npm version](https://badge.fury.io/js/%40sinclair%2Ftypebox-adapter.svg?1)](https://badge.fury.io/js/%40sinclair%2Ftypebox-adapter)
-[![Downloads](https://img.shields.io/npm/dm/%40sinclair%2Ftypebox-adapter.svg)](https://www.npmjs.com/package/%40sinclair%2Ftypebox-adapter)
-[![Build](https://github.com/sinclairzx81/typebox-adapter/actions/workflows/build.yml/badge.svg)](https://github.com/sinclairzx81/typebox-adapter/actions/workflows/build.yml)
+[![npm version](https://badge.fury.io/js/%40sinclair%2Ftypemap.svg)](https://badge.fury.io/js/%40sinclair%2Ftypemap)
+[![Downloads](https://img.shields.io/npm/dm/%40sinclair%2F2Ftypemap.svg)](https://www.npmjs.com/package/%40sinclair%2Ftypemap)
+[![Build](https://github.com/sinclairzx81/typemap/actions/workflows/build.yml/badge.svg)](https://github.com/sinclairzx81/typemap/actions/workflows/build.yml)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 </div>
@@ -24,10 +24,12 @@ $ npm install @sinclair/typemap --save
 
 ## Example
 
-Use syntax to construct types for TypeBox, Valibot and Zod ...
+Use TypeScript syntax to construct types for TypeBox, Valibot and Zod ... 
+
+[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAWhACaEBqAhgDbABGE8AvnAGZQQhwDkAAgGdgAOwDGNKsCgB6GOgwgqYHgCgV06XFERhA+MgBcKAPL0AVhlEwAPEgB0DuMwB8a7bv1wAvCnk5cABQABkgqcHC4RsIAriD0GFD4YXCoUbHxickAXmlxCSrMQQCU4aVl5WoaWjp6cBRGphZWAMqiABYKVLZwDnZOrirutRTedbQMTMGh4ZFwMXmZ4alz6QlJ4TkrCwXFlZpD8ERGJKSNljb2ji5uNYejJ1NwybPzGespuW-Zn-mFRUA)
 
 ```typescript
-import { TypeBox, Zod, Valibot } from '@sinclair/typemap'
+import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
 
 // const T: TObject<{ ... }>
 
@@ -56,6 +58,8 @@ const Z = Zod(`{
 
 ... or structurally remap types from one library to another
 
+[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAagIYA2wARhDIQFoQAmcAvnAGZQQhwDkAAgGdgAOwDGZEsCgB6GOgwgSYXgChVMmXADKqETBK44APjgNmp0hWrxTaTDlzqxEEYPjI4AXhQLHACisqGn9zfwADBFU4OFwALjgRAFcQSgwofGi4VATk1PTMmIAvXJS0qFUWcIBKWqA)
+
 ```typescript
 import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
 
@@ -69,6 +73,8 @@ const T = TypeBox(Valibot(Zod(`{
 ```
 
 ... or compile types for high performance runtime type checking
+
+[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFADQkWHABehYiDLiIAE0EC6EGpXgAVOAF4JAOggAjAFZY6MABRI4N23butWcFWs0AufQC0FAeRNmYAB4kARsADw9xPRoAVxBDLCgLAEoAGnsMzLhHWwivBQA5OISoVNC4Dkjo4sSU9KyG7KcbSvz5IvjEsptxKtjOpLTGhpyequ92mtKBXGTh+cac3AA+IRd1FB0UNDBMLAsNOYWm51UN5A8ANUYMYHlGGGhAjT9Tc2Dy46+HZrg8jQ6JW63xBJxaHgBU2BoK+owkEMBiU+MIWS2Wy1sazO8AASltkHpkAALMwAays3xy61xHkMEAg2EYNDgAFo4AAJYAAcyJcAACokCNBePQcMSybQuQBCcp5ACMwNaACZ0uVenAAMwzZJAA)
 
 ```typescript
 import { Compile } from '@sinclair/typemap'
@@ -98,9 +104,9 @@ const R = C.Check({                // const R: boolean - High Performance Checki
 
 ## Overview
 
-TypeMap is an type mapping library developed for TypeBox, Valibot and Zod. It enables quick compatibility between each library by structurally remapping type representations from one library to another. In addition,TypeMap offers a uniform syntax for type construction as well as high-performance runtime type checking for Valibot and Zod via the TypeBox compiler infrastructure.
+TypeMap is a type mapping library developed for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) runtime type libraries. It is designed to make these libraries cross compatible by structurally remapping types from one library to another. TypeMap also provides a uniform frontend syntax for creating types, as well as uniform type compilation for high-performance validation via the TypeBox compiler infrastructure.
 
-TypeMap is designed to be a simple tool to enable Valibot and Zod to integrate with TypeBox and Json Schema validation infrastructure. It is also written to allow TypeBox to integrate with systems leveraging Valibot and Zod for validation. The frontend syntax provided by TypeMap seeks to explore a uniform API surface for runtime type libraries.
+TypeMap is built to be a simple tool to let Valibot and Zod to integrate with TypeBox and Json Schema infrastructure. It is also written to enable TypeBox to integrate with systems using Valibot and Zod for validation.
 
 License: MIT
 
