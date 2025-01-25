@@ -2,7 +2,7 @@
 
 <h1>TypeMap</h1>
 
-<p>Uniform Mapping, Syntax and Compiler Library for TypeBox, Valibot and Zod</p>
+<p>Uniform Syntax, Mapping and Compiler Library for TypeBox, Valibot and Zod</p>
 
 <img src="https://github.com/sinclairzx81/typemap/blob/main/typemap.png?raw=true" />
 
