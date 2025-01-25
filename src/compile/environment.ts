@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-@sinclair/typebox-adapter
+@sinclair/typemap
 
 The MIT License (MIT)
 
@@ -26,4 +26,18 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export * from './box'
+/** Cached: flag to indicate if the environment supports runtime evaluation */
+let isEvalSupported: boolean | undefined = undefined
+
+// prettier-ignore
+function TryEval(): boolean {
+  try { new Function('null')(); return true } catch { return false }
+}
+/** Tests if the environment supports eval */
+// prettier-ignore
+export function IsEvalSupported(): boolean {
+  if(isEvalSupported === undefined) {
+    isEvalSupported = TryEval()
+  }
+  return isEvalSupported
+}

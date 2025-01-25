@@ -1,12 +1,12 @@
 {
-  "name": "@sinclair/typebox-adapter",
-  "version": "0.9.1",
-  "description": "Integrate Valibot and Zod with TypeBox",
+  "name": "@sinclair/typemap",
+  "version": "0.8.0",
+  "description": "Unified Syntax Frontend and Type Remapping System for TypeBox, Valibot and Zod",
   "author": "sinclairzx81",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sinclairzx81/typebox-adapter"
+    "url": "https://github.com/sinclairzx81/typemap"
   },
   "scripts": {
     "benchmark": "hammer task benchmark",
@@ -18,15 +18,12 @@
     "publish": "hammer task publish"
   },
   "peerDependencies": {
-    "@sinclair/typebox": "^0.34.14"
-  },
-  "optionalDependencies": {
+    "@sinclair/typebox": "^0.34.14",
     "valibot": "^1.0.0-beta.13",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.2",
-    "@effect/schema": "^0.75.5",
     "@sinclair/hammer": "^0.18.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.2",

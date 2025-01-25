@@ -1,6 +1,5 @@
-import { TypeCompiler } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
-import { Box } from '@sinclair/typebox-adapter'
+import { Compile, TypeBox } from '@sinclair/typemap'
 
 import * as v from 'valibot'
 import * as z from 'zod'
@@ -26,7 +25,7 @@ function zod() {
   return benchmark('zod', 'zod', () => T.safeParse({ x: 'hello', y: 42, z: true }).success)
 }
 function zod_using_value() {
-  const T = Box(
+  const T = TypeBox(
     z.object({
       x: z.string(),
       y: z.number(),
@@ -36,14 +35,12 @@ function zod_using_value() {
   return benchmark('zod', 'typebox:value', () => Value.Check(T, { x: 'hello', y: 42, z: true }))
 }
 function zod_using_compiler() {
-  const T = TypeCompiler.Compile(
-    Box(
-      z.object({
-        x: z.string(),
-        y: z.number(),
-        z: z.boolean(),
-      }),
-    ),
+  const T = Compile(
+    z.object({
+      x: z.string(),
+      y: z.number(),
+      z: z.boolean(),
+    }),
   )
   return benchmark('zod', 'typebox:compile', () => T.Check({ x: 'hello', y: 42, z: true }))
 }
@@ -59,7 +56,7 @@ function valibot() {
   return benchmark('valibot', 'valibot', () => v.safeParse(T, { x: 'hello', y: 42, z: true }).success)
 }
 function valibot_using_value() {
-  const T = Box(
+  const T = TypeBox(
     v.object({
       x: v.string(),
       y: v.number(),
@@ -69,14 +66,12 @@ function valibot_using_value() {
   return benchmark('valibot', 'typebox:value', () => Value.Check(T, { x: 'hello', y: 42, z: true }))
 }
 function valibot_using_compiler() {
-  const T = TypeCompiler.Compile(
-    Box(
-      v.object({
-        x: v.string(),
-        y: v.number(),
-        z: v.boolean(),
-      }),
-    ),
+  const T = Compile(
+    v.object({
+      x: v.string(),
+      y: v.number(),
+      z: v.boolean(),
+    }),
   )
   return benchmark('valibot', 'typebox:compile', () => T.Check({ x: 'hello', y: 42, z: true }))
 }

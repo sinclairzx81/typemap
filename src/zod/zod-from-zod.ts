@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-@sinclair/typebox-adapter
+@sinclair/typemap
 
 The MIT License (MIT)
 
@@ -26,4 +26,21 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export * from './box'
+import * as Guard from '../guard'
+import * as z from 'zod'
+
+type BaseType = z.ZodTypeAny | z.ZodEffects<any>
+
+// prettier-ignore
+export type TZodFromZod<Type extends object | string,
+  Result extends BaseType = (
+    Type extends BaseType 
+      ? Type 
+      : z.ZodNever
+  )
+> = Result
+
+// prettier-ignore
+export function ZodFromZod<Type extends object | string>(type: Type): TZodFromZod<Type> {
+  return (Guard.IsZod(type) ? type : z.never()) as never
+}

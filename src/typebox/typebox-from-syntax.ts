@@ -4,7 +4,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2017-2024 Haydn Paterson (sinclair) <haydn.developer@gmail.com>
+Copyright (c) 2024 Haydn Paterson (sinclair) <haydn.developer@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,19 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { removeNotices } from '../notices/remove-notices'
-import { compile } from './compile'
+import { StaticParseAsSchema, Parse } from '@sinclair/typebox/syntax'
+import * as t from '@sinclair/typebox'
 
-/** Builds the CommonJS version of this package */
-export async function build(target: string) {
-  console.log('building...cjs')
-  const buildTarget = `${target}/build/cjs`
-  await compile(buildTarget)
-  await removeNotices(buildTarget)
+// prettier-ignore
+export type TTypeBoxFromSyntax<
+  Type extends string | object, 
+  Parsed = Type extends string ? StaticParseAsSchema<{}, Type> : t.TNever,
+  Result extends t.TSchema = Parsed extends t.TSchema ? Parsed : t.TNever
+> = Result
+
+// prettier-ignore
+export function TypeBoxFromSyntax<Type extends string | object>(type: Type): TTypeBoxFromSyntax<Type> {
+  const parsed = t.ValueGuard.IsString(type) ? Parse(type) : t.Never()
+  const result = t.KindGuard.IsSchema(parsed) ? parsed : t.Never()
+  return result as never
 }

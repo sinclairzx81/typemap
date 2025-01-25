@@ -26,8 +26,31 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { type Static } from './static'
-export * from './compile/compile'
-export * from './typebox/typebox'
-export * from './valibot/valibot'
-export * from './zod/zod'
+import { type TValibotFromSyntax, ValibotFromSyntax } from './valibot-from-syntax'
+import { type TValibotFromTypeBox, ValibotFromTypeBox } from './valibot-from-typebox'
+import { type TValibotFromValibot, ValibotFromValibot } from './valibot-from-valibot'
+import { type TValibotFromZod, ValibotFromZod } from './valibot-from-zod'
+import * as Guard from '../guard'
+import * as v from 'valibot'
+import * as c from './common'
+
+/** Creates a Valibot type from Syntax or another Type */
+// prettier-ignore
+export type TValibot<Type extends object | string> = (
+  Guard.TIsSyntax<Type> extends true ? TValibotFromSyntax<Type> :
+  Guard.TIsTypeBox<Type> extends true ? TValibotFromTypeBox<Type> :
+  Guard.TIsValibot<Type> extends true ? TValibotFromValibot<Type> :
+  Guard.TIsZod<Type> extends true ? TValibotFromZod<Type> :
+  v.NeverSchema<c.BaseError>
+)
+/** Creates a Valibot type from Syntax or another Type */
+// prettier-ignore
+export function Valibot<Type extends object | string, Result = TValibot<Type>>(type: Type): Result {
+  return (
+    Guard.IsSyntax(type) ? ValibotFromSyntax(type) :
+    Guard.IsTypeBox(type) ? ValibotFromTypeBox(type) :
+    Guard.IsValibot(type) ? ValibotFromValibot(type) :
+    Guard.IsZod(type) ? ValibotFromZod(type as any) :
+    v.never()
+  ) as never
+}

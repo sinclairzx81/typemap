@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-@sinclair/typebox-adapter
+@sinclair/typemap
 
 The MIT License (MIT)
 
@@ -26,11 +26,20 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { TSchema, KindGuard } from '@sinclair/typebox'
+import { TTypeBoxFromSyntax, TypeBoxFromSyntax } from '../typebox/typebox-from-syntax'
+import { ZodFromTypeBox, TZodFromTypeBox } from './zod-from-typebox'
+import * as t from '@sinclair/typebox'
+import * as z from 'zod'
 
-/** Converts a TypeBox Type to a TypeBox Type */
-export type TBox<Type extends unknown> = Type extends TSchema ? Type : undefined
-/** Converts a TypeBox Type to a TypeBox Type */
-export function Box<Type extends unknown, Result extends TBox<Type> = TBox<Type>>(type: Type): Result {
-  return (KindGuard.IsSchema(type) ? type : undefined) as never
+// prettier-ignore
+export type TZodFromSyntax<Type extends object | string,
+  Schema extends t.TSchema = TTypeBoxFromSyntax<Type>,
+  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<Schema>
+> = Result
+
+// prettier-ignore
+export function ZodFromSyntax<Type extends string>(type: Type): TZodFromSyntax<Type> {
+  const schema = TypeBoxFromSyntax(type)
+  const result = ZodFromTypeBox(schema)
+  return result
 }
