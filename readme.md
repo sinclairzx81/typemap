@@ -81,19 +81,13 @@ import { Compile } from '@sinclair/typemap'
 
 import z from 'zod'
 
-const T = z.object({               // const T: z.ZodObject<{ 
-  x: z.number(),                   //   x: z.ZodNumber,
-  y: z.number(),                   //   y: z.ZodNumber,
-  z: z.number(),                   //   z: z.ZodNumber,
-})                                 // }>
-
-const C = Compile(T)               // const C: Validator<TObject<{
-                                   //   x: TNumber,
-                                   //   y: TNumber,
-                                   //   z: TNumber
-                                   // }>>   
-
-const R = C.Check({                // const R: boolean - High Performance Checking!
+const T = Compile(z.object({              // const T: Validator<TObject<{  
+  x: z.number(),                          //   x: TNumber,     
+  y: z.number(),                          //   y: TNumber,
+  z: z.number(),                          //   z: TNumber
+}))                                       // }>>   
+                                  
+const R = T.Check({                       // High Performance Check
   x: 1,
   y: 2, 
   z: 3
