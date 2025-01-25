@@ -1,38 +1,33 @@
-import { Box } from '@sinclair/typebox-adapter'
-import * as Types from '@sinclair/typebox'
+import { TypeBox, Zod } from '@sinclair/typemap'
 import { TypeGuard } from '@sinclair/typebox'
 import { Assert } from './assert'
-import * as v from 'valibot'
+import * as t from '@sinclair/typebox'
+import * as z from 'zod'
 
-describe('Valibot', () => {
+describe('Zod From TypeBox', () => {
   // ----------------------------------------------------------------
   // Metadata
   // ----------------------------------------------------------------
   it('Should map Description', () => {
-    const T = Box(v.pipe(v.number(), v.description('a number')))
+    const T = TypeBox(Zod(t.Number({ description: 'a number' })))
     Assert.IsEqual(T.description, 'a number')
   })
-  it('Should map Title', () => {
-    const T = Box(v.pipe(v.number(), v.title('a number')))
-    Assert.IsEqual(T.title, 'a number')
-  })
-  it('Should map Metadata', () => {
-    const T = Box(v.pipe(v.number(), v.metadata({ x: 1, y: 2 })))
-    Assert.IsEqual(T.x, 1)
-    Assert.IsEqual(T.y, 2)
+  it('Should map Default', () => {
+    const T = TypeBox(Zod(t.Number({ default: 12345 })))
+    Assert.IsEqual(T.default, 12345)
   })
   // ----------------------------------------------------------------
   // Any
   // ----------------------------------------------------------------
   it('Should map Any', () => {
-    const T = Box(v.any())
+    const T = TypeBox(Zod(t.Any()))
     Assert.IsTrue(TypeGuard.IsAny(T))
   })
   // ----------------------------------------------------------------
   // Array
   // ----------------------------------------------------------------
   it('Should map Array', () => {
-    const T = Box(v.array(v.number()))
+    const T = TypeBox(Zod(t.Array(t.Number())))
     Assert.IsTrue(TypeGuard.IsArray(T))
     Assert.IsTrue(TypeGuard.IsNumber(T.items))
   })
@@ -40,26 +35,26 @@ describe('Valibot', () => {
   // BigInt
   // ----------------------------------------------------------------
   it('Should map BigInt', () => {
-    const T = Box(v.bigint())
+    const T = TypeBox(Zod(t.BigInt()))
     Assert.IsTrue(TypeGuard.IsBigInt(T))
   })
   // ----------------------------------------------------------------
   // Date
   // ----------------------------------------------------------------
   it('Should map Date', () => {
-    const T = Box(v.date())
+    const T = TypeBox(Zod(t.Date()))
     Assert.IsTrue(TypeGuard.IsDate(T))
   })
   // ----------------------------------------------------------------
   // Effects
   // ----------------------------------------------------------------
   // it('Should map Effects (Transform)', () => {
-  //   const T = Box(v.number().transform(x => x))
+  //   const T = TypeBox(z.number().transform((x) => x))
   //   Assert.IsTrue(TypeGuard.IsNumber(T))
   //   Assert.IsTrue(TypeGuard.IsTransform(T))
   // })
   // it('Should map Effects (Refine)', () => {
-  //   const T = Box(v.number().refine(x => true))
+  //   const T = TypeBox(z.number().refine((x) => true))
   //   Assert.IsTrue(TypeGuard.IsNumber(T))
   //   Assert.IsTrue(TypeGuard.IsTransform(T))
   // })
@@ -67,49 +62,47 @@ describe('Valibot', () => {
   // Literal
   // ----------------------------------------------------------------
   it('Should map Literal (Number)', () => {
-    const T = Box(v.literal(42))
+    const T = TypeBox(Zod(t.Literal(42)))
     Assert.IsTrue(TypeGuard.IsLiteral(T))
     Assert.IsEqual(T.const, 42)
   })
   it('Should map Literal (String)', () => {
-    const T = Box(v.literal('hello'))
+    const T = TypeBox(Zod(t.Literal('hello')))
     Assert.IsTrue(TypeGuard.IsLiteral(T))
     Assert.IsEqual(T.const, 'hello')
   })
   it('Should map Literal (Boolean)', () => {
-    const T = Box(v.literal(true))
+    const T = TypeBox(Zod(t.Literal(true)))
     Assert.IsTrue(TypeGuard.IsLiteral(T))
     Assert.IsEqual(T.const, true)
-  })
-  // ----------------------------------------------------------------
-  // Nullable
-  // ----------------------------------------------------------------
-  it('Should map Nullable', () => {
-    const T = Box(v.nullable(v.number()))
-    Assert.IsTrue(TypeGuard.IsUnion(T))
-    Assert.IsTrue(TypeGuard.IsNull(T.anyOf[0]))
-    Assert.IsTrue(TypeGuard.IsNumber(T.anyOf[1]))
   })
   // ----------------------------------------------------------------
   // Object
   // ----------------------------------------------------------------
   it('Should map Object', () => {
-    const T = Box(
-      v.object({
-        x: v.number(),
-        y: v.string(),
-      }),
+    const T = TypeBox(
+      Zod(
+        t.Object({
+          x: t.Number(),
+          y: t.String(),
+        }),
+      ),
     )
     Assert.IsTrue(TypeGuard.IsObject(T))
     Assert.IsTrue(TypeGuard.IsNumber(T.properties.x))
     Assert.IsTrue(TypeGuard.IsString(T.properties.y))
   })
   it('Should map Object (Strict)', () => {
-    const T = Box(
-      v.strictObject({
-        x: v.number(),
-        y: v.string(),
-      }),
+    const T = TypeBox(
+      Zod(
+        t.Object(
+          {
+            x: t.Number(),
+            y: t.String(),
+          },
+          { additionalProperties: false },
+        ),
+      ),
     )
     Assert.IsTrue(TypeGuard.IsObject(T))
     Assert.IsTrue(TypeGuard.IsNumber(T.properties.x))
@@ -120,11 +113,13 @@ describe('Valibot', () => {
   // Optional
   // ----------------------------------------------------------------
   it('Should map Optional', () => {
-    const T = Box(
-      v.object({
-        x: v.optional(v.number()),
-        y: v.optional(v.number()),
-      }),
+    const T = TypeBox(
+      Zod(
+        t.Object({
+          x: t.Optional(t.Number()),
+          y: t.Optional(t.Number()),
+        }),
+      ),
     )
     Assert.IsTrue(TypeGuard.IsObject(T))
     Assert.IsTrue(TypeGuard.IsNumber(T.properties.x))
@@ -132,13 +127,32 @@ describe('Valibot', () => {
     Assert.IsTrue(TypeGuard.IsNumber(T.properties.y))
     Assert.IsTrue(TypeGuard.IsOptional(T.properties.y))
   })
-  it('Should map Optional (Partial)', () => {
-    const T = Box(
-      v.partial(
-        v.object({
-          x: v.number(),
-          y: v.number(),
+  it('Should map Optional (Readonly)', () => {
+    const T = TypeBox(
+      Zod(
+        t.Object({
+          x: t.ReadonlyOptional(t.Number()),
+          y: t.ReadonlyOptional(t.Number()),
         }),
+      ),
+    )
+    Assert.IsTrue(TypeGuard.IsObject(T))
+    Assert.IsTrue(TypeGuard.IsNumber(T.properties.x))
+    Assert.IsTrue(TypeGuard.IsOptional(T.properties.x))
+    Assert.IsFalse(TypeGuard.IsReadonly(T.properties.x)) // Cannot Map for Readonly in Zod
+    Assert.IsTrue(TypeGuard.IsNumber(T.properties.y))
+    Assert.IsTrue(TypeGuard.IsOptional(T.properties.y))
+    Assert.IsFalse(TypeGuard.IsReadonly(T.properties.y)) // Cannot Map for Readonly in Zod
+  })
+  it('Should map Optional (Partial)', () => {
+    const T = TypeBox(
+      Zod(
+        t.Partial(
+          t.Object({
+            x: t.Number(),
+            y: t.Number(),
+          }),
+        ),
       ),
     )
     Assert.IsTrue(TypeGuard.IsObject(T))
@@ -151,19 +165,43 @@ describe('Valibot', () => {
   // Promise
   // ----------------------------------------------------------------
   it('Should map Promise', () => {
-    const T = Box(v.promise())
-    Assert.IsEqual(T[Types.Kind], 'ValibotPromise')
+    const T = TypeBox(Zod(t.Promise(t.Number())))
+    Assert.IsTrue(TypeGuard.IsPromise(T))
+    Assert.IsTrue(TypeGuard.IsNumber(T.item))
+  })
+  // ----------------------------------------------------------------
+  // Readonly
+  // ----------------------------------------------------------------
+  it('Should map Readonly', () => {
+    const T = TypeBox(
+      Zod(
+        t.Object({
+          x: t.Readonly(t.Number()),
+          y: t.Readonly(t.Number()),
+        }),
+      ),
+    )
+    Assert.IsTrue(TypeGuard.IsObject(T))
+    Assert.IsTrue(TypeGuard.IsNumber(T.properties.x))
+    Assert.IsFalse(TypeGuard.IsReadonly(T.properties.x))
+    Assert.IsTrue(TypeGuard.IsNumber(T.properties.y))
+    Assert.IsFalse(TypeGuard.IsReadonly(T.properties.y))
   })
   // ----------------------------------------------------------------
   // Record
   // ----------------------------------------------------------------
-  it('Should map Record (String Key)', () => {
-    const T = Box(v.record(v.string(), v.number()))
+  it('Should map Record (Number Key)', () => {
+    const T = TypeBox(Zod(t.Record(t.Number(), t.Number())))
     Assert.IsTrue(TypeGuard.IsRecord(T))
-    Assert.IsTrue(TypeGuard.IsNumber(T.patternProperties[Types.PatternStringExact]))
+    Assert.IsTrue(TypeGuard.IsNumber(T.patternProperties[t.PatternNumberExact]))
+  })
+  it('Should map Record (String Key)', () => {
+    const T = TypeBox(Zod(t.Record(t.String(), t.Number())))
+    Assert.IsTrue(TypeGuard.IsRecord(T))
+    Assert.IsTrue(TypeGuard.IsNumber(T.patternProperties[t.PatternStringExact]))
   })
   it('Should map Record (Finite Union)', () => {
-    const T = Box(v.record(v.union([v.literal('x'), v.literal('y')]), v.number()))
+    const T = TypeBox(Zod(t.Record(t.Union([t.Literal('x'), t.Literal('y')]), t.Number())))
     Assert.IsTrue(TypeGuard.IsObject(T))
     Assert.IsTrue(TypeGuard.IsNumber(T.properties.x))
     Assert.IsTrue(TypeGuard.IsNumber(T.properties.y))
@@ -172,35 +210,35 @@ describe('Valibot', () => {
   // Never
   // ----------------------------------------------------------------
   it('Should map Never', () => {
-    const T = Box(v.never())
+    const T = TypeBox(Zod(t.Never()))
     Assert.IsTrue(TypeGuard.IsNever(T))
   })
   // ----------------------------------------------------------------
   // Null
   // ----------------------------------------------------------------
   it('Should map Null', () => {
-    const T = Box(v.null())
+    const T = TypeBox(Zod(t.Null()))
     Assert.IsTrue(TypeGuard.IsNull(T))
   })
   // ----------------------------------------------------------------
   // Number
   // ----------------------------------------------------------------
   it('Should map Number', () => {
-    const T = Box(v.number())
+    const T = TypeBox(Zod(t.Number()))
     Assert.IsTrue(TypeGuard.IsNumber(T))
   })
   it('Should map Number (Integer)', () => {
-    const T = Box(v.pipe(v.number(), v.integer()))
+    const T = TypeBox(Zod(t.Integer()))
     Assert.IsTrue(TypeGuard.IsNumber(T))
     Assert.IsEqual(T.multipleOf, 1)
   })
   it('Should map Number (Minimum)', () => {
-    const T = Box(v.pipe(v.number(), v.minValue(100)))
+    const T = TypeBox(Zod(t.Number({ minimum: 100 })))
     Assert.IsTrue(TypeGuard.IsNumber(T))
     Assert.IsEqual(T.minimum, 100)
   })
   it('Should map Number (Maximum)', () => {
-    const T = Box(v.pipe(v.number(), v.maxValue(100)))
+    const T = TypeBox(Zod(t.Number({ maximum: 100 })))
     Assert.IsTrue(TypeGuard.IsNumber(T))
     Assert.IsEqual(T.maximum, 100)
   })
@@ -208,194 +246,168 @@ describe('Valibot', () => {
   // String
   // ----------------------------------------------------------------
   it('Should map String', () => {
-    const T = Box(v.string())
+    const T = TypeBox(Zod(t.String()))
     Assert.IsTrue(TypeGuard.IsString(T))
   })
   it('Should map String (Base64)', () => {
-    const T = Box(v.pipe(v.string(), v.base64()))
+    const T = TypeBox(Zod(t.String({ format: 'base64' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:base64')
+    Assert.IsEqual(T.format, 'base64')
   })
-  it('Should map String (Bic)', () => {
-    const T = Box(v.pipe(v.string(), v.bic()))
+  it('Should map String (Base64Url)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'base64url' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:bic')
+    Assert.IsEqual(T.format, 'base64url')
   })
-  it('Should map String (CreditCard)', () => {
-    const T = Box(v.pipe(v.string(), v.creditCard()))
+  it('Should map String (Cidr V4)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'cidrv4' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:credit_card')
+    Assert.IsEqual(T.format, 'cidrv4')
+  })
+  it('Should map String (Cidr v6)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'cidrv6' })))
+    Assert.IsTrue(TypeGuard.IsString(T))
+    Assert.IsEqual(T.format, 'cidrv6')
+  })
+  it('Should map String (Cidr)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'cidr' })))
+    Assert.IsTrue(TypeGuard.IsString(T))
+    Assert.IsEqual(T.format, 'cidr')
+  })
+  it('Should map String (Cuid)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'cuid' })))
+    Assert.IsTrue(TypeGuard.IsString(T))
+    Assert.IsEqual(T.format, 'cuid')
   })
   it('Should map String (Cuid2)', () => {
-    const T = Box(v.pipe(v.string(), v.cuid2()))
+    const T = TypeBox(Zod(t.String({ format: 'cuid2' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:cuid2')
+    Assert.IsEqual(T.format, 'cuid2')
   })
-  it('Should map String (Decimal)', () => {
-    const T = Box(v.pipe(v.string(), v.decimal()))
+  it('Should map String (Ulid)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'ulid' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:decimal')
-  })
-  it('Should map String (Digits)', () => {
-    const T = Box(v.pipe(v.string(), v.digits()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:digits')
+    Assert.IsEqual(T.format, 'ulid')
   })
   it('Should map String (Email)', () => {
-    const T = Box(v.pipe(v.string(), v.email()))
+    const T = TypeBox(Zod(t.String({ format: 'email' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:email')
+    Assert.IsEqual(T.format, 'email')
   })
   it('Should map String (Emoji)', () => {
-    const T = Box(v.pipe(v.string(), v.emoji()))
+    const T = TypeBox(Zod(t.String({ format: 'emoji' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:emoji')
-  })
-  it('Should map String (Empty)', () => {
-    const T = Box(v.pipe(v.string(), v.empty()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.maxLength, 0)
+    Assert.IsEqual(T.format, 'emoji')
   })
   it('Should map String (EndsWith)', () => {
-    const T = Box(v.pipe(v.string(), v.endsWith('hello')))
+    const T = TypeBox(Zod(t.String({ pattern: 'hello$' })))
     Assert.IsTrue(TypeGuard.IsString(T))
     Assert.IsEqual(T.pattern, 'hello$')
   })
   it('Should map String (Includes)', () => {
-    const T = Box(v.pipe(v.string(), v.includes('hello')))
+    const T = TypeBox(Zod(t.String({ pattern: 'hello' })))
     Assert.IsTrue(TypeGuard.IsString(T))
     Assert.IsEqual(T.pattern, 'hello')
   })
-  it('Should map String (Ipv4)', () => {
-    const T = Box(v.pipe(v.string(), v.ipv4()))
+  it('Should map String (IpV4)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'ipv4' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:ipv4')
+    Assert.IsEqual(T.format, 'ipv4')
   })
   it('Should map String (IpV6)', () => {
-    const T = Box(v.pipe(v.string(), v.ipv6()))
+    const T = TypeBox(Zod(t.String({ format: 'ipv6' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:ipv6')
+    Assert.IsEqual(T.format, 'ipv6')
   })
   it('Should map String (Ip)', () => {
-    const T = Box(v.pipe(v.string(), v.ip()))
+    const T = TypeBox(Zod(t.String({ format: 'ip' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:ip')
+    Assert.IsEqual(T.format, 'ip')
   })
-  it('Should map String (IsoDate)', () => {
-    const T = Box(v.pipe(v.string(), v.isoDate()))
+  it('Should map String (Jwt)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'jwt' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:iso_date')
-  })
-  it('Should map String (IsoDateTime)', () => {
-    const T = Box(v.pipe(v.string(), v.isoDateTime()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:iso_date_time')
-  })
-  it('Should map String (IsoTime)', () => {
-    const T = Box(v.pipe(v.string(), v.isoTime()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:iso_time')
-  })
-  it('Should map String (IsoTimeSecond)', () => {
-    const T = Box(v.pipe(v.string(), v.isoTimeSecond()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:iso_time_second')
-  })
-  it('Should map String (IsoTimestamp)', () => {
-    const T = Box(v.pipe(v.string(), v.isoTimestamp()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:iso_timestamp')
-  })
-  it('Should map String (IsoWeek)', () => {
-    const T = Box(v.pipe(v.string(), v.isoWeek()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:iso_week')
+    Assert.IsEqual(T.format, 'jwt')
   })
   it('Should map String (Length)', () => {
-    const T = Box(v.pipe(v.string(), v.length(100)))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.maxLength, 100)
-    Assert.IsEqual(T.minLength, 100)
-  })
-  it('Should map String (Mac48)', () => {
-    const T = Box(v.pipe(v.string(), v.mac48()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:mac48')
-  })
-  it('Should map String (Mac64)', () => {
-    const T = Box(v.pipe(v.string(), v.mac64()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:mac64')
-  })
-  it('Should map String (Mac)', () => {
-    const T = Box(v.pipe(v.string(), v.mac()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:mac')
-  })
-  it('Should map String (MaxLength)', () => {
-    const T = Box(v.pipe(v.string(), v.maxLength(100)))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.maxLength, 100)
-  })
-  it('Should map String (MinLength)', () => {
-    const T = Box(v.pipe(v.string(), v.minLength(100)))
+    const T = TypeBox(Zod(t.String({ minLength: 100, maxLength: 100 })))
     Assert.IsTrue(TypeGuard.IsString(T))
     Assert.IsEqual(T.minLength, 100)
+    Assert.IsEqual(T.maxLength, 100)
+  })
+  it('Should map String (Min)', () => {
+    const T = TypeBox(Zod(t.String({ minLength: 100 })))
+    Assert.IsTrue(TypeGuard.IsString(T))
+    Assert.IsEqual(T.minLength, 100)
+  })
+  it('Should map String (Max)', () => {
+    const T = TypeBox(Zod(t.String({ maxLength: 100 })))
+    Assert.IsTrue(TypeGuard.IsString(T))
+    Assert.IsEqual(T.maxLength, 100)
   })
   it('Should map String (Nanoid)', () => {
-    const T = Box(v.pipe(v.string(), v.nanoid()))
+    const T = TypeBox(Zod(t.String({ format: 'nanoid' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:nanoid')
-  })
-  it('Should map String (Octal)', () => {
-    const T = Box(v.pipe(v.string(), v.octal()))
-    Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:octal')
+    Assert.IsEqual(T.format, 'nanoid')
   })
   it('Should map String (RegExp)', () => {
-    const T = Box(v.pipe(v.string(), v.regex(/abc/)))
+    const T = TypeBox(Zod(t.RegExp(/abc/)))
     Assert.IsTrue(TypeGuard.IsString(T))
     Assert.IsEqual(T.pattern, 'abc')
   })
   it('Should map String (StartsWith)', () => {
-    const T = Box(v.pipe(v.string(), v.startsWith('hello')))
+    const T = TypeBox(Zod(t.String({ pattern: '^hello' })))
     Assert.IsTrue(TypeGuard.IsString(T))
     Assert.IsEqual(T.pattern, '^hello')
   })
-  it('Should map String (Ulid)', () => {
-    const T = Box(v.pipe(v.string(), v.ulid()))
+  it('Should map String (Time)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'time' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:ulid')
+    Assert.IsEqual(T.format, 'time')
+  })
+  it('Should map String (Ulid)', () => {
+    const T = TypeBox(Zod(t.String({ format: 'ulid' })))
+    Assert.IsTrue(TypeGuard.IsString(T))
+    Assert.IsEqual(T.format, 'ulid')
   })
   it('Should map String (Url)', () => {
-    const T = Box(v.pipe(v.string(), v.url()))
+    const T = TypeBox(Zod(t.String({ format: 'url' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:url')
+    Assert.IsEqual(T.format, 'url')
   })
   it('Should map String (Uuid)', () => {
-    const T = Box(v.pipe(v.string(), v.uuid()))
+    const T = TypeBox(Zod(t.String({ format: 'uuid' })))
     Assert.IsTrue(TypeGuard.IsString(T))
-    Assert.IsEqual(T.format, 'valibot:uuid')
+    Assert.IsEqual(T.format, 'uuid')
   })
   // ----------------------------------------------------------------
   // Symbol
   // ----------------------------------------------------------------
   it('Should map Symbol', () => {
-    const T = Box(v.symbol())
+    const T = TypeBox(Zod(t.Symbol()))
     Assert.IsTrue(TypeGuard.IsSymbol(T))
+  })
+  // ----------------------------------------------------------------
+  // Tuple
+  // ----------------------------------------------------------------
+  it('Should map Tuple', () => {
+    const T = TypeBox(Zod(t.Tuple([t.Number(), t.String()])))
+    Assert.IsTrue(TypeGuard.IsTuple(T))
+    Assert.IsTrue(TypeGuard.IsNumber(T.items![0]))
+    Assert.IsTrue(TypeGuard.IsString(T.items![1]))
   })
   // ----------------------------------------------------------------
   // Undefined
   // ----------------------------------------------------------------
   it('Should map Undefined', () => {
-    const T = Box(v.undefined())
+    const T = TypeBox(Zod(t.Undefined()))
     Assert.IsTrue(TypeGuard.IsUndefined(T))
   })
   // ----------------------------------------------------------------
   // Union
   // ----------------------------------------------------------------
   it('Should map Union', () => {
-    const T = Box(v.union([v.string(), v.boolean()]))
+    const T = TypeBox(Zod(t.Union([t.String(), t.Boolean()])))
     Assert.IsTrue(TypeGuard.IsUnion(T))
     Assert.IsTrue(TypeGuard.IsString(T.anyOf[0]))
     Assert.IsTrue(TypeGuard.IsBoolean(T.anyOf[1]))
@@ -404,14 +416,14 @@ describe('Valibot', () => {
   // Unknown
   // ----------------------------------------------------------------
   it('Should map Unknown', () => {
-    const T = Box(v.unknown())
+    const T = TypeBox(Zod(t.Unknown()))
     Assert.IsTrue(TypeGuard.IsUnknown(T))
   })
   // ----------------------------------------------------------------
   // Void
   // ----------------------------------------------------------------
   it('Should map Void', () => {
-    const T = Box(v.void())
+    const T = TypeBox(Zod(t.Void()))
     Assert.IsTrue(TypeGuard.IsVoid(T))
   })
 })

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-@sinclair/typebox-adapter
+@sinclair/typemap
 
 The MIT License (MIT)
 
@@ -26,4 +26,19 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export * from './box'
+import * as s from '@sinclair/typebox/syntax'
+import * as t from '@sinclair/typebox'
+import * as v from 'valibot'
+import * as z from 'zod'
+
+type BaseSchema = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
+
+/** Statically infers a type */
+// prettier-ignore
+export type Static<Type extends object | string> = (
+  Type extends string ? s.StaticParseAsType<{}, Type> :
+  Type extends t.TSchema ? t.Static<Type> : 
+  Type extends BaseSchema ? v.InferInput<Type> : 
+  Type extends z.ZodTypeAny ? z.infer<Type> :
+  never
+)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-@sinclair/typebox-adapter
+@sinclair/typemap
 
 The MIT License (MIT)
 
@@ -26,14 +26,15 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import * as tb from '@sinclair/typebox'
+import * as t from '@sinclair/typebox'
 import * as v from 'valibot'
+import * as Guard from '../guard'
 
 // ------------------------------------------------------------------
 // Options
 // ------------------------------------------------------------------
 function IsSchemaWithPipe(type: BaseSchema): type is v.SchemaWithPipe<[BaseSchema, ...BaseValidation[]]> {
-  return tb.ValueGuard.IsObject(type) && tb.ValueGuard.HasPropertyKey(type, 'pipe') && tb.ValueGuard.IsArray(type.pipe)
+  return t.ValueGuard.IsObject(type) && t.ValueGuard.HasPropertyKey(type, 'pipe') && t.ValueGuard.IsArray(type.pipe)
 }
 // prettier-ignore
 function Options(type: BaseSchema) {
@@ -42,19 +43,19 @@ function Options(type: BaseSchema) {
     return {
       ...options, ...(
       action.type === 'args' ? {} :
-      action.type === 'base64' ? { format: 'valibot:base64' } :
-      action.type === 'bic' ? { format: 'valibot:bic' } :
+      action.type === 'base64' ? { format: 'base64' } :
+      action.type === 'bic' ? { format: 'bic' } :
       action.type === 'brand' ? {} :
       action.type === 'bytes' ? {} :
       action.type === 'check' ? {} :
       action.type === 'check_items' ? {} :
-      action.type === 'credit_card' ? { format: 'valibot:credit_card' } :
-      action.type === 'cuid2' ? { format: 'valibot:cuid2' } :
-      action.type === 'decimal' ? { format: 'valibot:decimal' } :
+      action.type === 'credit_card' ? { format: 'credit_card' } :
+      action.type === 'cuid2' ? { format: 'cuid2' } :
+      action.type === 'decimal' ? { format: 'decimal' } :
       action.type === 'description' ? { description: action.description } :
-      action.type === 'digits' ? { format: 'valibot:digits' } :
-      action.type === 'email' ? { format: 'valibot:email' } :
-      action.type === 'emoji' ? { format: 'valibot:emoji' } :
+      action.type === 'digits' ? { format: 'digits' } :
+      action.type === 'email' ? { format: 'email' } :
+      action.type === 'emoji' ? { format: 'emoji' } :
       action.type === 'empty' ? (
       type.type === 'array' ? { maxItems: 0 } :
       type.type === 'string' ? { maxLength: 0 } :
@@ -71,26 +72,26 @@ function Options(type: BaseSchema) {
       action.type === 'hex_color' ? {} :
       action.type === 'imei' ? {} :
       action.type === 'includes' ? (
-      type.type === 'array' ? { contains: tb.Literal(action.requirement) } :
+      type.type === 'array' ? { contains: t.Literal(action.requirement) } :
       type.type === 'string' ? { pattern: action.requirement } :
       {}) :
       action.type === 'integer' ? { multipleOf: 1 } :
-      action.type === 'ip' ? { format: 'valibot:ip' } :
-      action.type === 'ipv4' ? { format: 'valibot:ipv4' } :
-      action.type === 'ipv6' ? { format: 'valibot:ipv6' } :
-      action.type === 'iso_date' ? { format: 'valibot:iso_date' } :
-      action.type === 'iso_date_time' ? { format: 'valibot:iso_date_time' } :
-      action.type === 'iso_time' ? { format: 'valibot:iso_time' } :
-      action.type === 'iso_time_second' ? { format: 'valibot:iso_time_second' } :
-      action.type === 'iso_timestamp' ? { format: 'valibot:iso_timestamp' } :
-      action.type === 'iso_week' ? { format: 'valibot:iso_week' } :
+      action.type === 'ip' ? { format: 'ip' } :
+      action.type === 'ipv4' ? { format: 'ipv4' } :
+      action.type === 'ipv6' ? { format: 'ipv6' } :
+      action.type === 'iso_date' ? { format: 'iso_date' } :
+      action.type === 'iso_date_time' ? { format: 'iso_date_time' } :
+      action.type === 'iso_time' ? { format: 'iso_time' } :
+      action.type === 'iso_time_second' ? { format: 'iso_time_second' } :
+      action.type === 'iso_timestamp' ? { format: 'iso_timestamp' } :
+      action.type === 'iso_week' ? { format: 'iso_week' } :
       action.type === 'length' ? (
       type.type === 'string' ? { minLength: action.requirement, maxLength: action.requirement } :
       type.type === 'array' ? { minItems: action.requirement, maxItems: action.requirement } :
       {}) :
-      action.type === 'mac' ? { format: 'valibot:mac' } :
-      action.type === 'mac48' ? { format: 'valibot:mac48' } :
-      action.type === 'mac64' ? { format: 'valibot:mac64' } :
+      action.type === 'mac' ? { format: 'mac' } :
+      action.type === 'mac48' ? { format: 'mac48' } :
+      action.type === 'mac64' ? { format: 'mac64' } :
       action.type === 'map_items' ? {} :
       action.type === 'max_bytes' ? {} :
       action.type === 'max_graphemes' ? {} :
@@ -101,7 +102,7 @@ function Options(type: BaseSchema) {
       action.type === 'max_size' ? {} :
       action.type === 'max_value' ? { maximum: action.requirement } :
       action.type === 'max_words' ? {} :
-      action.type === 'metadata' ? { ...action.metadata } :
+      action.type === 'metadata' ? { metadata: action.metadata } :
       action.type === 'mime_type' ? {} :
       action.type === 'min_bytes' ? {} :
       action.type === 'min_graphemes' ? {} :
@@ -113,7 +114,7 @@ function Options(type: BaseSchema) {
       action.type === 'min_value' ? { minimum: action.requirement } :
       action.type === 'min_words' ? {} :
       action.type === 'multiple_of' ? { multipleOf: action.requirement } :
-      action.type === 'nanoid' ? { format: 'valibot:nanoid' } :
+      action.type === 'nanoid' ? { format: 'nanoid' } :
       action.type === 'non_empty' ? {} :
       action.type === 'normalize' ? {} :
       action.type === 'not_bytes' ? {} :
@@ -122,7 +123,7 @@ function Options(type: BaseSchema) {
       action.type === 'not_size' ? {} :
       action.type === 'not_value' ? {} :
       action.type === 'not_words' ? {} :
-      action.type === 'octal' ? { format: 'valibot:octal' } :
+      action.type === 'octal' ? { format: 'octal' } :
       action.type === 'partial_check' ? {} :
       action.type === 'raw_check' ? {} :
       action.type === 'raw_transform' ? {} :
@@ -144,9 +145,9 @@ function Options(type: BaseSchema) {
       action.type === 'trim' ? {} :
       action.type === 'trim_end' ? {} :
       action.type === 'trim_start' ? {} :
-      action.type === 'ulid' ? { format: 'valibot:ulid' } :
-      action.type === 'url' ? { format: 'valibot:url' } :
-      action.type === 'uuid' ? { format: 'valibot:uuid' } :
+      action.type === 'ulid' ? { format: 'ulid' } :
+      action.type === 'url' ? { format: 'url' } :
+      action.type === 'uuid' ? { format: 'uuid' } :
       action.type === 'value' ? {} :
       action.type === 'words' ? {} :
       {})
@@ -156,31 +157,31 @@ function Options(type: BaseSchema) {
 // ------------------------------------------------------------------
 // Formats
 // ------------------------------------------------------------------
-tb.FormatRegistry.Set('valibot:base64', (value) => v.safeParse(v.pipe(v.string(), v.base64()), value).success)
-tb.FormatRegistry.Set('valibot:bic', (value) => v.safeParse(v.pipe(v.string(), v.bic()), value).success)
-tb.FormatRegistry.Set('valibot:credit_card', (value) => v.safeParse(v.pipe(v.string(), v.creditCard()), value).success)
-tb.FormatRegistry.Set('valibot:cuid2', (value) => v.safeParse(v.pipe(v.string(), v.cuid2()), value).success)
-tb.FormatRegistry.Set('valibot:decimal', (value) => v.safeParse(v.pipe(v.string(), v.decimal()), value).success)
-tb.FormatRegistry.Set('valibot:digits', (value) => v.safeParse(v.pipe(v.string(), v.digits()), value).success)
-tb.FormatRegistry.Set('valibot:email', (value) => v.safeParse(v.pipe(v.string(), v.email()), value).success)
-tb.FormatRegistry.Set('valibot:emoji', (value) => v.safeParse(v.pipe(v.string(), v.emoji()), value).success)
-tb.FormatRegistry.Set('valibot:ip', (value) => v.safeParse(v.pipe(v.string(), v.ip()), value).success)
-tb.FormatRegistry.Set('valibot:ipv4', (value) => v.safeParse(v.pipe(v.string(), v.ipv4()), value).success)
-tb.FormatRegistry.Set('valibot:ipv6', (value) => v.safeParse(v.pipe(v.string(), v.ipv6()), value).success)
-tb.FormatRegistry.Set('valibot:iso_date', (value) => v.safeParse(v.pipe(v.string(), v.isoDate()), value).success)
-tb.FormatRegistry.Set('valibot:iso_date_time', (value) => v.safeParse(v.pipe(v.string(), v.isoDateTime()), value).success)
-tb.FormatRegistry.Set('valibot:iso_time', (value) => v.safeParse(v.pipe(v.string(), v.isoTime()), value).success)
-tb.FormatRegistry.Set('valibot:iso_time_second', (value) => v.safeParse(v.pipe(v.string(), v.isoTimeSecond()), value).success)
-tb.FormatRegistry.Set('valibot:iso_timestamp', (value) => v.safeParse(v.pipe(v.string(), v.isoTimestamp()), value).success)
-tb.FormatRegistry.Set('valibot:iso_week', (value) => v.safeParse(v.pipe(v.string(), v.isoWeek()), value).success)
-tb.FormatRegistry.Set('valibot:mac', (value) => v.safeParse(v.pipe(v.string(), v.mac()), value).success)
-tb.FormatRegistry.Set('valibot:mac48', (value) => v.safeParse(v.pipe(v.string(), v.mac48()), value).success)
-tb.FormatRegistry.Set('valibot:mac64', (value) => v.safeParse(v.pipe(v.string(), v.mac64()), value).success)
-tb.FormatRegistry.Set('valibot:nanoid', (value) => v.safeParse(v.pipe(v.string(), v.nanoid()), value).success)
-tb.FormatRegistry.Set('valibot:octal', (value) => v.safeParse(v.pipe(v.string(), v.octal()), value).success)
-tb.FormatRegistry.Set('valibot:ulid', (value) => v.safeParse(v.pipe(v.string(), v.ulid()), value).success)
-tb.FormatRegistry.Set('valibot:url', (value) => v.safeParse(v.pipe(v.string(), v.url()), value).success)
-tb.FormatRegistry.Set('valibot:uuid', (value) => v.safeParse(v.pipe(v.string(), v.uuid()), value).success)
+t.FormatRegistry.Set('base64', (value) => v.safeParse(v.pipe(v.string(), v.base64()), value).success)
+t.FormatRegistry.Set('bic', (value) => v.safeParse(v.pipe(v.string(), v.bic()), value).success)
+t.FormatRegistry.Set('credit_card', (value) => v.safeParse(v.pipe(v.string(), v.creditCard()), value).success)
+t.FormatRegistry.Set('cuid2', (value) => v.safeParse(v.pipe(v.string(), v.cuid2()), value).success)
+t.FormatRegistry.Set('decimal', (value) => v.safeParse(v.pipe(v.string(), v.decimal()), value).success)
+t.FormatRegistry.Set('digits', (value) => v.safeParse(v.pipe(v.string(), v.digits()), value).success)
+t.FormatRegistry.Set('email', (value) => v.safeParse(v.pipe(v.string(), v.email()), value).success)
+t.FormatRegistry.Set('emoji', (value) => v.safeParse(v.pipe(v.string(), v.emoji()), value).success)
+t.FormatRegistry.Set('ip', (value) => v.safeParse(v.pipe(v.string(), v.ip()), value).success)
+t.FormatRegistry.Set('ipv4', (value) => v.safeParse(v.pipe(v.string(), v.ipv4()), value).success)
+t.FormatRegistry.Set('ipv6', (value) => v.safeParse(v.pipe(v.string(), v.ipv6()), value).success)
+t.FormatRegistry.Set('iso_date', (value) => v.safeParse(v.pipe(v.string(), v.isoDate()), value).success)
+t.FormatRegistry.Set('iso_date_time', (value) => v.safeParse(v.pipe(v.string(), v.isoDateTime()), value).success)
+t.FormatRegistry.Set('iso_time', (value) => v.safeParse(v.pipe(v.string(), v.isoTime()), value).success)
+t.FormatRegistry.Set('iso_time_second', (value) => v.safeParse(v.pipe(v.string(), v.isoTimeSecond()), value).success)
+t.FormatRegistry.Set('iso_timestamp', (value) => v.safeParse(v.pipe(v.string(), v.isoTimestamp()), value).success)
+t.FormatRegistry.Set('iso_week', (value) => v.safeParse(v.pipe(v.string(), v.isoWeek()), value).success)
+t.FormatRegistry.Set('mac', (value) => v.safeParse(v.pipe(v.string(), v.mac()), value).success)
+t.FormatRegistry.Set('mac48', (value) => v.safeParse(v.pipe(v.string(), v.mac48()), value).success)
+t.FormatRegistry.Set('mac64', (value) => v.safeParse(v.pipe(v.string(), v.mac64()), value).success)
+t.FormatRegistry.Set('nanoid', (value) => v.safeParse(v.pipe(v.string(), v.nanoid()), value).success)
+t.FormatRegistry.Set('octal', (value) => v.safeParse(v.pipe(v.string(), v.octal()), value).success)
+t.FormatRegistry.Set('ulid', (value) => v.safeParse(v.pipe(v.string(), v.ulid()), value).success)
+t.FormatRegistry.Set('url', (value) => v.safeParse(v.pipe(v.string(), v.url()), value).success)
+t.FormatRegistry.Set('uuid', (value) => v.safeParse(v.pipe(v.string(), v.uuid()), value).success)
 
 // ------------------------------------------------------------------
 // Schema
@@ -191,156 +192,156 @@ type BaseRecordKey = v.BaseSchema<string, string | number | symbol, v.BaseIssue<
 // ------------------------------------------------------------------
 // Any
 // ------------------------------------------------------------------
-type TFromAny<_Type extends v.AnySchema> = tb.Ensure<tb.TAny>
-function FromAny(type: BaseSchema): tb.TSchema {
-  return tb.Any(Options(type))
+type TFromAny<_Type extends v.AnySchema> = t.Ensure<t.TAny>
+function FromAny(type: BaseSchema): t.TSchema {
+  return t.Any(Options(type))
 }
 // ------------------------------------------------------------------
 // Array
 // ------------------------------------------------------------------
-type TFromArray<Type extends BaseSchema> = tb.Ensure<tb.TArray<TFromType<Type>>>
-function FromArray(type: BaseSchema): tb.TSchema {
-  return tb.Array(FromType((type as v.ArraySchema<any, any>).item), Options(type))
+type TFromArray<Type extends BaseSchema> = t.Ensure<t.TArray<TFromType<Type>>>
+function FromArray(type: BaseSchema): t.TSchema {
+  return t.Array(FromType((type as v.ArraySchema<any, any>).item), Options(type))
 }
 // ------------------------------------------------------------------
 // BigInt
 // ------------------------------------------------------------------
-type TFromBigInt<_Type extends v.BigintSchema<any>> = tb.Ensure<tb.TBigInt>
-function FromBigInt(type: BaseSchema): tb.TSchema {
-  return tb.BigInt(Options(type))
+type TFromBigInt<_Type extends v.BigintSchema<any>> = t.Ensure<t.TBigInt>
+function FromBigInt(type: BaseSchema): t.TSchema {
+  return t.BigInt(Options(type))
 }
 // ------------------------------------------------------------------
 // Blob
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TBlob>('ValibotBlob', (schema, value) => {
+t.TypeRegistry.Set<TBlob>('ValibotBlob', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-interface TBlob<Type extends v.BlobSchema<any> = v.BlobSchema<any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotBlob'
+interface TBlob<Type extends v.BlobSchema<any> = v.BlobSchema<any>> extends t.TSchema {
+  [t.Kind]: 'ValibotBlob'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _Blob(type: v.BlobSchema<any>, options?: tb.SchemaOptions): TBlob {
-  return tb.CreateType({ [tb.Kind]: 'ValibotBlob', type }, options) as never
+function _Blob(type: v.BlobSchema<any>, options?: t.SchemaOptions): TBlob {
+  return t.CreateType({ [t.Kind]: 'ValibotBlob', type }, options) as never
 }
-type TFromBlob<Type extends v.BlobSchema<any>> = tb.Ensure<TBlob<Type>>
-function FromBlob(type: BaseSchema): tb.TSchema {
+type TFromBlob<Type extends v.BlobSchema<any>> = t.Ensure<TBlob<Type>>
+function FromBlob(type: BaseSchema): t.TSchema {
   return _Blob(type as v.BlobSchema<any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Boolean
 // ------------------------------------------------------------------
-type TFromBoolean<_Type extends v.BooleanSchema<any>> = tb.TBoolean
-function FromBoolean(type: BaseSchema): tb.TSchema {
-  return tb.Boolean(Options(type))
+type TFromBoolean<_Type extends v.BooleanSchema<any>> = t.TBoolean
+function FromBoolean(type: BaseSchema): t.TSchema {
+  return t.Boolean(Options(type))
 }
 // ------------------------------------------------------------------
 // Custom
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TCustom>('ValibotCustom', (schema, value) => v.safeParse(schema.schema, value).success)
-export interface TCustom<Type extends v.CustomSchema<any, any> = v.CustomSchema<any, any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotCustom'
+t.TypeRegistry.Set<TCustom>('ValibotCustom', (schema, value) => v.safeParse(schema.schema, value).success)
+export interface TCustom<Type extends v.CustomSchema<any, any> = v.CustomSchema<any, any>> extends t.TSchema {
+  [t.Kind]: 'ValibotCustom'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function Custom<Type extends v.CustomSchema<any, any>>(type: Type, options?: tb.SchemaOptions): TCustom<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotCustom', type }, options) as never
+function Custom<Type extends v.CustomSchema<any, any>>(type: Type, options?: t.SchemaOptions): TCustom<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotCustom', type }, options) as never
 }
-type TFromCustom<Type extends v.CustomSchema<any, any>> = tb.Ensure<TCustom<Type>>
-function FromCustom(type: BaseSchema): tb.TSchema {
+type TFromCustom<Type extends v.CustomSchema<any, any>> = t.Ensure<TCustom<Type>>
+function FromCustom(type: BaseSchema): t.TSchema {
   return Custom(type as v.CustomSchema<any, any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Date
 // ------------------------------------------------------------------
-type TFromDate<_Type extends v.DateSchema<any>> = tb.TDate
-function FromDate(type: BaseSchema): tb.TSchema {
-  return tb.Date(Options(type))
+type TFromDate<_Type extends v.DateSchema<any>> = t.TDate
+function FromDate(type: BaseSchema): t.TSchema {
+  return t.Date(Options(type))
 }
 // ------------------------------------------------------------------
 // Enum
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TValibotEnum>('ValibotEnum', (schema, value) => {
+t.TypeRegistry.Set<TValibotEnum>('ValibotEnum', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TValibotEnum<Type extends v.EnumSchema<v.Enum, any> = v.EnumSchema<v.Enum, any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotEnum'
+export interface TValibotEnum<Type extends v.EnumSchema<v.Enum, any> = v.EnumSchema<v.Enum, any>> extends t.TSchema {
+  [t.Kind]: 'ValibotEnum'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function ValibotEnum<Type extends v.EnumSchema<v.Enum, any>>(type: Type, options?: tb.SchemaOptions): TValibotEnum<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotEnum', type }, options) as never
+function ValibotEnum<Type extends v.EnumSchema<v.Enum, any>>(type: Type, options?: t.SchemaOptions): TValibotEnum<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotEnum', type }, options) as never
 }
 type TFromEnum<Enum extends v.EnumSchema<v.Enum, any>> = TValibotEnum<Enum>
-function FromEnum<Type extends BaseSchema>(type: Type): tb.TSchema {
+function FromEnum<Type extends BaseSchema>(type: Type): t.TSchema {
   return ValibotEnum(type as never as v.EnumSchema<v.Enum, any>, Options(type))
 }
 // ------------------------------------------------------------------
 // File
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TFile>('ValibotFile', (schema, value) => {
+t.TypeRegistry.Set<TFile>('ValibotFile', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TFile<Type extends v.FileSchema<any> = v.FileSchema<any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotFile'
+export interface TFile<Type extends v.FileSchema<any> = v.FileSchema<any>> extends t.TSchema {
+  [t.Kind]: 'ValibotFile'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _File(type: v.FileSchema<any>, options?: tb.SchemaOptions): TFile {
-  return tb.CreateType({ [tb.Kind]: 'ValibotFile', type }, options) as never
+function _File(type: v.FileSchema<any>, options?: t.SchemaOptions): TFile {
+  return t.CreateType({ [t.Kind]: 'ValibotFile', type }, options) as never
 }
-type TFromFile<Type extends v.FileSchema<any>> = tb.Ensure<TFile<Type>>
-function FromFile(type: BaseSchema): tb.TSchema {
+type TFromFile<Type extends v.FileSchema<any>> = t.Ensure<TFile<Type>>
+function FromFile(type: BaseSchema): t.TSchema {
   return _File(type as v.FileSchema<any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Function
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TFunction>('ValibotFunction', (schema, value) => {
+t.TypeRegistry.Set<TFunction>('ValibotFunction', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TFunction<Type extends v.FunctionSchema<any> = v.FunctionSchema<any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotFunction'
+export interface TFunction<Type extends v.FunctionSchema<any> = v.FunctionSchema<any>> extends t.TSchema {
+  [t.Kind]: 'ValibotFunction'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _Function<Type extends v.FunctionSchema<any>>(type: Type, options?: tb.SchemaOptions): TFunction<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotFunction', type }, options) as never
+function _Function<Type extends v.FunctionSchema<any>>(type: Type, options?: t.SchemaOptions): TFunction<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotFunction', type }, options) as never
 }
-type TFromFunction<Type extends v.FunctionSchema<any>> = tb.Ensure<TFunction<Type>>
-function FromFunction(type: BaseSchema): tb.TSchema {
+type TFromFunction<Type extends v.FunctionSchema<any>> = t.Ensure<TFunction<Type>>
+function FromFunction(type: BaseSchema): t.TSchema {
   return _Function(type as v.FunctionSchema<any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Instance
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TInstance>('ValibotInstance', (schema, value) => {
+t.TypeRegistry.Set<TInstance>('ValibotInstance', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TInstance<Type extends v.InstanceSchema<v.Class, any> = v.InstanceSchema<v.Class, any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotInstance'
+export interface TInstance<Type extends v.InstanceSchema<v.Class, any> = v.InstanceSchema<v.Class, any>> extends t.TSchema {
+  [t.Kind]: 'ValibotInstance'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function Instance<Type extends v.InstanceSchema<v.Class, any>>(type: Type, options?: tb.SchemaOptions): TInstance<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotInstance', type }, options) as never
+function Instance<Type extends v.InstanceSchema<v.Class, any>>(type: Type, options?: t.SchemaOptions): TInstance<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotInstance', type }, options) as never
 }
-type TFromInstance<Type extends v.InstanceSchema<v.Class, any>> = tb.Ensure<TInstance<Type>>
-function FromInstance(type: BaseSchema): tb.TSchema {
+type TFromInstance<Type extends v.InstanceSchema<v.Class, any>> = t.Ensure<TInstance<Type>>
+function FromInstance(type: BaseSchema): t.TSchema {
   return Instance(type as v.InstanceSchema<v.Class, any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Intersect
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromIntersect<Type extends BaseSchema[], Result extends tb.TSchema[] = []> = (
+type TFromIntersect<Type extends BaseSchema[], Result extends t.TSchema[] = []> = (
   Type extends [infer Left extends BaseSchema, ...infer Right extends BaseSchema[]]
     ? TFromIntersect<Right, [...Result, TFromType<Left>]>
-    : tb.TIntersect<Result>
+    : t.TIntersect<Result>
 )
-function FromIntersect(type: BaseSchema): tb.TSchema {
+function FromIntersect(type: BaseSchema): t.TSchema {
   const intersect = type as v.IntersectSchema<BaseSchema[], any>
-  return tb.Intersect(
+  return t.Intersect(
     intersect.options.map((option) => FromType(option)),
     Options(type),
   )
@@ -348,268 +349,268 @@ function FromIntersect(type: BaseSchema): tb.TSchema {
 // ------------------------------------------------------------------
 // Literal
 // ------------------------------------------------------------------
-type TFromLiteral<Value extends tb.TLiteralValue> = tb.Ensure<tb.TLiteral<Value>>
-function FromLiteral(type: BaseSchema): tb.TSchema {
-  const literal = type as v.LiteralSchema<tb.TLiteralValue, any>
-  return tb.Literal(literal.literal, Options(type))
+type TFromLiteral<Value extends t.TLiteralValue> = t.Ensure<t.TLiteral<Value>>
+function FromLiteral(type: BaseSchema): t.TSchema {
+  const literal = type as v.LiteralSchema<t.TLiteralValue, any>
+  return t.Literal(literal.literal, Options(type))
 }
 // ------------------------------------------------------------------
 // LooseObject
 // ------------------------------------------------------------------
-type TFromLooseObject<Properties extends v.ObjectEntries> = tb.Ensure<
-  tb.TObject<{
+type TFromLooseObject<Properties extends v.ObjectEntries> = t.Ensure<
+  t.TObject<{
     -readonly [Key in keyof Properties]: TFromType<Properties[Key]>
   }>
 >
-function FromLooseObject(type: BaseSchema): tb.TSchema {
+function FromLooseObject(type: BaseSchema): t.TSchema {
   const object = type as v.LooseObjectSchema<v.ObjectEntries, any>
   const keys = globalThis.Object.getOwnPropertyNames(object.entries)
-  return tb.Object(
+  return t.Object(
     keys.reduce((properties, key) => {
       return { ...properties, [key]: FromType(object.entries[key]) }
-    }, {} as tb.TProperties),
+    }, {} as t.TProperties),
     Options(type),
   )
 }
 // ------------------------------------------------------------------
 // LooseTuple
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TLooseTuple>('ValibotLooseTuple', (schema, value) => {
+t.TypeRegistry.Set<TLooseTuple>('ValibotLooseTuple', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TLooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any> = v.LooseTupleSchema<BaseSchema[], any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotLooseTuple'
+export interface TLooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any> = v.LooseTupleSchema<BaseSchema[], any>> extends t.TSchema {
+  [t.Kind]: 'ValibotLooseTuple'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function LooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any>>(type: Type, schema?: tb.SchemaOptions): TLooseTuple<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotLooseTuple', type }) as never
+function LooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any>>(type: Type, schema?: t.SchemaOptions): TLooseTuple<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotLooseTuple', type }) as never
 }
-type TFromLooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any>> = tb.Ensure<TLooseTuple<Type>>
-function FromLooseTuple(type: BaseSchema): tb.TSchema {
+type TFromLooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any>> = t.Ensure<TLooseTuple<Type>>
+function FromLooseTuple(type: BaseSchema): t.TSchema {
   return LooseTuple(type as v.LooseTupleSchema<BaseSchema[], any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Map
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TMap>('ValibotMap', (schema, value) => {
+t.TypeRegistry.Set<TMap>('ValibotMap', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TMap<Type extends v.MapSchema<BaseSchema, BaseSchema, any> = v.MapSchema<BaseSchema, BaseSchema, any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotMap'
+export interface TMap<Type extends v.MapSchema<BaseSchema, BaseSchema, any> = v.MapSchema<BaseSchema, BaseSchema, any>> extends t.TSchema {
+  [t.Kind]: 'ValibotMap'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _Map<Type extends v.MapSchema<BaseSchema, BaseSchema, any>>(type: Type, options?: tb.SchemaOptions): TMap<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotMap', type }) as never
+function _Map<Type extends v.MapSchema<BaseSchema, BaseSchema, any>>(type: Type, options?: t.SchemaOptions): TMap<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotMap', type }) as never
 }
-type TFromMap<Type extends v.MapSchema<BaseSchema, BaseSchema, any>> = tb.Ensure<TMap<Type>>
-function FromMap(type: BaseSchema): tb.TSchema {
+type TFromMap<Type extends v.MapSchema<BaseSchema, BaseSchema, any>> = t.Ensure<TMap<Type>>
+function FromMap(type: BaseSchema): t.TSchema {
   return _Map(type as v.MapSchema<BaseSchema, BaseSchema, any>, Options(type))
 }
 // ------------------------------------------------------------------
 // NaN
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TNaN>('ValibotNaN', (schema, value) => {
+t.TypeRegistry.Set<TNaN>('ValibotNaN', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TNaN<Type extends v.NanSchema<any> = v.NanSchema<any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotNaN'
+export interface TNaN<Type extends v.NanSchema<any> = v.NanSchema<any>> extends t.TSchema {
+  [t.Kind]: 'ValibotNaN'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _NaN<Type extends v.NanSchema<any>>(type: Type, options?: tb.SchemaOptions): TNaN<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotNaN', type }, options) as never
+function _NaN<Type extends v.NanSchema<any>>(type: Type, options?: t.SchemaOptions): TNaN<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotNaN', type }, options) as never
 }
-type TFromNaN<Type extends v.NanSchema<any>> = tb.Ensure<TNaN<Type>>
-function FromNaN(type: BaseSchema): tb.TSchema {
+type TFromNaN<Type extends v.NanSchema<any>> = t.Ensure<TNaN<Type>>
+function FromNaN(type: BaseSchema): t.TSchema {
   return _NaN(type as v.NanSchema<any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Never
 // ------------------------------------------------------------------
-type TFromNever<_Type extends v.NeverSchema<any>> = tb.TNever
-function FromNever(type: BaseSchema): tb.TSchema {
-  return tb.Never(Options(type))
+type TFromNever<_Type extends v.NeverSchema<any>> = t.TNever
+function FromNever(type: BaseSchema): t.TSchema {
+  return t.Never(Options(type))
 }
 // ------------------------------------------------------------------
 // NonNullable
 // ------------------------------------------------------------------
-type TFromNonNullable<Type extends BaseSchema> = tb.TExclude<TFromType<Type>, tb.TNull>
-function FromNonNullable(type: BaseSchema): tb.TSchema {
+type TFromNonNullable<Type extends BaseSchema> = t.TExclude<TFromType<Type>, t.TNull>
+function FromNonNullable(type: BaseSchema): t.TSchema {
   const non_nullable = type as v.NonNullableSchema<BaseSchema, any>
-  return tb.Exclude(FromType(non_nullable.wrapped), tb.Null(), Options(type))
+  return t.Exclude(FromType(non_nullable.wrapped), t.Null(), Options(type))
 }
 // ------------------------------------------------------------------
 // NonNullish
 // ------------------------------------------------------------------
-type TFromNonNullish<Type extends BaseSchema> = tb.TExclude<TFromType<Type>, tb.TUnion<[tb.TNull, tb.TUndefined]>>
-function FromNonNullish(type: BaseSchema): tb.TSchema {
+type TFromNonNullish<Type extends BaseSchema> = t.TExclude<TFromType<Type>, t.TUnion<[t.TNull, t.TUndefined]>>
+function FromNonNullish(type: BaseSchema): t.TSchema {
   const non_nullish = type as v.NonNullishSchema<BaseSchema, any>
-  return tb.Exclude(FromType(non_nullish.wrapped), tb.Union([tb.Null(), tb.Undefined()]), Options(type))
+  return t.Exclude(FromType(non_nullish.wrapped), t.Union([t.Null(), t.Undefined()]), Options(type))
 }
 // ------------------------------------------------------------------
 // NonOptional
 // ------------------------------------------------------------------
-type TFromNonOptional<Type extends BaseSchema, Result extends TFromType<Type> = TFromType<Type>> = tb.TOptionalWithFlag<Result, false>
-function FromNonOptional(type: BaseSchema): tb.TSchema {
+type TFromNonOptional<Type extends BaseSchema, Result extends TFromType<Type> = TFromType<Type>> = t.TOptionalWithFlag<Result, false>
+function FromNonOptional(type: BaseSchema): t.TSchema {
   const non_optional = type as v.NonOptionalSchema<BaseSchema, any>
-  return tb.Optional(FromType(non_optional.wrapped), false)
+  return t.Optional(FromType(non_optional.wrapped), false)
 }
 // ------------------------------------------------------------------
 // Null
 // ------------------------------------------------------------------
-type TFromNull<_Type extends v.NullSchema<any>> = tb.TNull
+type TFromNull<_Type extends v.NullSchema<any>> = t.TNull
 function FromNull(type: BaseSchema) {
-  return tb.Null(Options(type))
+  return t.Null(Options(type))
 }
 // ------------------------------------------------------------------
 // Nullable
 // ------------------------------------------------------------------
-type TFromNullable<Type extends BaseSchema> = tb.TUnion<[TFromType<Type>, tb.TNull]>
+type TFromNullable<Type extends BaseSchema> = t.TUnion<[TFromType<Type>, t.TNull]>
 function FromNullable(type: BaseSchema) {
   const nullable = type as v.NullableSchema<BaseSchema, any>
-  return tb.Union([tb.Null(), FromType(nullable.wrapped)], Options(type))
+  return t.Union([t.Null(), FromType(nullable.wrapped)], Options(type))
 }
 // ------------------------------------------------------------------
 // Nullish
 // ------------------------------------------------------------------
-type TFromNullish<Type extends BaseSchema> = tb.TUnion<[TFromType<Type>, tb.TNull, tb.TUndefined]>
+type TFromNullish<Type extends BaseSchema> = t.TUnion<[TFromType<Type>, t.TNull, t.TUndefined]>
 function FromNullish(type: BaseSchema) {
   const nullish = type as v.NullishSchema<BaseSchema, any>
-  return tb.Union([FromType(nullish.wrapped), tb.Null(), tb.Undefined()], Options(type))
+  return t.Union([FromType(nullish.wrapped), t.Null(), t.Undefined()], Options(type))
 }
 // ------------------------------------------------------------------
 // Number
 // ------------------------------------------------------------------
-type TFromNumber<_Type extends v.NumberSchema<any>> = tb.TNumber
-function FromNumber(type: BaseSchema): tb.TSchema {
-  return tb.Number(Options(type))
+type TFromNumber<_Type extends v.NumberSchema<any>> = t.TNumber
+function FromNumber(type: BaseSchema): t.TSchema {
+  return t.Number(Options(type))
 }
 // ------------------------------------------------------------------
 // Object
 // ------------------------------------------------------------------
-type TFromObject<Properties extends v.ObjectEntries> = tb.Ensure<
-  tb.TObject<{
+type TFromObject<Properties extends v.ObjectEntries> = t.Ensure<
+  t.TObject<{
     -readonly [Key in keyof Properties]: TFromType<Properties[Key]>
   }>
 >
-function FromObject(type: BaseSchema): tb.TSchema {
+function FromObject(type: BaseSchema): t.TSchema {
   const object = type as v.ObjectSchema<v.ObjectEntries, any>
   const keys = globalThis.Object.getOwnPropertyNames(object.entries)
-  return tb.Object(
+  return t.Object(
     keys.reduce((properties, key) => {
       return { ...properties, [key]: FromType(object.entries[key]) }
-    }, {} as tb.TProperties),
+    }, {} as t.TProperties),
     Options(type),
   )
 }
 // ------------------------------------------------------------------
 // ObjectWithRest
 // ------------------------------------------------------------------
-type TFromObjectWithRest<Properties extends v.ObjectEntries, _Rest extends BaseSchema> = tb.Ensure<
-  tb.TObject<{
+type TFromObjectWithRest<Properties extends v.ObjectEntries, _Rest extends BaseSchema> = t.Ensure<
+  t.TObject<{
     -readonly [Key in keyof Properties]: TFromType<Properties[Key]>
   }>
 >
-function FromObjectWithRest(type: BaseSchema): tb.TSchema {
+function FromObjectWithRest(type: BaseSchema): t.TSchema {
   const object = type as v.ObjectWithRestSchema<v.ObjectEntries, BaseSchema, any>
   const keys = globalThis.Object.getOwnPropertyNames(object.entries)
-  return tb.Object(
+  return t.Object(
     keys.reduce((properties, key) => {
       return { ...properties, [key]: FromType(object.entries[key]) }
-    }, {} as tb.TProperties),
+    }, {} as t.TProperties),
     { ...Options(type), additionalProperties: FromType(object.rest) },
   )
 }
 // ------------------------------------------------------------------
 // Optional
 // ------------------------------------------------------------------
-type TFromOptional<Type extends BaseSchema, Result extends TFromType<Type> = TFromType<Type>> = tb.TOptionalWithFlag<Result, true>
-function FromOptional(type: BaseSchema): tb.TSchema {
+type TFromOptional<Type extends BaseSchema, Result extends TFromType<Type> = TFromType<Type>> = t.TOptionalWithFlag<Result, true>
+function FromOptional(type: BaseSchema): t.TSchema {
   const optional = type as v.OptionalSchema<BaseSchema, any>
-  return tb.Optional(FromType(optional.wrapped))
+  return t.Optional(FromType(optional.wrapped))
 }
 // ------------------------------------------------------------------
 // PickList
 // ------------------------------------------------------------------
 type PickListOption = string | number | bigint
 // prettier-ignore
-type TFromPickList<Options extends PickListOption[], Result extends tb.TSchema[] = []> = (
+type TFromPickList<Options extends PickListOption[], Result extends t.TSchema[] = []> = (
   Options extends [infer Left extends PickListOption, ...infer Right extends PickListOption[]]
   ? (
-    Left extends tb.TLiteralValue
-    ? TFromPickList<Right, [...Result, tb.TLiteral<Left>]>
+    Left extends t.TLiteralValue
+    ? TFromPickList<Right, [...Result, t.TLiteral<Left>]>
     : TFromPickList<Right, [...Result]>
   )
-  : tb.TUnion<Result>
+  : t.TUnion<Result>
 )
-function FromPickList(type: BaseSchema): tb.TSchema {
+function FromPickList(type: BaseSchema): t.TSchema {
   const picklist = type as v.PicklistSchema<v.PicklistOptions, any>
-  return tb.Union(
-    picklist.options.map((option) => tb.Literal(option as tb.TLiteralValue)),
+  return t.Union(
+    picklist.options.map((option) => t.Literal(option as t.TLiteralValue)),
     Options(type),
   )
 }
 // ------------------------------------------------------------------
 // Promise
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TPromise>('ValibotPromise', (schema, value) => {
+t.TypeRegistry.Set<TPromise>('ValibotPromise', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TPromise<Type extends v.PromiseSchema<any> = v.PromiseSchema<any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotPromise'
+export interface TPromise<Type extends v.PromiseSchema<any> = v.PromiseSchema<any>> extends t.TSchema {
+  [t.Kind]: 'ValibotPromise'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _Promise<Type extends v.PromiseSchema<any>>(type: Type, options?: tb.SchemaOptions): TPromise<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotPromise', type }, options) as never
+function _Promise<Type extends v.PromiseSchema<any>>(type: Type, options?: t.SchemaOptions): TPromise<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotPromise', type }, options) as never
 }
-type TFromPromise<Type extends v.PromiseSchema<any>> = tb.Ensure<TPromise<Type>>
-function FromPromise(type: BaseSchema): tb.TSchema {
+type TFromPromise<Type extends v.PromiseSchema<any>> = t.Ensure<TPromise<Type>>
+function FromPromise(type: BaseSchema): t.TSchema {
   return _Promise(type as v.PromiseSchema<any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Record
 // ------------------------------------------------------------------
-type TFromRecord<Key extends BaseRecordKey, Value extends BaseSchema> = tb.Ensure<tb.TRecordOrObject<TFromType<Key>, TFromType<Value>>>
+type TFromRecord<Key extends BaseRecordKey, Value extends BaseSchema> = t.Ensure<t.TRecordOrObject<TFromType<Key>, TFromType<Value>>>
 function FromRecord(type: BaseSchema) {
   const record = type as v.RecordSchema<BaseRecordKey, BaseSchema, any>
-  return tb.Record(FromType(record.key), FromType(record.value), Options(type))
+  return t.Record(FromType(record.key), FromType(record.value), Options(type))
 }
 // ------------------------------------------------------------------
 // Set
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TInstance>('ValibotSet', (schema, value) => {
+t.TypeRegistry.Set<TInstance>('ValibotSet', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TSet<Type extends v.SetSchema<BaseSchema, any> = v.SetSchema<BaseSchema, any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotSet'
+export interface TSet<Type extends v.SetSchema<BaseSchema, any> = v.SetSchema<BaseSchema, any>> extends t.TSchema {
+  [t.Kind]: 'ValibotSet'
   static: v.InferOutput<this['type']> extends infer Result ? Result : never
   type: Type
 }
-function Set<Type extends v.SetSchema<BaseSchema, any>>(type: Type, options?: tb.SchemaOptions): TSet<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotSet', type }, options) as never
+function Set<Type extends v.SetSchema<BaseSchema, any>>(type: Type, options?: t.SchemaOptions): TSet<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotSet', type }, options) as never
 }
-type TFromSet<Type extends v.SetSchema<BaseSchema, any>> = tb.Ensure<TSet<Type>>
-function FromSet(type: BaseSchema): tb.TSchema {
+type TFromSet<Type extends v.SetSchema<BaseSchema, any>> = t.Ensure<TSet<Type>>
+function FromSet(type: BaseSchema): t.TSchema {
   return Set(type as v.SetSchema<BaseSchema, any>)
 }
 // ------------------------------------------------------------------
 // StrictObject
 // ------------------------------------------------------------------
-type TFromStrictObject<Properties extends v.ObjectEntries> = tb.Ensure<
-  tb.TObject<{
+type TFromStrictObject<Properties extends v.ObjectEntries> = t.Ensure<
+  t.TObject<{
     -readonly [Key in keyof Properties]: TFromType<Properties[Key]>
   }>
 >
-function FromStrictObject(type: BaseSchema): tb.TSchema {
+function FromStrictObject(type: BaseSchema): t.TSchema {
   const object = type as v.StrictObjectSchema<v.ObjectEntries, any>
   const keys = globalThis.Object.getOwnPropertyNames(object.entries)
-  return tb.Object(
+  return t.Object(
     keys.reduce((properties, key) => {
       return { ...properties, [key]: FromType(object.entries[key]) }
-    }, {} as tb.TProperties),
+    }, {} as t.TProperties),
     { ...Options(type), additionalProperties: false },
   )
 }
@@ -617,121 +618,121 @@ function FromStrictObject(type: BaseSchema): tb.TSchema {
 // StrictTuple
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromStrictTuple<Type extends BaseSchema[], Result extends tb.TSchema[] = []> = (
+type TFromStrictTuple<Type extends BaseSchema[], Result extends t.TSchema[] = []> = (
   Type extends [infer Left extends BaseSchema, ...infer Right extends BaseSchema[]]
     ? TFromTuple<Right, [...Result, TFromType<Left>]>
-    : tb.TTuple<Result>
+    : t.TTuple<Result>
 )
-function FromStrictTuple(type: BaseSchema): tb.TSchema {
+function FromStrictTuple(type: BaseSchema): t.TSchema {
   const tuple = type as v.StrictTupleSchema<any, any>
   const items = globalThis.Array.isArray(tuple.items) ? tuple.items.map((item) => FromType(item)) : []
-  return tb.Tuple(items, Options(type))
+  return t.Tuple(items, Options(type))
 }
 // ------------------------------------------------------------------
 // String
 // ------------------------------------------------------------------
-type TFromString<_Type extends v.StringSchema<any>> = tb.TString
-function FromString(type: BaseSchema): tb.TSchema {
-  return tb.String(Options(type))
+type TFromString<_Type extends v.StringSchema<any>> = t.TString
+function FromString(type: BaseSchema): t.TSchema {
+  return t.String(Options(type))
 }
 // ------------------------------------------------------------------
 // Symbol
 // ------------------------------------------------------------------
-type TFromSymbol<_Type extends v.SymbolSchema<any>> = tb.TSymbol
-function FromSymbol(type: BaseSchema): tb.TSchema {
-  return tb.Symbol(Options(type))
+type TFromSymbol<_Type extends v.SymbolSchema<any>> = t.TSymbol
+function FromSymbol(type: BaseSchema): t.TSchema {
+  return t.Symbol(Options(type))
 }
 // ------------------------------------------------------------------
 // Tuple
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromTuple<Type extends BaseSchema[], Result extends tb.TSchema[] = []> = (
+type TFromTuple<Type extends BaseSchema[], Result extends t.TSchema[] = []> = (
   Type extends [infer Left extends BaseSchema, ...infer Right extends BaseSchema[]]
     ? TFromTuple<Right, [...Result, TFromType<Left>]>
-    : tb.TTuple<Result>
+    : t.TTuple<Result>
 )
-function FromTuple(type: BaseSchema): tb.TSchema {
+function FromTuple(type: BaseSchema): t.TSchema {
   const tuple = type as v.TupleSchema<any, any>
   const items = globalThis.Array.isArray(tuple.items) ? tuple.items.map((item) => FromType(item)) : []
-  return tb.Tuple(items, Options(type))
+  return t.Tuple(items, Options(type))
 }
 // ------------------------------------------------------------------
 // TupleWithRest
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TTupleWithRest>('ValibotTupleWithRest', (schema, value) => {
+t.TypeRegistry.Set<TTupleWithRest>('ValibotTupleWithRest', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-interface TTupleWithRest<Type extends v.TupleWithRestSchema<BaseSchema[], BaseSchema, any> = v.TupleWithRestSchema<BaseSchema[], BaseSchema, any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotTupleWithRest'
+interface TTupleWithRest<Type extends v.TupleWithRestSchema<BaseSchema[], BaseSchema, any> = v.TupleWithRestSchema<BaseSchema[], BaseSchema, any>> extends t.TSchema {
+  [t.Kind]: 'ValibotTupleWithRest'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function TupleWithRest<Type extends v.TupleWithRestSchema<BaseSchema[], BaseSchema, any>>(type: Type, options?: tb.SchemaOptions): TTupleWithRest<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotTupleWithRest', type }, Options(type)) as never
+function TupleWithRest<Type extends v.TupleWithRestSchema<BaseSchema[], BaseSchema, any>>(type: Type, options?: t.SchemaOptions): TTupleWithRest<Type> {
+  return t.CreateType({ [t.Kind]: 'ValibotTupleWithRest', type }, Options(type)) as never
 }
-type TFromTupleWithRest<Type extends v.TupleWithRestSchema<BaseSchema[], BaseSchema, any>> = tb.Ensure<TTupleWithRest<Type>>
-function FromTupleWithRest(type: BaseSchema): tb.TSchema {
+type TFromTupleWithRest<Type extends v.TupleWithRestSchema<BaseSchema[], BaseSchema, any>> = t.Ensure<TTupleWithRest<Type>>
+function FromTupleWithRest(type: BaseSchema): t.TSchema {
   return TupleWithRest(type as v.TupleWithRestSchema<BaseSchema[], BaseSchema, any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Undefined
 // ------------------------------------------------------------------
-type TFromUndefined<_Type extends v.UndefinedSchema<any>> = tb.TUndefined
-function FromUndefined(type: BaseSchema): tb.TSchema {
-  return tb.Undefined(Options(type))
+type TFromUndefined<_Type extends v.UndefinedSchema<any>> = t.TUndefined
+function FromUndefined(type: BaseSchema): t.TSchema {
+  return t.Undefined(Options(type))
 }
 // ------------------------------------------------------------------
 // Undefinable
 // ------------------------------------------------------------------
-type TFromUndefinedable<Type extends BaseSchema> = tb.TUnion<[TFromType<Type>, tb.TUndefined]>
-function FromUndefinedable(type: BaseSchema): tb.TSchema {
+type TFromUndefinedable<Type extends BaseSchema> = t.TUnion<[TFromType<Type>, t.TUndefined]>
+function FromUndefinedable(type: BaseSchema): t.TSchema {
   const undefinedable = type as v.UndefinedableSchema<BaseSchema, any>
-  return tb.Union([FromType(undefinedable.wrapped), tb.Undefined()], Options(type))
+  return t.Union([FromType(undefinedable.wrapped), t.Undefined()], Options(type))
 }
 // ------------------------------------------------------------------
 // Union
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromUnion<Type extends BaseSchema[], Result extends tb.TSchema[] = []> = (
+type TFromUnion<Type extends BaseSchema[], Result extends t.TSchema[] = []> = (
   Type extends [infer Left extends BaseSchema, ...infer Right extends BaseSchema[]]
     ? TFromUnion<Right, [...Result, TFromType<Left>]>
-    : tb.TUnion<Result>
+    : t.TUnion<Result>
 )
-function FromUnion(type: BaseSchema): tb.TSchema {
+function FromUnion(type: BaseSchema): t.TSchema {
   const variants = (type as v.UnionSchema<BaseSchema[], any>).options.map((option) => FromType(option))
-  return tb.Union(variants, Options(type))
+  return t.Union(variants, Options(type))
 }
 // ------------------------------------------------------------------
 // Unknown
 // ------------------------------------------------------------------
-type TFromUnknown<_Type extends v.UnknownSchema> = tb.TUnknown
-function FromUnknown(type: BaseSchema): tb.TSchema {
-  return tb.Unknown(Options(type))
+type TFromUnknown<_Type extends v.UnknownSchema> = t.TUnknown
+function FromUnknown(type: BaseSchema): t.TSchema {
+  return t.Unknown(Options(type))
 }
 // ------------------------------------------------------------------
 // Variant
 // ------------------------------------------------------------------
-tb.TypeRegistry.Set<TVariant>('ValibotVariant', (schema, value) => {
+t.TypeRegistry.Set<TVariant>('ValibotVariant', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-interface TVariant<Type extends v.VariantSchema<string, v.VariantOptions<string>, any> = v.VariantSchema<string, v.VariantOptions<string>, any>> extends tb.TSchema {
-  [tb.Kind]: 'ValibotVariant'
+interface TVariant<Type extends v.VariantSchema<string, v.VariantOptions<string>, any> = v.VariantSchema<string, v.VariantOptions<string>, any>> extends t.TSchema {
+  [t.Kind]: 'ValibotVariant'
   static: v.InferOutput<this['type']>
   type: Type
 }
 function Variant<Type extends v.VariantSchema<string, v.VariantOptions<string>, any>>(type: Type): TVariant<Type> {
-  return tb.CreateType({ [tb.Kind]: 'ValibotVariant', type }, Options(type)) as never
+  return t.CreateType({ [t.Kind]: 'ValibotVariant', type }, Options(type)) as never
 }
-type TFromVariant<Type extends v.VariantSchema<string, v.VariantOptions<string>, any>> = tb.Ensure<TVariant<Type>>
-function FromVariant(type: BaseSchema): tb.TSchema {
+type TFromVariant<Type extends v.VariantSchema<string, v.VariantOptions<string>, any>> = t.Ensure<TVariant<Type>>
+function FromVariant(type: BaseSchema): t.TSchema {
   return Variant(type as v.VariantSchema<string, v.VariantOptions<string>, any>)
 }
 // ------------------------------------------------------------------
 // Void
 // ------------------------------------------------------------------
-type TFromVoid<_Type extends v.VoidSchema<any>> = tb.TVoid
-function FromVoid(type: BaseSchema): tb.TSchema {
-  return tb.Void(Options(type))
+type TFromVoid<_Type extends v.VoidSchema<any>> = t.TVoid
+function FromVoid(type: BaseSchema): t.TSchema {
+  return t.Void(Options(type))
 }
 // ------------------------------------------------------------------
 // Type
@@ -753,7 +754,7 @@ export type TFromType<Type extends BaseSchema> = (
   Type extends v.FunctionSchema<any> ? TFromFunction<Type> :
   Type extends v.InstanceSchema<v.Class, any> ? TFromInstance<Type> :
   Type extends v.IntersectSchema<infer Types extends BaseSchema[], any> ? TFromIntersect<Types> :
-  Type extends v.LiteralSchema<infer Value extends tb.TLiteralValue, any> ? TFromLiteral<Value> :
+  Type extends v.LiteralSchema<infer Value extends t.TLiteralValue, any> ? TFromLiteral<Value> :
   Type extends v.LooseObjectSchema<infer Properties extends v.ObjectEntries, any> ? TFromLooseObject<Properties> :
   Type extends v.LooseTupleSchema<BaseSchema[], any> ? TFromLooseTuple<Type> :
   Type extends v.MapSchema<BaseSchema, BaseSchema, any> ? TFromMap<Type> :
@@ -785,7 +786,7 @@ export type TFromType<Type extends BaseSchema> = (
   Type extends v.UnknownSchema ? TFromUnknown<Type> :
   Type extends v.VariantSchema<string, v.VariantOptions<string>, any> ? TFromVariant<Type> :
   Type extends v.VoidSchema<any> ? TFromVoid<Type> :
-  tb.TNever
+  t.TNever
 )
 // prettier-ignore
 export function FromType<Type extends BaseSchema>(type: Type): TFromType<Type> {
@@ -834,35 +835,18 @@ export function FromType<Type extends BaseSchema>(type: Type): TFromType<Type> {
     type.type === 'union' ? FromUnion(type) :
     type.type === 'variant' ? FromVariant(type) :
     type.type === 'void' ? FromVoid(type) :
-    tb.Never()
+    t.Never()
   ) as never
 }
 // ------------------------------------------------------------------
-// IsValibot
+// TypeBoxFromValibot
 // ------------------------------------------------------------------
 // prettier-ignore
-export function IsValibot(type: unknown): type is BaseSchema {
-  return (
-    tb.ValueGuard.IsObject(type) &&
-    tb.ValueGuard.HasPropertyKey(type, '~standard') &&
-    tb.ValueGuard.IsObject(type['~standard']) &&
-    tb.ValueGuard.HasPropertyKey(type['~standard'], 'vendor') &&
-    type['~standard'].vendor === 'valibot'
-  )
-}
-// ------------------------------------------------------------------
-// Box
-// ------------------------------------------------------------------
-/** Converts a Valibot Type to a TypeBox Type */
-// prettier-ignore
-export type TBox<Type extends unknown> = (
-  Type extends BaseSchema
-  ? Type extends { '~standard': { vendor: 'valibot' } }
-  ? TFromType<Type>
-  : undefined
-  : undefined
+export type TTypeBoxFromValibot<Type extends unknown> = (
+  Type extends BaseSchema ? TFromType<Type> : t.TNever
 )
 /** Converts a Valibot Type to a TypeBox Type */
-export function Box<Type extends unknown, Result extends TBox<Type> = TBox<Type>>(type: Type): Result {
-  return (IsValibot(type) ? FromType(type) : undefined) as never
+// prettier-ignore
+export function TypeBoxFromValibot<Type extends unknown, Result extends TTypeBoxFromValibot<Type> = TTypeBoxFromValibot<Type>>(type: Type): Result {
+  return (Guard.IsValibot(type) ? FromType(type) : t.Never()) as never
 }

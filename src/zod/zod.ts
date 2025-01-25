@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-@sinclair/typebox-adapter
+@sinclair/typemap
 
 The MIT License (MIT)
 
@@ -26,33 +26,31 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { TSchema, KindGuard, Unknown, type TUnknown } from '@sinclair/typebox'
-import * as TypeBox from './typebox/index'
-import * as Valibot from './valibot/index'
-import * as Zod from './zod/index'
+import { type TZodFromSyntax, ZodFromSyntax } from './zod-from-syntax'
+import { type TZodFromTypeBox, ZodFromTypeBox } from './zod-from-typebox'
+import { type TZodFromValibot, ZodFromValibot } from './zod-from-valibot'
+import { type TZodFromZod, ZodFromZod } from './zod-from-zod'
+import * as Guard from '../guard'
+import * as z from 'zod'
 
-/** Converts a Zod, Valibot or TypeBox Type to a TypeBox Type */
+/** Creates a Zod type from Syntax or another Type */
 // prettier-ignore
-export type TBox<Type extends unknown> = (
-  TypeBox.TBox<Type> extends infer Schema extends TSchema ? Schema : 
-  Valibot.TBox<Type> extends infer Schema extends TSchema ? Schema :
-  Zod.TBox<Type> extends infer Schema extends TSchema ? Schema :
-  TUnknown
+export type TZod<Type extends object | string> = (
+  Guard.TIsSyntax<Type> extends true ? TZodFromSyntax<Type> :
+  Guard.TIsTypeBox<Type> extends true ? TZodFromTypeBox<Type> :
+  Guard.TIsValibot<Type> extends true ? TZodFromValibot<Type> :
+  Guard.TIsZod<Type> extends true ? TZodFromZod<Type> :
+  z.ZodNever
 )
-/** Converts a Zod, Valibot or TypeBox Type to a TypeBox Type */
+
+/** Creates a Zod type from Syntax or another Type */
 // prettier-ignore
-export function Box<Type extends unknown>(type: Type): TBox<Type> {
-  {
-    const result = TypeBox.Box(type)
-    if(KindGuard.IsSchema(result)) return result as never  
-  }
-  {
-    const result = Valibot.Box(type)
-    if(KindGuard.IsSchema(result)) return result as never
-  }
-  {
-    const result = Zod.Box(type)
-    if(KindGuard.IsSchema(result)) return result as never
-  }
-  return Unknown() as never
+export function Zod<Type extends object | string, Result = TZod<Type>>(type: Type): Result {
+  return (
+    Guard.IsSyntax(type) ? ZodFromSyntax(type) : 
+    Guard.IsTypeBox(type) ? ZodFromTypeBox(type) : 
+    Guard.IsValibot(type) ? ZodFromValibot(type) : 
+    Guard.IsZod(type) ? ZodFromZod(type) : 
+    z.never()
+  ) as never
 }

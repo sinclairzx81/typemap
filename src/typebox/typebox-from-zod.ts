@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-@sinclair/typebox-adapter
+@sinclair/typemap
 
 The MIT License (MIT)
 
@@ -26,106 +26,106 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import * as tb from '@sinclair/typebox'
+import * as t from '@sinclair/typebox'
 import * as z from 'zod'
+import * as Guard from '../guard'
 
 // ------------------------------------------------------------------
 // Options
 // ------------------------------------------------------------------
-function Options(type: z.ZodTypeAny): tb.SchemaOptions {
-  const description = tb.ValueGuard.IsUndefined(type.description) ? {} : { description: type.description }
+function Options(type: z.ZodTypeAny): t.SchemaOptions {
+  const description = t.ValueGuard.IsUndefined(type.description) ? {} : { description: type.description }
   return { ...description }
 }
 // ------------------------------------------------------------------
 // Formats
 // ------------------------------------------------------------------
 const check = (type: z.ZodTypeAny, value: unknown) => type.safeParse(value).success
-tb.FormatRegistry.Set('zod:base64', (value) => check(z.string().base64(), value))
-tb.FormatRegistry.Set('zod:base64url', (value) => check(z.string().base64url(), value))
-tb.FormatRegistry.Set('zod:cidrv4', (value) => check(z.string().cidr({ version: 'v4' }), value))
-tb.FormatRegistry.Set('zod:cidrv6', (value) => check(z.string().cidr({ version: 'v6' }), value))
-tb.FormatRegistry.Set('zod:cidr', (value) => check(z.string().cidr(), value))
-tb.FormatRegistry.Set('zod:cuid', (value) => check(z.string().cuid(), value))
-tb.FormatRegistry.Set('zod:cuid2', (value) => check(z.string().cuid2(), value))
-tb.FormatRegistry.Set('zod:ulid', (value) => check(z.string().ulid(), value))
-tb.FormatRegistry.Set('zod:email', (value) => check(z.string().email(), value))
-tb.FormatRegistry.Set('zod:emoji', (value) => check(z.string().emoji(), value))
-tb.FormatRegistry.Set('zod:ipv4', (value) => check(z.string().ip({ version: 'v4' }), value))
-tb.FormatRegistry.Set('zod:ipv6', (value) => check(z.string().ip({ version: 'v6' }), value))
-tb.FormatRegistry.Set('zod:ip', (value) => check(z.string().ip(), value))
-tb.FormatRegistry.Set('zod:ipv6Cidr', (value) => check(z.string().cidr({ version: 'v6' }), value))
-tb.FormatRegistry.Set('zod:nanoid', (value) => check(z.string().nanoid(), value))
-tb.FormatRegistry.Set('zod:jwt', (value) => check(z.string().jwt(), value))
-tb.FormatRegistry.Set('zod:date', (value) => check(z.string().date(), value))
-tb.FormatRegistry.Set('zod:datetime', (value) => check(z.string().datetime(), value))
-tb.FormatRegistry.Set('zod:duration', (value) => check(z.string().duration(), value))
-tb.FormatRegistry.Set('zod:time', (value) => check(z.string().time(), value))
-tb.FormatRegistry.Set('zod:url', (value) => check(z.string().url(), value))
-tb.FormatRegistry.Set('zod:uuid', (value) => check(z.string().uuid(), value))
+t.FormatRegistry.Set('base64', (value) => check(z.string().base64(), value))
+t.FormatRegistry.Set('base64url', (value) => check(z.string().base64url(), value))
+t.FormatRegistry.Set('cidrv4', (value) => check(z.string().cidr({ version: 'v4' }), value))
+t.FormatRegistry.Set('cidrv6', (value) => check(z.string().cidr({ version: 'v6' }), value))
+t.FormatRegistry.Set('cidr', (value) => check(z.string().cidr(), value))
+t.FormatRegistry.Set('cuid', (value) => check(z.string().cuid(), value))
+t.FormatRegistry.Set('cuid2', (value) => check(z.string().cuid2(), value))
+t.FormatRegistry.Set('date', (value) => check(z.string().date(), value))
+t.FormatRegistry.Set('datetime', (value) => check(z.string().datetime(), value))
+t.FormatRegistry.Set('duration', (value) => check(z.string().duration(), value))
+t.FormatRegistry.Set('email', (value) => check(z.string().email(), value))
+t.FormatRegistry.Set('emoji', (value) => check(z.string().emoji(), value))
+t.FormatRegistry.Set('ipv4', (value) => check(z.string().ip({ version: 'v4' }), value))
+t.FormatRegistry.Set('ipv6', (value) => check(z.string().ip({ version: 'v6' }), value))
+t.FormatRegistry.Set('ip', (value) => check(z.string().ip(), value))
+t.FormatRegistry.Set('jwt', (value) => check(z.string().jwt(), value))
+t.FormatRegistry.Set('nanoid', (value) => check(z.string().nanoid(), value))
+t.FormatRegistry.Set('time', (value) => check(z.string().time(), value))
+t.FormatRegistry.Set('ulid', (value) => check(z.string().ulid(), value))
+t.FormatRegistry.Set('url', (value) => check(z.string().url(), value))
+t.FormatRegistry.Set('uuid', (value) => check(z.string().uuid(), value))
 // ------------------------------------------------------------------
 // Any
 // ------------------------------------------------------------------
-type TFromAny = tb.TAny
-function FromAny<Def extends z.ZodAnyDef>(_def: Def) {
-  return tb.Any()
+type TFromAny = t.TAny
+function FromAny<Def extends z.ZodAnyDef>(_def: Def): t.TSchema {
+  return t.Any()
 }
 // ------------------------------------------------------------------
 // Array
 // ------------------------------------------------------------------
-type TFromArray<Type extends z.ZodTypeAny> = tb.Ensure<tb.TArray<TFromType<Type>>>
-function FromArray<Def extends z.ZodArrayDef>(def: Def): tb.TSchema {
+type TFromArray<Type extends z.ZodTypeAny> = t.Ensure<t.TArray<TFromType<Type>>>
+function FromArray<Def extends z.ZodArrayDef>(def: Def): t.TSchema {
   const minItems = def.minLength === null ? {} : { minItems: def.minLength.value }
   const maxItems = def.maxLength === null ? {} : { minItems: def.maxLength.value }
   const options = { ...minItems, ...maxItems }
-  return tb.Array(FromType(def.type), options)
+  return t.Array(FromType(def.type), options)
 }
 // ------------------------------------------------------------------
 // BigInt
 // ------------------------------------------------------------------
-type TFromBigInt = tb.TBigInt
-function FromBigInt<Def extends z.ZodBigIntDef>(def: Def) {
-  return tb.BigInt()
+type TFromBigInt = t.TBigInt
+function FromBigInt<Def extends z.ZodBigIntDef>(def: Def): t.TSchema {
+  return t.BigInt()
 }
 // ------------------------------------------------------------------
 // Boolean
 // ------------------------------------------------------------------
-type TFromBoolean = tb.TBoolean
-function FromBoolean<Def extends z.ZodBooleanDef>(def: Def) {
-  return tb.Boolean()
+type TFromBoolean = t.TBoolean
+function FromBoolean<Def extends z.ZodBooleanDef>(def: Def): t.TSchema {
+  return t.Boolean()
 }
 // ------------------------------------------------------------------
 // Date
 // ------------------------------------------------------------------
-type TFromDate = tb.TDate
-function FromDate<Def extends z.ZodDateDef>(def: Def) {
-  return tb.Date()
+type TFromDate = t.TDate
+function FromDate<Def extends z.ZodDateDef>(def: Def): t.TSchema {
+  return t.Date()
 }
 // ------------------------------------------------------------------
 // Default
 // ------------------------------------------------------------------
 type TFromDefault<Type extends z.ZodType> = TFromType<Type>
-function FromDefault<Def extends z.ZodDefaultDef>(def: Def): tb.TSchema {
-  return tb.CloneType(FromType(def.innerType), { default: def.defaultValue() })
+function FromDefault<Def extends z.ZodDefaultDef>(def: Def): t.TSchema {
+  return t.CloneType(FromType(def.innerType), { default: def.defaultValue() })
 }
 // ------------------------------------------------------------------
 // DiscriminatedUnion
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromDiscriminatedUnion<Discriminator extends string, Types extends readonly z.ZodObject<any>[], Result extends tb.TSchema[] = []> = (
+type TFromDiscriminatedUnion<Discriminator extends string, Types extends readonly z.ZodObject<any>[], Result extends t.TSchema[] = []> = (
   Types extends [infer Left extends z.ZodObject<any>, ...infer Right extends z.ZodObject<any>[]] 
     ? TFromDiscriminatedUnion<Discriminator, Right, [...Result, TFromType<Left>]>
-    : tb.TUnion<Result>
+    : t.TUnion<Result>
 )
-function FromDiscriminatedUnion<Def extends z.ZodDiscriminatedUnionDef<string, z.ZodDiscriminatedUnionOption<string>[]>>(def: Def): tb.TSchema {
+function FromDiscriminatedUnion<Def extends z.ZodDiscriminatedUnionDef<string, z.ZodDiscriminatedUnionOption<string>[]>>(def: Def): t.TSchema {
   const types = def.options.map((type) => FromType(type))
-  return tb.Union(types, { discriminator: def.discriminator })
+  return t.Union(types, { discriminator: def.discriminator })
 }
 // ------------------------------------------------------------------
 // Effects
 // ------------------------------------------------------------------
-type TFromEffects<Input extends z.ZodTypeAny, Output extends unknown> = tb.Ensure<tb.TTransform<TFromType<Input>, Output>>
-function FromEffects<Type extends z.ZodEffects<z.ZodTypeAny, unknown>>(type: Type): tb.TSchema {
-  return tb
+type TFromEffects<Input extends z.ZodTypeAny, Output extends unknown> = t.Ensure<t.TTransform<TFromType<Input>, Output>>
+function FromEffects<Type extends z.ZodEffects<z.ZodTypeAny, unknown>>(type: Type): t.TSchema {
+  return t
     .Transform(FromType(type._def.schema))
     .Decode((value) => type.parse(value))
     .Encode((_) => {
@@ -133,69 +133,77 @@ function FromEffects<Type extends z.ZodEffects<z.ZodTypeAny, unknown>>(type: Typ
     })
 }
 // ------------------------------------------------------------------
+// Enum
+// ------------------------------------------------------------------
+type TFromEnum<Variants extends string[], Result extends t.TLiteral[] = []> = Variants extends [infer Left extends string, ...infer Right extends string[]] ? TFromEnum<Right, [...Result, t.TLiteral<Left>]> : t.TUnion<Result>
+function FromEnum<Def extends z.ZodEnumDef>(def: Def): t.TSchema {
+  const variants = def.values.map((value) => t.Literal(value))
+  return t.Union(variants)
+}
+// ------------------------------------------------------------------
 // Literal
 // ------------------------------------------------------------------
-type TFromLiteral<Value extends unknown> = tb.Ensure<Value extends tb.TLiteralValue ? tb.TLiteral<Value> : tb.TNever>
-function FromLiteral<Def extends z.ZodLiteralDef>(def: Def) {
-  return tb.Literal(def.value as tb.TLiteralValue)
+type TFromLiteral<Value extends unknown> = t.Ensure<Value extends t.TLiteralValue ? t.TLiteral<Value> : t.TNever>
+function FromLiteral<Def extends z.ZodLiteralDef>(def: Def): t.TSchema {
+  return t.Literal(def.value as t.TLiteralValue)
 }
 // ------------------------------------------------------------------
 // Intersect
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromIntersect<Types extends z.ZodTypeAny[], Result extends tb.TSchema[] = []> = (
+type TFromIntersect<Types extends z.ZodTypeAny[], Result extends t.TSchema[] = []> = (
   Types extends [infer Left extends z.ZodTypeAny, ...infer Right extends z.ZodTypeAny[]]
     ? TFromIntersect<Right, [...Result, TFromType<Left>]>
-    : tb.Ensure<tb.TIntersect<Result>>
+    : t.Ensure<t.TIntersect<Result>>
 )
-function FromIntersect<Type extends z.ZodIntersectionDef>(type: Type): tb.TSchema {
-  return tb.Intersect([FromType(type.left), FromType(type.right)])
+function FromIntersect<Type extends z.ZodIntersectionDef>(type: Type): t.TSchema {
+  return t.Intersect([FromType(type.left), FromType(type.right)])
 }
 // ------------------------------------------------------------------
 // Object
 // ------------------------------------------------------------------
-type TFromObject<Properties extends z.ZodRawShape> = tb.Ensure<
-  tb.TObject<{
+type TFromObject<Properties extends z.ZodRawShape> = t.Ensure<
+  t.TObject<{
     [Key in keyof Properties]: TFromType<Properties[Key]>
   }>
 >
-function FromObject<Def extends z.ZodObjectDef<z.ZodRawShape>, Shape extends z.ZodRawShape>(def: Def, shape: Shape): tb.TSchema {
+function FromObject<Def extends z.ZodObjectDef<z.ZodRawShape>, Shape extends z.ZodRawShape>(def: Def, shape: Shape): t.TSchema {
   const additionalProperties = def.unknownKeys === 'strict' ? { additionalProperties: false } : {}
   const options = { ...additionalProperties }
-  return tb.Object(
+  return t.Object(
     globalThis.Object.keys(shape).reduce((properties: any, key: any) => {
       return { ...properties, [key]: FromType(shape[key]) }
-    }, {} as tb.TProperties) as never,
+    }, {} as t.TProperties) as never,
     options,
   )
 }
 // ------------------------------------------------------------------
 // Optional
 // ------------------------------------------------------------------
-type TFromOptional<Type extends z.ZodTypeAny, Result extends tb.TSchema = tb.TOptional<TFromType<Type>>> = Result
-function FromOptional<Def extends z.ZodOptionalDef>(def: Def): tb.TSchema {
-  return tb.Optional(FromType(def.innerType))
+type TFromOptional<Type extends z.ZodTypeAny, Result extends t.TSchema = t.TOptional<TFromType<Type>>> = Result
+function FromOptional<Def extends z.ZodOptionalDef>(def: Def): t.TSchema {
+  return t.Optional(FromType(def.innerType))
 }
 // ------------------------------------------------------------------
 // Promise
 // ------------------------------------------------------------------
-type TFromPromise<Type extends z.ZodTypeAny> = tb.Ensure<tb.TPromise<TFromType<Type>>>
-function FromPromise<Def extends z.ZodPromiseDef>(def: Def): tb.TSchema {
-  return tb.Promise(FromType(def.type))
+type TFromPromise<Type extends z.ZodTypeAny> = t.Ensure<t.TPromise<TFromType<Type>>>
+function FromPromise<Def extends z.ZodPromiseDef>(def: Def): t.TSchema {
+  return t.Promise(FromType(def.type))
 }
 // ------------------------------------------------------------------
 // Nullable
 // ------------------------------------------------------------------
-type TFromNullable<Type extends z.ZodTypeAny> = tb.Ensure<tb.TUnion<[tb.TNull, TFromType<Type>]>>
-function FromNullable<Def extends z.ZodNullableDef>(def: Def): tb.TSchema {
-  return tb.Union([tb.Null(), FromType(def.innerType)])
+type TFromNullable<Type extends z.ZodTypeAny> = t.Ensure<t.TUnion<[t.TNull, TFromType<Type>]>>
+function FromNullable<Def extends z.ZodNullableDef>(def: Def): t.TSchema {
+  return t.Union([t.Null(), FromType(def.innerType)])
 }
 // ------------------------------------------------------------------
 // Number
 // ------------------------------------------------------------------
-type TFromNumber = tb.TNumber
+type TFromNumber = t.TNumber
 // prettier-ignore
-function FromNumber<Def extends z.ZodNumberDef>(def: Def) {
+function FromNumber<Def extends z.ZodNumberDef>(def: Def): t.TSchema {
   const options = def.checks.reduce((options, check) => {
     return { ...options, ... (    
       check.kind === 'int' ? { multipleOf: 1 } :
@@ -205,124 +213,124 @@ function FromNumber<Def extends z.ZodNumberDef>(def: Def) {
       {} 
     )}
   }, {})
-  return tb.Number(options)
+  return t.Number(options)
 }
 // ------------------------------------------------------------------
 // Never
 // ------------------------------------------------------------------
-type TFromNever = tb.TNever
-function FromNever<Def extends z.ZodNeverDef>(def: Def) {
-  return tb.Never()
+type TFromNever = t.TNever
+function FromNever<Def extends z.ZodNeverDef>(def: Def): t.TSchema {
+  return t.Never()
 }
 // ------------------------------------------------------------------
 // Null
 // ------------------------------------------------------------------
-type TFromNull = tb.TNull
-function FromNull<Def extends z.ZodNullDef>(def: Def) {
-  return tb.Null()
+type TFromNull = t.TNull
+function FromNull<Def extends z.ZodNullDef>(def: Def): t.TSchema {
+  return t.Null()
 }
 // ------------------------------------------------------------------
 // Readonly
 // ------------------------------------------------------------------
-type TFromReadonly<Type extends z.ZodTypeAny, Result extends tb.TSchema = tb.TReadonly<TFromType<Type>>> = Result
-function FromReadonly<Def extends z.ZodReadonlyDef>(def: Def): tb.TSchema {
-  return tb.Readonly(FromType(def.innerType))
+type TFromReadonly<Type extends z.ZodTypeAny, Result extends t.TSchema = t.TReadonly<TFromType<Type>>> = Result
+function FromReadonly<Def extends z.ZodReadonlyDef>(def: Def): t.TSchema {
+  return t.Readonly(FromType(def.innerType))
 }
 // ------------------------------------------------------------------
 // Record
 // ------------------------------------------------------------------
-type TFromRecord<Key extends z.ZodTypeAny, Value extends z.ZodTypeAny> = tb.Ensure<tb.TRecordOrObject<TFromType<Key>, TFromType<Value>>>
-function FromRecord<Def extends z.ZodRecordDef>(def: Def): tb.TSchema {
-  return tb.Record(FromType(def.keyType), FromType(def.valueType))
+type TFromRecord<Key extends z.ZodTypeAny, Value extends z.ZodTypeAny> = t.Ensure<t.TRecordOrObject<TFromType<Key>, TFromType<Value>>>
+function FromRecord<Def extends z.ZodRecordDef>(def: Def): t.TSchema {
+  return t.Record(FromType(def.keyType), FromType(def.valueType))
 }
 // ------------------------------------------------------------------
 // String
 // ------------------------------------------------------------------
-type TFromString = tb.TString
+type TFromString = t.TString
 // prettier-ignore
-function FromString<Def extends z.ZodStringDef>(def: Def) {
+function FromString<Def extends z.ZodStringDef>(def: Def): t.TSchema {
   const options = def.checks.reduce((options, check) => {
     return { ...options, ...(
-      check.kind === 'base64' ? { format: 'zod:base64' } :
-      check.kind === 'base64url' ? { format: 'zod:base64url' } :
-      check.kind === 'cidr' ? { format: check.version === 'v4' ? 'zod:cidrv4' : check.version === 'v6' ? 'zod:cidrv6' : 'zod:cidr' } :
-      check.kind === 'cuid' ? { format: 'zod:cuid' } :
-      check.kind === 'cuid2' ? { format: 'zod:cuid2' } :
-      check.kind === 'date' ? { format: 'zod:date' } : 
-      check.kind === 'datetime' ? { format: 'zod:datetime' } :
-      check.kind === 'duration' ? { format: 'zod:duration' } :
-      check.kind === 'email' ? { format: 'zod:email' } :
-      check.kind === 'emoji' ? { format: 'zod:emoji' } :
+      check.kind === 'base64' ? { format: 'base64' } :
+      check.kind === 'base64url' ? { format: 'base64url' } :
+      check.kind === 'cidr' ? { format: check.version === 'v4' ? 'cidrv4' : check.version === 'v6' ? 'cidrv6' : 'cidr' } :
+      check.kind === 'cuid' ? { format: 'cuid' } :
+      check.kind === 'cuid2' ? { format: 'cuid2' } :
+      check.kind === 'date' ? { format: 'date' } : 
+      check.kind === 'datetime' ? { format: 'datetime' } :
+      check.kind === 'duration' ? { format: 'duration' } :
+      check.kind === 'email' ? { format: 'email' } :
+      check.kind === 'emoji' ? { format: 'emoji' } :
       check.kind === 'endsWith' ? { pattern: `${check.value}$` } :
       check.kind === 'includes' ? { pattern: check.value } :
-      check.kind === 'ip' ? { format: check.version === 'v4' ? 'zod:ipv4' : check.version === 'v6' ? 'zod:ipv6' : 'zod:ip' } :
-      check.kind === 'jwt' ? { format: 'zod:jwt' } :
+      check.kind === 'ip' ? { format: check.version === 'v4' ? 'ipv4' : check.version === 'v6' ? 'ipv6' : 'ip' } :
+      check.kind === 'jwt' ? { format: 'jwt' } :
       check.kind === 'length' ? { minLength: check.value, maxLength: check.value } :
       check.kind === 'min' ? { minLength: check.value } : 
       check.kind === 'max' ? { maxLength: check.value } : 
-      check.kind === 'nanoid' ? { format: 'zod:nanoid' } :
+      check.kind === 'nanoid' ? { format: 'nanoid' } :
       check.kind === 'regex' ? { pattern: check.regex.source } :
       check.kind === 'startsWith' ? { pattern: `^${check.value}` } :
-      check.kind === 'time' ? { format: 'zod:time' } :
-      check.kind === 'ulid' ? { format: 'zod:ulid' } :
-      check.kind === 'url' ? { format: 'zod:url' } : 
-      check.kind === 'uuid' ? { format: 'zod:uuid' } :
+      check.kind === 'time' ? { format: 'time' } :
+      check.kind === 'ulid' ? { format: 'ulid' } :
+      check.kind === 'url' ? { format: 'url' } : 
+      check.kind === 'uuid' ? { format: 'uuid' } :
       {}
     )}
   }, {})
-  return tb.String(options)
+  return t.String(options)
 }
 // ------------------------------------------------------------------
 // Symbol
 // ------------------------------------------------------------------
-type TFromSymbol = tb.TSymbol
-function FromSymbol<Def extends z.ZodSymbolDef>(def: Def) {
-  return tb.Symbol()
+type TFromSymbol = t.TSymbol
+function FromSymbol<Def extends z.ZodSymbolDef>(def: Def): t.TSchema {
+  return t.Symbol()
 }
 // ------------------------------------------------------------------
 // Tuple
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromTuple<Types extends z.ZodTypeAny[], Result extends tb.TSchema[] = []> = (
+type TFromTuple<Types extends z.ZodTypeAny[], Result extends t.TSchema[] = []> = (
   Types extends [infer Left extends z.ZodTypeAny, ...infer Right extends z.ZodTypeAny[]]
     ? TFromTuple<Right, [...Result, TFromType<Left>]>
-    : tb.TTuple<Result>
+    : t.TTuple<Result>
 )
-function FromTuple<Def extends z.ZodTupleDef>(def: Def): tb.TSchema {
-  return tb.Tuple(def.items.map((item) => FromType(item)))
+function FromTuple<Def extends z.ZodTupleDef>(def: Def): t.TSchema {
+  return t.Tuple(def.items.map((item) => FromType(item)))
 }
 // ------------------------------------------------------------------
 // Undefined
 // ------------------------------------------------------------------
-type TFromUndefined = tb.TUndefined
-function FromUndefined<Def extends z.ZodUndefinedDef>(def: Def) {
-  return tb.Undefined()
+type TFromUndefined = t.TUndefined
+function FromUndefined<Def extends z.ZodUndefinedDef>(def: Def): t.TSchema {
+  return t.Undefined()
 }
 // ------------------------------------------------------------------
 // Union
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromUnion<Types extends z.ZodTypeAny[], Result extends tb.TSchema[] = []> = (
+type TFromUnion<Types extends z.ZodTypeAny[], Result extends t.TSchema[] = []> = (
   Types extends [infer Left extends z.ZodTypeAny, ...infer Right extends z.ZodTypeAny[]]
     ? TFromUnion<Right, [...Result, TFromType<Left>]>
-    : tb.TUnion<Result>
+    : t.TUnion<Result>
 )
-function FromUnion<Def extends z.ZodUnionDef>(def: Def): tb.TSchema {
-  return tb.Union(def.options.map((item) => FromType(item)))
+function FromUnion<Def extends z.ZodUnionDef>(def: Def): t.TSchema {
+  return t.Union(def.options.map((item) => FromType(item)))
 }
 // ------------------------------------------------------------------
 // Unknown
 // ------------------------------------------------------------------
-type TFromUnknown = tb.TUnknown
-function FromUnknown<Def extends z.ZodUnknownDef>(def: Def) {
-  return tb.Unknown()
+type TFromUnknown = t.TUnknown
+function FromUnknown<Def extends z.ZodUnknownDef>(def: Def): t.TSchema {
+  return t.Unknown()
 }
 // ------------------------------------------------------------------
 // Void
 // ------------------------------------------------------------------
-type TFromVoid = tb.TVoid
-function FromVoid<Def extends z.ZodVoidDef>(def: Def) {
-  return tb.Void()
+type TFromVoid = t.TVoid
+function FromVoid<Def extends z.ZodVoidDef>(def: Def): t.TSchema {
+  return t.Void()
 }
 // ------------------------------------------------------------------
 // Type
@@ -337,6 +345,7 @@ type TFromType<Type extends z.ZodType> = (
   Type extends z.ZodDefault<infer Type> ? TFromDefault<Type> :
   Type extends z.ZodDiscriminatedUnion<infer Discriminator, infer Types> ? TFromDiscriminatedUnion<Discriminator, Types> : 
   Type extends z.ZodEffects<infer Input, infer Output> ? TFromEffects<Input, Output> :
+  Type extends z.ZodEnum<infer Variants> ? TFromEnum<Variants> :
   Type extends z.ZodLiteral<infer Value> ? TFromLiteral<Value> :
   Type extends z.ZodNullable<infer Type> ? TFromNullable<Type> :
   Type extends z.ZodObject<infer Properties> ? TFromObject<Properties> :
@@ -349,17 +358,17 @@ type TFromType<Type extends z.ZodType> = (
   Type extends z.ZodNull ? TFromNull :
   Type extends z.ZodString ? TFromString :
   Type extends z.ZodSymbol ? TFromSymbol :
-  Type extends z.ZodTuple<infer Types> ? TFromTuple<tb.Assert<Types, z.ZodTypeAny[]>> :  
+  Type extends z.ZodTuple<infer Types> ? TFromTuple<t.Assert<Types, z.ZodTypeAny[]>> :  
   Type extends z.ZodUndefined ? TFromUndefined :
-  Type extends z.ZodUnion<infer Types> ? TFromUnion<tb.Assert<Types, z.ZodTypeAny[]>> :
+  Type extends z.ZodUnion<infer Types> ? TFromUnion<t.Assert<Types, z.ZodTypeAny[]>> :
   Type extends z.ZodUnknown ? TFromUnknown :
   Type extends z.ZodVoid ? TFromVoid :
   // Intersection (Ensure Last Due to Zod Differentiation Issue)
   Type extends z.ZodIntersection<infer Left, infer Right> ? TFromIntersect<[Left, Right]> :
-  tb.TNever
+  t.TNever
 )
 // prettier-ignore
-function FromType<Type extends z.ZodType>(type: Type): tb.TSchema {
+function FromType<Type extends z.ZodType>(type: Type): t.TSchema {
   const schema = (
     type instanceof z.ZodAny ? FromAny(type._def) :
     type instanceof z.ZodArray ? FromArray(type._def) :
@@ -369,6 +378,7 @@ function FromType<Type extends z.ZodType>(type: Type): tb.TSchema {
     type instanceof z.ZodDefault ? FromDefault(type._def) :
     type instanceof z.ZodDiscriminatedUnion ? FromDiscriminatedUnion(type._def) :
     type instanceof z.ZodEffects ? FromEffects(type) :
+    type instanceof z.ZodEnum ? FromEnum(type._def) :
     type instanceof z.ZodLiteral ? FromLiteral(type._def) :
     type instanceof z.ZodNullable ? FromNullable(type._def) :
     type instanceof z.ZodObject ? FromObject(type._def, type.shape) :
@@ -388,16 +398,19 @@ function FromType<Type extends z.ZodType>(type: Type): tb.TSchema {
     type instanceof z.ZodVoid ? FromVoid(type._def) :
     // Intersection (Ensure Last Due to Zod Differentiation Issue)
     type instanceof z.ZodIntersection ? FromIntersect(type._def) :
-    tb.Never()
-  ) as tb.TSchema
-  return tb.CreateType(schema, Options(type)) as tb.TSchema
+    t.Never()
+  ) as t.TSchema
+  return t.CreateType(schema, Options(type)) as t.TSchema
 }
 // ------------------------------------------------------------------
-// Box
+// TypeBoxFromZod
 // ------------------------------------------------------------------
-/** Converts a Zod Type to a TypeBox Type */
-export type TBox<Type extends unknown> = Type extends z.ZodType ? TFromType<Type> : undefined
-/** Converts a Zod Type to a TypeBox Type */
-export function Box<Type extends unknown, Result extends TBox<Type> = TBox<Type>>(type: Type): Result {
-  return (type instanceof z.ZodType ? FromType(type) : undefined) as never
+// prettier-ignore
+export type TTypeBoxFromZod<Type extends unknown> = (
+  Type extends z.ZodType ? TFromType<Type> : t.TNever
+)
+
+// prettier-ignore
+export function TypeBoxFromZod<Type extends unknown, Result extends TTypeBoxFromZod<Type> = TTypeBoxFromZod<Type>>(type: Type): Result {
+  return (type instanceof z.ZodType ? FromType(type) : t.Never()) as never
 }

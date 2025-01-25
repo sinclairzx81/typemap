@@ -4,7 +4,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2017-2024 Haydn Paterson (sinclair) <haydn.developer@gmail.com>
+Copyright (c) 2024 Haydn Paterson (sinclair) <haydn.developer@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,21 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { removeNotices } from '../notices/remove-notices'
-import { compile } from './compile'
+import { type TTypeBoxFromZod, TypeBoxFromZod } from '../typebox/typebox-from-zod'
+import { type TValibotFromTypeBox, ValibotFromTypeBox } from './valibot-from-typebox'
+import * as t from '@sinclair/typebox'
+import * as v from 'valibot'
 
-/** Builds the CommonJS version of this package */
-export async function build(target: string) {
-  console.log('building...cjs')
-  const buildTarget = `${target}/build/cjs`
-  await compile(buildTarget)
-  await removeNotices(buildTarget)
+// prettier-ignore
+export type TValibotFromZod<
+  Type extends object | string,
+  Schema extends t.TSchema = TTypeBoxFromZod<Type>,
+  Result extends v.BaseSchema<any, any, any> = TValibotFromTypeBox<Schema> 
+> = Result
+
+// prettier-ignore
+export function ValibotFromZod<Type extends object | string>(type: Type): TValibotFromZod<Type> {
+  const schema = TypeBoxFromZod(type)
+  const result = ValibotFromTypeBox(schema)
+  return result
 }

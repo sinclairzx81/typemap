@@ -5,10 +5,7 @@
     "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {
-      "@sinclair/typebox-adapter/typebox": ["src/typebox/index.ts"],
-      "@sinclair/typebox-adapter/valibot": ["src/valibot/index.ts"],
-      "@sinclair/typebox-adapter/zod": ["src/zod/index.ts"],
-      "@sinclair/typebox-adapter": ["src/index.ts"]
+      "@sinclair/typemap": ["src/index.ts"]
     }
   }
 }

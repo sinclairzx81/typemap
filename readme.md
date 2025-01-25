@@ -1,10 +1,10 @@
 <div align='center'>
 
-<h1>TypeBox Adapter</h1>
+<h1>TypeMap</h1>
 
-<p>Integrate Valibot and Zod with TypeBox</p>
+<p>Unified Syntax Frontend and Type Remapping System for TypeBox, Valibot and Zod</p>
 
-<img src="https://raw.githubusercontent.com/sinclairzx81/typebox-adapter/refs/heads/main/typebox-adapter.png" />
+<img src="typemap.png" />
 
 <br />
 <br />
@@ -19,84 +19,186 @@
 ## Install
 
 ```bash
-$ npm install @sinclair/typebox-adapter --save
+$ npm install @sinclair/typemap --save
 ```
 
 ## Example
 
-TypeBox Adapter converts Valibot and Zod Types into TypeBox compatible schematics
-
-[TypeScript Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgIQgDzgXzgMyhEOAcgAEBnYAOwGMAbAQ2CgHoYBPMAUwCN0BaegBN6YGJyhEAUKEixEcAMox6MYNSy58hUhRoMmrDj3RSZ0eACo49MnABumgsTv1awXjFPhzcKzbgAXo7aARCCUpLMzHAAaq7uEPAwEHAAKkaoaJKS7FyxcAC8isqq1AA8uZwQOLEAfNnUEJRk8DGFKOgAFHYAdBDcAFac1DCdSHATk1PTMzNRcI3Nre0IkhNoAFz2PZQAriDc4p0AlAA0sxeXVxPzE5VbRP1DI0Sna3BsW717B0dn1wDAbc4FBOABHXZMTiCLYAbSIaFexDYSKIASIAF03hMAl8dvtDlAToCSVdgWB8FxYMBOGQtqtMMdjqSWay4MD1vS4PdiD9CUQsNi2cKSRyPlyeUQ+eIBZghSKFZcxbj5JLpRIsO9FdrpsDMFqdYb5vrItEAFphbkpdJcTLZSpwM3tJQqNQVIzVR31SSLFqO9qZToBPqDYajcaG9nRX3wM1bVIAeVDIzKqwm9C2wZaUCoAHMTudI0roun40oc5Rc0LuJmetm8wWi8XJjW0uW80LqLX65XiU2LsCu22YBXc5JGcz+8LjbUgA)
+Use syntax to construct types for TypeBox, Valibot and Zod ...
 
 ```typescript
-import { Box } from '@sinclair/typebox-adapter'
+import { TypeBox, Zod, Valibot } from '@sinclair/typemap'
 
-import * as v from 'valibot'
-import * as z from 'zod'
+// const T: TObject<{ ... }>
 
-// Valibot to TypeBox (Runtime)
+const T = TypeBox(`{ 
+  x: number,
+  y: number,
+  z: number
+}`)              
 
-const V = Box(v.object({                            // const V = {
-  x: v.number(),                                    //   type: 'object',
-  y: v.number(),                                    //   required: ['x', 'y', 'z'],
-  z: v.number()                                     //   properties: {
-}))                                                 //     x: { type: 'number' },
-                                                    //     y: { type: 'number' },
-                                                    //     z: { type: 'number' }
-                                                    //   }
-                                                    // }
+// const V: ObjectSchema<{ ... }>
 
-// Zod to TypeBox (Static)
+const V = Valibot(`{ 
+  x: number,
+  y: number,
+  z: number
+}`)
 
-const Z = Box(z.object({                            // const Z: TObject<{
-  a: z.string(),                                    //   a: TString,
-  b: z.string(),                                    //   b: TString,
-  c: z.string()                                     //   c: TString
-}))                                                 // }>
+// const Z: ZodObject<{ ... }>
+
+const Z = Zod(`{ 
+  x: number,
+  y: number,
+  z: number
+}`)
 ```
+
+... or structurally remap types from one library to another
+
+```typescript
+import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
+
+// Syntax > Zod > Valibot > TypeBox
+
+const T = TypeBox(Valibot(Zod(`{
+  x: number,
+  y: number,
+  z: number
+}`)))
+```
+
+... or compile types for high performance runtime type checking
+
+```typescript
+import { Compile } from '@sinclair/typemap'
+
+import z from 'zod'
+
+const T = z.object({               // const T: z.ZodObject<{ 
+  x: z.number(),                   //   x: z.ZodNumber,
+  y: z.number(),                   //   y: z.ZodNumber,
+  z: z.number(),                   //   z: z.ZodNumber,
+})                                 // }>
+
+const C = Compile(T)               // const C: Validator<TObject<{
+                                   //   x: TNumber,
+                                   //   y: TNumber,
+                                   //   z: TNumber
+                                   // }>>   
+
+const R = C.Check({                // const R: boolean - High Performance Checking!
+  x: 1,
+  y: 2, 
+  z: 3
+})
+```
+
+
 
 ## Overview
 
-TypeBox Adapter converts Zod and Valibot types into TypeBox schematics (Json Schema). It performs a deep structural remapping of the types provided by these libraries into TypeScript-aligned Json Schema, enabling integration with industry-standard validators like Ajv and OpenAPI-related technologies, while also facilitating interoperability and acceleration via the TypeBox validation infrastructure.
+TypeMap is an type mapping library developed for TypeBox, Valibot and Zod. It enables quick compatibility between each library by structurally remapping type representations from one library to another. In addition,TypeMap offers a uniform syntax for type construction as well as high-performance runtime type checking for Valibot and Zod via the TypeBox compiler infrastructure.
 
-License MIT
+TypeMap is designed to be a simple tool to enable Valibot and Zod to integrate with TypeBox and Json Schema validation infrastructure. It is also written to allow TypeBox to integrate with systems leveraging Valibot and Zod for validation. The frontend syntax provided by TypeMap seeks to explore a uniform API surface for runtime type libraries.
+
+License: MIT
 
 ## Contents
 
 - [Install](#Install)
 - [Overview](#Overview)
-- [Usage](#Usage)
+- [Libraries](#Libraries)
+  - [TypeBox](#TypeBox)
   - [Valibot](#Valibot)
   - [Zod](#Zod)
+- [Static](#Static)
+- [Compile](#Compile)
 - [Benchmark](#Benchmark)
 - [Contribute](#Contribute)
 
-## Usage
+## Libraries
 
-TypeBox Adapter provides a singular Box function to transform Valibot and Zod types into TypeBox schematics. The top-level export is capable of transforming both Valibot and Zod, but you should use the appropriate submodule depending on which library you are using.
+TypeMap exports mapping functions named after the library they map for. Each function can accept a type from any other library, where the function will attempt to map the type or return a `never` representation if a mapping is not possible.
+
+### TypeBox
+
+Use the TypeBox function to map the parameter into a TypeBox type
+
+```typescript
+import { TypeBox } from '@sinclair/typemap'
+
+const A = TypeBox(t.Number())                  // const A: TNumber         (TypeBox)
+const B = TypeBox(v.string())                  // const B: TString         (Valibot)
+const C = TypeBox(z.boolean())                 // const C: TBoolean        (Zod)
+const D = TypeBox('string[]')                  // const D: TArray<TString> (Syntax)
+```
 
 ### Valibot
 
-Use the `/valibot` submodule if you only have Valibot installed. Refer to the Valibot [documentation](https://valibot.dev/) for more information on this type library.
+Use the Valibot function to map the parameter into a Valibot type
 
 ```typescript
-import { Box } from '@sinclair/typebox-adapter/valibot' // Transform Valibot Only
+import { Valibot } from '@sinclair/typemap'
 
-import * as v from 'valibot'
-
-const T = Box(v.string())                               // const T = { type: 'string' }
+const A = Valibot(t.Number())                  // const A: v.NumberSchema     (TypeBox)
+const B = Valibot(v.string())                  // const B: v.StringSchema     (Valibot)
+const C = Valibot(z.boolean())                 // const C: v.BooleanSchema    (Zod)
+const D = Valibot('string[]')                  // const D: v.ArraySchema<...> (Syntax)
 ```
 
 ### Zod
 
-Use the `/zod` submodule if you only have Zod installed. Refer to the Zod [documentation](https://zod.dev/) for more information on this type library.
+Use the Zod function to map the parameter into a Zod type
 
 ```typescript
-import { Box } from '@sinclair/typebox-adapter/zod'     // Transform Zod Only
+import { Zod } from '@sinclair/typemap'
 
-import * as z from 'zod'
+const A = Zod(t.Number())                  // const A: z.ZodNumber     (TypeBox)
+const B = Zod(v.string())                  // const B: z.ZodString     (Valibot)
+const C = Zod(z.boolean())                 // const C: z.ZodBoolean    (Zod)
+const D = Zod('string[]')                  // const D: z.ZodArray<...> (Syntax)
+```
 
-const T = Box(z.string())                               // const T = { type: 'string' }
+## Static
+
+TypeMap can statically infer for TypeBox, Valibot, Zod and Syntax with the `Static` type.
+
+```typescript
+import { type Static } from '@sinclair/typemap'
+
+const T = t.Number()                                // TypeBox
+const V = v.string()                                // Valibot
+const Z = z.boolean()                               // Zod
+const S = 'string[]'                                // Syntax
+
+type T = Static<typeof T>                           // number
+type V = Static<typeof V>                           // string
+type Z = Static<typeof Z>                           // boolean 
+type S = Static<typeof S>                           // string[]
+```
+
+## Compile
+
+TypeMap offers JIT compilation of TypeBox, Valibot, Zod and Syntax using the `Compile` function. This function will internally use the TypeBox TypeCompiler for high performance checking. This function will also gracefully degrade to dynamic checking if the runtime does not support JavaScript evaluation.
+
+The `Compile` function returns a validator object that implements the [standard-schema](https://github.com/standard-schema/standard-schema) interface.
+
+```typescript
+import { Compile } from '@sinclair/typemap'
+
+// Pass TypeBox, Valibot, Zod or Syntax to JIT Compile the type.
+const V = Compile(`{
+  x: number
+  y: number,
+  z: number
+}`)
+
+// TypeMap Interface
+const R1 = V.Check({ x: 1, y: 2, z: 3 })
+
+// Standard Schema Interface
+const R2 = V['~standard'].validate({ x: 1, y: 2, z: 3 })
 ```
 
 ## Benchmark
@@ -136,5 +238,5 @@ For community benchmarks, refer to the [runtime-type-benchmarks](https://github.
 
 ## Contribute
 
-This project is open to community contributions. Please ensure you submit an open issue before creating a pull request. TypeBox and its associated projects encourage open community discussion before accepting new features.
+This project is open to community contributions. Please ensure you submit an open issue before creating a pull request. TypeMap encourages open community discussion before accepting new features.
 

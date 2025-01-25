@@ -1,23 +1,25 @@
-import { Box } from '@sinclair/typebox-adapter'
-import * as v from 'valibot'
-import * as z from 'zod'
+import { TypeBox, Zod, Valibot } from '@sinclair/typemap'
 
-// Valibot to TypeBox (Runtime)
+// const T: TObject<{ ... }>
 
-const V = Box(
-  v.object({
-    x: v.number(),
-    y: v.number(),
-    z: v.number(),
-  }),
-)
+const T = TypeBox(`{ 
+  x: number,
+  y: number,
+  z: number
+}`)
 
-// Zod to TypeBox (Static)
+// const V: ObjectSchema<{ ... }>
 
-const Z = Box(
-  z.object({
-    a: z.string(),
-    b: z.string(),
-    c: z.string(),
-  }),
-)
+const V = Valibot(`{ 
+  x: number,
+  y: number,
+  z: number
+}`)
+
+// const Z: ZodObject<{ ... }>
+
+const Z = Zod(`{ 
+  x: number,
+  y: number,
+  z: number
+}`)
