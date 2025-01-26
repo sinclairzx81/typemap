@@ -36,16 +36,16 @@ import * as c from './common'
 
 /** Creates a Valibot type from Syntax or another Type */
 // prettier-ignore
-export type TValibot<Type extends object | string> = (
+export type TValibot<Type extends object | string, Result = (
   Guard.TIsSyntax<Type> extends true ? TValibotFromSyntax<Type> :
   Guard.TIsTypeBox<Type> extends true ? TValibotFromTypeBox<Type> :
   Guard.TIsValibot<Type> extends true ? TValibotFromValibot<Type> :
   Guard.TIsZod<Type> extends true ? TValibotFromZod<Type> :
   v.NeverSchema<c.BaseError>
-)
+)> = Result
 /** Creates a Valibot type from Syntax or another Type */
 // prettier-ignore
-export function Valibot<Type extends object | string, Result = TValibot<Type>>(type: Type): Result {
+export function Valibot<Type extends object | string, Mapped = TValibot<Type>, Result extends Mapped = Mapped>(type: Type): Result {
   return (
     Guard.IsSyntax(type) ? ValibotFromSyntax(type) :
     Guard.IsTypeBox(type) ? ValibotFromTypeBox(type) :
