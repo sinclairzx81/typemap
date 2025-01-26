@@ -35,17 +35,17 @@ import * as z from 'zod'
 
 /** Creates a Zod type from Syntax or another Type */
 // prettier-ignore
-export type TZod<Type extends object | string> = (
+export type TZod<Type extends object | string, Result = (
   Guard.TIsSyntax<Type> extends true ? TZodFromSyntax<Type> :
   Guard.TIsTypeBox<Type> extends true ? TZodFromTypeBox<Type> :
   Guard.TIsValibot<Type> extends true ? TZodFromValibot<Type> :
   Guard.TIsZod<Type> extends true ? TZodFromZod<Type> :
   z.ZodNever
-)
+)> = Result
 
 /** Creates a Zod type from Syntax or another Type */
 // prettier-ignore
-export function Zod<Type extends object | string, Result = TZod<Type>>(type: Type): Result {
+export function Zod<Type extends object | string, Mapped = TZod<Type>, Result extends Mapped = Mapped>(type: Type): Result {
   return (
     Guard.IsSyntax(type) ? ZodFromSyntax(type) : 
     Guard.IsTypeBox(type) ? ZodFromTypeBox(type) : 

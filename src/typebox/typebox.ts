@@ -35,13 +35,14 @@ import * as t from '@sinclair/typebox'
 
 /** Creates a TypeBox type from Syntax or another Type */
 // prettier-ignore
-export type TTypeBox<Type extends object | string> = (
+export type TTypeBox<Type extends object | string, Result = (
   Guard.TIsSyntax<Type> extends true ? TTypeBoxFromSyntax<Type> :
   Guard.TIsTypeBox<Type> extends true ? TTypeBoxFromTypeBox<Type> :
   Guard.TIsValibot<Type> extends true ? TTypeBoxFromValibot<Type> :
   Guard.TIsZod<Type> extends true ? TTypeBoxFromZod<Type> :
   t.TNever
-)
+)> = Result
+
 /** Creates a TypeBox type from Syntax or another Type */
 // prettier-ignore
 export function TypeBox<Type extends object | string>(type: Type): TTypeBox<Type> {
@@ -58,6 +59,6 @@ export function TypeBox<Type extends object | string>(type: Type): TTypeBox<Type
  * Creates a TypeBox type from Syntax or another Type
  * @deprecated Use TypeBox() export instead
  */
-export function Box<Type extends object | string>(type: Type): TTypeBox<Type> {
-  return TypeBox(type)
+export function Box<Type extends object | string, Mapped = TTypeBox<Type>, Result extends Mapped = Mapped>(type: Type): Result {
+  return TypeBox(type) as never
 }

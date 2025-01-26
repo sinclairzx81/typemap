@@ -96,7 +96,7 @@ function FromFunction(type: t.TFunction): c.BaseSchema {
 // ------------------------------------------------------------------
 // Integer
 // ------------------------------------------------------------------
-type TFromInteger = v.NumberSchema<c.BaseError>
+type TFromInteger<Result = v.NumberSchema<c.BaseError>> = Result
 function FromInteger(type: t.TInteger): c.BaseSchema {
   const { exclusiveMaximum, exclusiveMinimum, minimum, maximum, multipleOf } = type
   const constraints = CreateConstraints(type, [v.integer()])
@@ -110,9 +110,12 @@ function FromInteger(type: t.TInteger): c.BaseSchema {
 // ------------------------------------------------------------------
 // Intersect
 // ------------------------------------------------------------------
-type TFromIntersect<Types extends t.TSchema[], Result extends c.BaseSchema[] = []> = Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]]
-  ? TFromIntersect<Right, [...Result, TFromType<Left>]>
-  : v.IntersectSchema<Result, any>
+// prettier-ignore
+type TFromIntersect<Types extends t.TSchema[], Result extends c.BaseSchema[] = []> = (
+  Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]]
+    ? TFromIntersect<Right, [...Result, TFromType<Left>]>
+    : v.IntersectSchema<Result, any>
+)
 function FromIntersect(type: t.TIntersect): c.BaseSchema {
   const schemas = type.allOf.map((schema) => FromType(schema))
   return CreateType(v.intersect(schemas), CreateConstraints(type))
@@ -120,7 +123,7 @@ function FromIntersect(type: t.TIntersect): c.BaseSchema {
 // ------------------------------------------------------------------
 // Literal
 // ------------------------------------------------------------------
-type TFromLiteral<Value extends t.TLiteralValue> = v.LiteralSchema<Value, any>
+type TFromLiteral<Value extends t.TLiteralValue, Result = v.LiteralSchema<Value, undefined>> = Result
 function FromLiteral(type: t.TLiteral): c.BaseSchema {
   return CreateType(v.literal(type.const), CreateConstraints(type))
 }
@@ -385,9 +388,9 @@ function FromType(type: t.TSchema): c.BaseSchema {
 // ValibotFromTypeBox
 // ------------------------------------------------------------------
 // prettier-ignore
-export type TValibotFromTypeBox<Type extends object | string> = (
+export type TValibotFromTypeBox<Type extends object | string, Result extends c.BaseSchema = (
   Type extends t.TSchema ? TFromType<Type> : v.NeverSchema<c.BaseError>
-)
+)> = Result
 // prettier-ignore
 export function ValibotFromTypeBox<Type extends object | string>(type: Type): TValibotFromTypeBox<Type> {
   return (t.KindGuard.IsSchema(type) ? FromType(type) : v.never()) as never
