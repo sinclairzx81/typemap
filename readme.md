@@ -26,34 +26,43 @@ $ npm install @sinclair/typemap --save
 
 Use TypeScript syntax to construct types for TypeBox, Valibot and Zod ... 
 
-[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAWhACaEBqAhgDbABGE8AvnAGZQQhwDkAAgGdgAOwDGNKsCgB6GOgwgqYHgCgV06XFERhA+MgBcKAPL0AVhlEwAPEgB0DuMwB8a7bv1wAvCnk5cABQABkgqcHC4RsIAriD0GFD4YXCoUbHxickAXmlxCSrMQQCU4aVl5WoaWjp6cBRGphZWAMqiABYKVLZwDnZOrirutRTedbQMTMGh4ZFwMXmZ4alz6QlJ4TkrCwXFlZpD8ERGJKSNljb2ji5uNYejJ1NwybPzGespuW-Zn-mFRUA)
+[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAagIYA2wARhDIQFoQAmcAvnAGZQQhwDkAAgGdgAOwDGZEsCgB6GOgwgSYXgChVMmSgUBlMVGBh4O1CJglc2zOrEQRg43AC8cAAYJVcOLgBccEQCuIJQYUPiecKh+gcGh4V4AXtFBIVCqLK7qmnAAwnYOUAFi8AAyVFAkUKhWGIIcXDwmZhY2+fDIzjU4uAAUOgCUXkPDI6NjI9m29u1+yADylABWGMUAPB7jm1vbO17ZXr4oAHIpcRG7F5fj+5GzJ7Fh51fPVzdJx6dpL9+X2SwAfK1psROqQKNQYH1Bj9tpM2sQ-AtlsU9AALRQkdZPGE4iZaA5+e6pNEY1ZYEiCDAAUSgXCg-3iuKZwxuUTgRNCJKUZIp1Np0AZ2OZOLehM+XMx5MpNLpgOFwr+hAAdCrAUCHHA6J0GIwofLNnDgXQ-DqkSsYFj9UybocdRzHlbcayTUx7YzHT9RZrXZ8hR7floWMrVX7nhotAAFSqUuBNcyWAA+cCjUBjaEwcHV8AAStqmFClWBoxgerwVUreNCYYaNdm-Bt-d8bckHgBuUON2H427+T7tzsvL0xVL9gevQNAA)
 
 ```typescript
 import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
 
-// const T: TObject<{ ... }>
+// TypeScript Syntax Type
 
-const T = TypeBox(`{ 
+const S = `{
   x: number,
   y: number,
   z: number
-}`)              
+}`
 
-// const V: ObjectSchema<{ ... }>
+// Construct Library Types from Syntax
 
-const V = Valibot(`{ 
-  x: number,
-  y: number,
-  z: number
-}`)
+const T = TypeBox(S)                                // const T: TObject<{
+                                                    //   x: TNumber,
+                                                    //   y: TNumber,
+                                                    //   z: TNumber
+                                                    // }>
 
-// const Z: ZodObject<{ ... }>
+const V = Valibot(S)                                // const V: ObjectSchema<{
+                                                    //   x: NumberSchema<...>,
+                                                    //   y: NumberSchema<...>,
+                                                    //   z: NumberSchema<...>
+                                                    // }, ...>
 
-const Z = Zod(`{ 
-  x: number,
-  y: number,
-  z: number
-}`)
+
+const Z = Zod(S)                                    // const Z: ZodObject<{
+                                                    //   x: ZodNumber,
+                                                    //   y: ZodNumber,
+                                                    //   z: ZodNumber
+                                                    // }, ...>
+                        
+// Parse Syntax | Parse Value 
+
+const R = Zod('string | number').parse('...')       // const R: string | number
 ```
 
 ... or structurally remap types from one library to another
@@ -81,13 +90,13 @@ import { Compile } from '@sinclair/typemap'
 
 import z from 'zod'
 
-const T = Compile(z.object({              // const T: Validator<TObject<{  
-  x: z.number(),                          //   x: TNumber,     
-  y: z.number(),                          //   y: TNumber,
-  z: z.number(),                          //   z: TNumber
-}))                                       // }>>   
+const T = Compile(z.object({                         // const T: Validator<TObject<{  
+  x: z.number(),                                     //   x: TNumber,     
+  y: z.number(),                                     //   y: TNumber,
+  z: z.number(),                                     //   z: TNumber
+}))                                                  // }>>   
                                   
-const R = T.Check({                       // High Performance Check
+const R = T.Check({                                  // High Performance Check
   x: 1,
   y: 2, 
   z: 3
