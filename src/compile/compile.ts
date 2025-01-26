@@ -82,6 +82,10 @@ export class Validator<Type extends t.TSchema> implements StandardSchemaV1<Type,
   public get ['~standard'](): StandardSchemaProps<Type> {
     return this.#standard
   }
+  /** Returns the code used by this validator. */
+  public Code(): string {
+    return this.#check.Code()
+  }
   /** Parses this value. Do not use this function for high throughput validation */
   public Parse(value: unknown): t.StaticDecode<Type> {
     return Value.Parse(this.#check.Schema(), value)
