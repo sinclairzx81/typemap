@@ -1,6 +1,6 @@
 {
   "name": "@sinclair/typemap",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Uniform Syntax, Mapping and Compiler Library for TypeBox, Valibot and Zod",
   "author": "sinclairzx81",
   "license": "MIT",
