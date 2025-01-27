@@ -289,7 +289,7 @@ type S = Static<typeof S>                           // string[]
 
 ## Compile
 
-TypeMap can compile Zod and Valibot on TypeBox infrastructure. This can be used to significantly increase validation throughput.
+Use the Compile function to compile Zod and Valibot on TypeBox validation infrastructure.
 
 ```typescript
 import { Compile, Zod } from '@sinclair/typemap'
