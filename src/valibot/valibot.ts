@@ -30,27 +30,42 @@ import { type TValibotFromSyntax, ValibotFromSyntax } from './valibot-from-synta
 import { type TValibotFromTypeBox, ValibotFromTypeBox } from './valibot-from-typebox'
 import { type TValibotFromValibot, ValibotFromValibot } from './valibot-from-valibot'
 import { type TValibotFromZod, ValibotFromZod } from './valibot-from-zod'
-import * as Guard from '../guard'
+import { type TSyntaxOptions } from '../options'
+import * as g from '../guard'
+import * as t from '@sinclair/typebox'
 import * as v from 'valibot'
 import * as c from './common'
 
+import { TParameter, TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
+
+// ------------------------------------------------------------------
+// Valibot
+// ------------------------------------------------------------------
 /** Creates a Valibot type from Syntax or another Type */
 // prettier-ignore
-export type TValibot<Type extends object | string, Result = (
-  Guard.TIsSyntax<Type> extends true ? TValibotFromSyntax<Type> :
-  Guard.TIsTypeBox<Type> extends true ? TValibotFromTypeBox<Type> :
-  Guard.TIsValibot<Type> extends true ? TValibotFromValibot<Type> :
-  Guard.TIsZod<Type> extends true ? TValibotFromZod<Type> :
+export type TValibot<Parameter extends TParameter, Type extends object | string, Result = (
+  Type extends string ? TValibotFromSyntax<TContextFromParameter<Parameter>, Type> :
+  g.TIsTypeBox<Type> extends true ? TValibotFromTypeBox<Type> :
+  g.TIsValibot<Type> extends true ? TValibotFromValibot<Type> :
+  g.TIsZod<Type> extends true ? TValibotFromZod<Type> :
   v.NeverSchema<c.BaseError>
 )> = Result
+
+/** Creates a Valibot type from Syntax or another Type */
+export function Valibot<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TValibot<Parameter, Type>
+/** Creates a Valibot type from Syntax or another Type */
+export function Valibot<Type extends string>(type: Type, options?: TSyntaxOptions): TValibot<{}, Type>
+/** Creates a Valibot type from Syntax or another Type */
+export function Valibot<Type extends object>(type: Type, options?: TSyntaxOptions): TValibot<{}, Type>
 /** Creates a Valibot type from Syntax or another Type */
 // prettier-ignore
-export function Valibot<Type extends object | string, Mapped = TValibot<Type>, Result extends Mapped = Mapped>(type: Type): Result {
+export function Valibot(...args: any[]): never {
+  const [parameter, type, options] = g.Signature(args)
   return (
-    Guard.IsSyntax(type) ? ValibotFromSyntax(type) :
-    Guard.IsTypeBox(type) ? ValibotFromTypeBox(type) :
-    Guard.IsValibot(type) ? ValibotFromValibot(type) :
-    Guard.IsZod(type) ? ValibotFromZod(type as any) :
+    t.ValueGuard.IsString(type) ? ValibotFromSyntax(ContextFromParameter(parameter), type, options) :
+    g.IsTypeBox(type) ? ValibotFromTypeBox(type) :
+    g.IsValibot(type) ? ValibotFromValibot(type) :
+    g.IsZod(type) ? ValibotFromZod(type as any) :
     v.never()
   ) as never
 }

@@ -23,7 +23,7 @@ export async function start() {
 // Format
 // -------------------------------------------------------------------------------
 export async function format() {
-  await shell('prettier --no-semi --single-quote --print-width 240 --trailing-comma all --write test src example/index.ts')
+  await shell('prettier --no-semi --single-quote --print-width 240 --trailing-comma all --write test src')
 }
 // ------------------------------------------------------------------
 // Test

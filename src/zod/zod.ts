@@ -30,27 +30,42 @@ import { type TZodFromSyntax, ZodFromSyntax } from './zod-from-syntax'
 import { type TZodFromTypeBox, ZodFromTypeBox } from './zod-from-typebox'
 import { type TZodFromValibot, ZodFromValibot } from './zod-from-valibot'
 import { type TZodFromZod, ZodFromZod } from './zod-from-zod'
-import * as Guard from '../guard'
+import { type TSyntaxOptions } from '../options'
+
+import * as g from '../guard'
+import * as t from '@sinclair/typebox'
 import * as z from 'zod'
 
+import { TParameter, TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
+
+// ------------------------------------------------------------------
+// Zod
+// ------------------------------------------------------------------
 /** Creates a Zod type from Syntax or another Type */
 // prettier-ignore
-export type TZod<Type extends object | string, Result = (
-  Guard.TIsSyntax<Type> extends true ? TZodFromSyntax<Type> :
-  Guard.TIsTypeBox<Type> extends true ? TZodFromTypeBox<Type> :
-  Guard.TIsValibot<Type> extends true ? TZodFromValibot<Type> :
-  Guard.TIsZod<Type> extends true ? TZodFromZod<Type> :
+export type TZod<Parameter extends TParameter, Type extends object | string, Result = (
+  Type extends string ? TZodFromSyntax<TContextFromParameter<Parameter>, Type> :
+  g.TIsTypeBox<Type> extends true ? TZodFromTypeBox<Type> :
+  g.TIsValibot<Type> extends true ? TZodFromValibot<Type> :
+  g.TIsZod<Type> extends true ? TZodFromZod<Type> :
   z.ZodNever
 )> = Result
 
 /** Creates a Zod type from Syntax or another Type */
+export function Zod<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TZod<Parameter, Type>
+/** Creates a Zod type from Syntax or another Type */
+export function Zod<Type extends string>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
+/** Creates a Zod type from Syntax or another Type */
+export function Zod<Type extends object>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
+/** Creates a Zod type from Syntax or another Type */
 // prettier-ignore
-export function Zod<Type extends object | string, Mapped = TZod<Type>, Result extends Mapped = Mapped>(type: Type): Result {
+export function Zod(...args: any[]): never {
+  const [parameter, type, options] = g.Signature(args)
   return (
-    Guard.IsSyntax(type) ? ZodFromSyntax(type) : 
-    Guard.IsTypeBox(type) ? ZodFromTypeBox(type) : 
-    Guard.IsValibot(type) ? ZodFromValibot(type) : 
-    Guard.IsZod(type) ? ZodFromZod(type) : 
+    t.ValueGuard.IsString(type) ? ZodFromSyntax(ContextFromParameter(parameter), type, options) : 
+    g.IsTypeBox(type) ? ZodFromTypeBox(type) : 
+    g.IsValibot(type) ? ZodFromValibot(type) : 
+    g.IsZod(type) ? ZodFromZod(type) : 
     z.never()
   ) as never
 }

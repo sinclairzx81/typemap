@@ -29,8 +29,8 @@ THE SOFTWARE.
 import { TypeCompiler, TypeCheck, ValueErrorIterator } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
 import { TypeBox, TTypeBox } from '../typebox/typebox'
-import { StandardSchemaV1 } from './standard'
 import { IsEvalSupported } from './environment'
+import { StandardSchemaV1 } from './standard'
 import * as t from '@sinclair/typebox'
 
 // ------------------------------------------------------------------
@@ -112,9 +112,8 @@ function CompileDynamic<Type extends t.TSchema>(type: Type, references: t.TSchem
 /** Compiles a type for high performance validation */
 // prettier-ignore
 type TCompile<Type extends object | string,
-  Schema extends t.TSchema = TTypeBox<Type>,
-  Result extends Validator<Schema> = Validator<Schema>
-> = Result
+  Schema extends t.TSchema = TTypeBox<{}, Type>,
+> = Validator<Schema>
 /** Compiles a type for high performance validation */
 // prettier-ignore
 export function Compile<Type extends object | string>(type: Type): TCompile<Type> {
