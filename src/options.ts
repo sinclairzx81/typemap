@@ -26,21 +26,15 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { StaticParseAsSchema, Parse } from '@sinclair/typebox/syntax'
 import * as t from '@sinclair/typebox'
 
-// ------------------------------------------------------------------
-// TypeBoxFromSyntax
-// ------------------------------------------------------------------
+/** Syntax Options and Constraints */
 // prettier-ignore
-export type TTypeBoxFromSyntax<Context extends t.TProperties, Type extends string | object, 
-  Mapped = Type extends string ? StaticParseAsSchema<Context, Type> : t.TNever,
-  Result extends t.TSchema = Mapped extends t.TSchema ? Mapped : t.TNever
-> = Result
-
-/** Creates a TypeBox Type From Syntax */
-export function TypeBoxFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TTypeBoxFromSyntax<Context, Type> {
-  const parsed = t.ValueGuard.IsString(type) ? Parse(context, type, options) : t.Never()
-  const result = t.KindGuard.IsSchema(parsed) ? parsed : t.Never()
-  return result as never
-}
+export type TSyntaxOptions = (
+  t.ObjectOptions 
+  & t.ArrayOptions
+  & t.NumberOptions
+  & t.IntegerOptions 
+  & t.StringOptions
+  & t.DateOptions
+)

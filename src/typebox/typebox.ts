@@ -26,39 +26,77 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { TTypeBoxFromSyntax, TypeBoxFromSyntax } from './typebox-from-syntax'
-import { TTypeBoxFromTypeBox, TypeBoxFromTypeBox } from './typebox-from-typebox'
-import { TTypeBoxFromValibot, TypeBoxFromValibot } from './typebox-from-valibot'
-import { TTypeBoxFromZod, TypeBoxFromZod } from './typebox-from-zod'
-import * as Guard from '../guard'
+import { type TTypeBoxFromSyntax, TypeBoxFromSyntax } from './typebox-from-syntax'
+import { type TTypeBoxFromTypeBox, TypeBoxFromTypeBox } from './typebox-from-typebox'
+import { type TTypeBoxFromValibot, TypeBoxFromValibot } from './typebox-from-valibot'
+import { type TTypeBoxFromZod, TypeBoxFromZod } from './typebox-from-zod'
+import { type TSyntaxOptions } from '../options'
+import * as g from '../guard'
 import * as t from '@sinclair/typebox'
 
-/** Creates a TypeBox type from Syntax or another Type */
-// prettier-ignore
-export type TTypeBox<Type extends object | string, Result = (
-  Guard.TIsSyntax<Type> extends true ? TTypeBoxFromSyntax<Type> :
-  Guard.TIsTypeBox<Type> extends true ? TTypeBoxFromTypeBox<Type> :
-  Guard.TIsValibot<Type> extends true ? TTypeBoxFromValibot<Type> :
-  Guard.TIsZod<Type> extends true ? TTypeBoxFromZod<Type> :
-  t.TNever
-)> = Result
+// ------------------------------------------------------------------------------
+//
+// TParameter: Shared
+//
+// TypeBox supports Type injection via a Context parameter. Because the Context
+// only accepts types of TSchema, we need to an intermediate structure to hold
+// remote types such that they can be mapped prior to syntax parsing.
+//
+// -------------------------------------------------------------------------------
+export type TParameter = Record<PropertyKey, object>
 
-/** Creates a TypeBox type from Syntax or another Type */
+// ------------------------------------------------------------------
+// ContextFromParameter
+// ------------------------------------------------------------------
 // prettier-ignore
-export function TypeBox<Type extends object | string>(type: Type): TTypeBox<Type> {
-  return (
-    Guard.IsSyntax(type) ? TypeBoxFromSyntax(type) :
-    Guard.IsTypeBox(type) ? TypeBoxFromTypeBox(type) :
-    Guard.IsValibot(type) ? TypeBoxFromValibot(type) :
-    Guard.IsZod(type) ? TypeBoxFromZod(type) :
-    t.Never()
-  ) as never
+export type TContextFromParameter<Parameter extends TParameter,
+  Result extends t.TProperties = {
+    [Key in keyof Parameter]: TTypeBox<{}, Parameter[Key]>
+  }
+> = Result
+// prettier-ignore
+export function ContextFromParameter<Parameter extends TParameter>(parameter: Parameter): TContextFromParameter<Parameter> {
+  return globalThis.Object.getOwnPropertyNames(parameter).reduce((result, key) => {
+    return { ...result, [key]: TypeBox(parameter[key] as never) }
+  }, {} as t.TProperties) as never
 }
 
-/**
- * Creates a TypeBox type from Syntax or another Type
- * @deprecated Use TypeBox() export instead
- */
-export function Box<Type extends object | string, Mapped = TTypeBox<Type>, Result extends Mapped = Mapped>(type: Type): Result {
-  return TypeBox(type) as never
+// ------------------------------------------------------------------
+// TypeBox
+// ------------------------------------------------------------------
+/** Creates a TypeBox type from Syntax or another Type */
+// prettier-ignore
+export type TTypeBox<Parameter extends TParameter, Type extends object | string, Result = (
+  Type extends string ? TTypeBoxFromSyntax<TContextFromParameter<Parameter>, Type> :
+  g.TIsTypeBox<Type> extends true ? TTypeBoxFromTypeBox<Type> :
+  g.TIsValibot<Type> extends true ? TTypeBoxFromValibot<Type> :
+  g.TIsZod<Type> extends true ? TTypeBoxFromZod<Type> :
+  t.TNever
+)> = Result
+/** Creates a TypeBox type from Syntax or another Type */
+export function TypeBox<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TTypeBox<Parameter, Type>
+/** Creates a TypeBox type from Syntax or another Type */
+export function TypeBox<Type extends object | string>(type: Type, options?: TSyntaxOptions): TTypeBox<{}, Type>
+/** Creates a TypeBox type from Syntax or another Type */
+// prettier-ignore
+export function TypeBox(...args: any[]): never {
+  const [parameter, type, options] = g.Signature(args)
+  return t.CloneType(
+    t.ValueGuard.IsString(type) ? TypeBoxFromSyntax(ContextFromParameter(parameter), type, options) :
+    g.IsTypeBox(type) ? TypeBoxFromTypeBox(type) :
+    g.IsValibot(type) ? TypeBoxFromValibot(type) :
+    g.IsZod(type) ? TypeBoxFromZod(type) :
+    t.Never(),
+  options) as never
+}
+
+
+/** Creates a TypeBox type from Syntax or another Type */
+export function Type<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TTypeBox<Parameter, Type>
+/** Creates a TypeBox type from Syntax or another Type */
+export function Type<Type extends object | string>(type: Type, options?: TSyntaxOptions): TTypeBox<{}, Type>
+/** Creates a TypeBox type from Syntax or another Type */
+// prettier-ignore
+export function Type(...args: any[]): never {
+  return TypeBox.apply(null, args as never) as never
 }

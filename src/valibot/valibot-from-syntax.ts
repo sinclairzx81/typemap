@@ -32,15 +32,18 @@ import { ValibotFromTypeBox, TValibotFromTypeBox } from './valibot-from-typebox'
 import * as t from '@sinclair/typebox'
 import * as c from './common'
 
+// ------------------------------------------------------------------
+// ValibotFromSyntax
+// ------------------------------------------------------------------
 // prettier-ignore
-export type TValibotFromSyntax<Type extends object | string, 
-  Schema extends t.TSchema = TTypeBoxFromSyntax<Type>,
+export type TValibotFromSyntax<Context extends t.TProperties, Type extends string, 
+  Schema extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
   Result extends c.BaseSchema = TValibotFromTypeBox<Schema>
 > = Result
 
 // prettier-ignore
-export function ValibotFromSyntax<Type extends object | string>(type: Type): TValibotFromSyntax<Type> {
-  const schema = TypeBoxFromSyntax(type)
+export function ValibotFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TValibotFromSyntax<Context, Type> {
+  const schema = TypeBoxFromSyntax(context, type, options)
   const result = ValibotFromTypeBox(schema)
-  return result
+  return result as never
 }

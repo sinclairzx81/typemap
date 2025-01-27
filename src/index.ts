@@ -27,6 +27,7 @@ THE SOFTWARE.
 ---------------------------------------------------------------------------*/
 
 export { type Static } from './static'
+export { type TSyntaxOptions as Options } from './options'
 export * from './compile/compile'
 export * from './typebox/typebox'
 export * from './valibot/valibot'

@@ -31,15 +31,17 @@ import { ZodFromTypeBox, TZodFromTypeBox } from './zod-from-typebox'
 import * as t from '@sinclair/typebox'
 import * as z from 'zod'
 
+// ------------------------------------------------------------------
+// ZodFromSyntax
+// ------------------------------------------------------------------
 // prettier-ignore
-export type TZodFromSyntax<Type extends object | string,
-  Schema extends t.TSchema = TTypeBoxFromSyntax<Type>,
+export type TZodFromSyntax<Context extends t.TProperties, Type extends string,
+  Schema extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
   Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<Schema>
 > = Result
 
-// prettier-ignore
-export function ZodFromSyntax<Type extends string>(type: Type): TZodFromSyntax<Type> {
-  const schema = TypeBoxFromSyntax(type)
+export function ZodFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TZodFromSyntax<Context, Type> {
+  const schema = TypeBoxFromSyntax(context, type, options)
   const result = ZodFromTypeBox(schema)
-  return result
+  return result as never
 }

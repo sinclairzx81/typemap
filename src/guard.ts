@@ -31,19 +31,13 @@ import * as v from 'valibot'
 import * as z from 'zod'
 
 // ------------------------------------------------------------------
-// Syntax
-// ------------------------------------------------------------------
-/** Returns true if the given value is a Syntax type */
-export type TIsSyntax<Type extends unknown> = Type extends string ? true : false
-/** Returns true if the given value is a Syntax type */
-export function IsSyntax(type: unknown): type is string {
-  return t.ValueGuard.IsString(type)
-}
-// ------------------------------------------------------------------
 // TypeBox
 // ------------------------------------------------------------------
 /** Returns true if the given value is a TypeBox type */
-export type TIsTypeBox<Type extends unknown> = Type extends t.TSchema ? true : false
+// prettier-ignore
+export type TIsTypeBox<Type extends unknown> = (
+  Type extends t.TSchema ? true : false
+)
 /** Returns true if the given value is a TypeBox type */
 export function IsTypeBox(type: unknown): type is t.TSchema {
   return t.KindGuard.IsSchema(type)
@@ -74,12 +68,44 @@ export function IsValibot(type: unknown): type is v.AnySchema {
 // ------------------------------------------------------------------
 // Zod
 // ------------------------------------------------------------------
-// prettier-ignore
 /** Returns true if the given value is a Zod type */
+// prettier-ignore
 export type TIsZod<Type extends unknown> = (
   Type extends z.ZodTypeAny ? true : false
 )
 /** Returns true if the given value is a Zod type */
+// prettier-ignore
 export function IsZod(type: unknown): type is z.ZodTypeAny {
-  return t.ValueGuard.IsObject(type) && t.ValueGuard.HasPropertyKey(type, '~standard') && t.ValueGuard.IsObject(type['~standard']) && t.ValueGuard.HasPropertyKey(type['~standard'], 'vendor') && type['~standard'].vendor === 'zod'
+  return (
+    t.ValueGuard.IsObject(type) && 
+    t.ValueGuard.HasPropertyKey(type, '~standard') && 
+    t.ValueGuard.IsObject(type['~standard']) && 
+    t.ValueGuard.HasPropertyKey(type['~standard'], 'vendor') && 
+    type['~standard'].vendor === 'zod'
+  )
+}
+// ------------------------------------------------------------------
+// Signature
+// ------------------------------------------------------------------
+function Signature1(args: any[]) {
+  return args.length === 3 && t.ValueGuard.IsObject(args[0]) && t.ValueGuard.IsString(args[1]) && t.ValueGuard.IsObject(args[2])
+}
+function Signature2(args: any[]) {
+  return args.length === 2 && t.ValueGuard.IsString(args[0]) && t.ValueGuard.IsObject(args[1])
+}
+function Signature3(args: any[]) {
+  return args.length === 2 && t.ValueGuard.IsObject(args[0]) && t.ValueGuard.IsString(args[1])
+}
+function Signature4(args: any[]) {
+  return args.length === 1 && (t.ValueGuard.IsString(args[0]) || t.ValueGuard.IsObject(args[0]))
+}
+export function Signature(args: any[]): [parameter: Record<PropertyKey, object>, type: string | object, options: object] {
+  // prettier-ignore
+  return (
+    Signature1(args) ? [args[0], args[1], args[2]] :
+    Signature2(args) ? [{}, args[0], args[1]] :
+    Signature3(args) ? [args[0], args[1], {}] :
+    Signature4(args) ? [{}, args[0], {}] :
+    [{}, 'never', {}]
+  )
 }

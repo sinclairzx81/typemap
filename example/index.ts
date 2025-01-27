@@ -1,14 +1,16 @@
 import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
 
-// TypeScript Syntax Type
+// Parse Syntax | Parse Value 
+
+const R = Zod('string | number').parse('...')       // const R: string | number
+
+// Syntax Type
 
 const S = `{
   x: number,
   y: number,
   z: number
 }`
-
-// Construct Library Types from Syntax
 
 const T = TypeBox(S)                                // const T: TObject<{
                                                     //   x: TNumber,
@@ -29,6 +31,3 @@ const Z = Zod(S)                                    // const Z: ZodObject<{
                                                     //   z: ZodNumber
                                                     // }, ...>
                         
-// Parse Syntax | Parse Value 
-
-const R = Zod('string | number').parse('...')       // const R: string | number
