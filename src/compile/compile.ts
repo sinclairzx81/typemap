@@ -72,31 +72,31 @@ export class StandardSchemaProps<Type extends t.TSchema> implements StandardSche
 // Validator<TSchema>
 // ------------------------------------------------------------------
 export class Validator<Type extends t.TSchema> implements StandardSchemaV1<Type, t.Static<Type>> {
-  readonly #standard: StandardSchemaProps<Type>
-  readonly #check: TypeCheck<Type>
+  private readonly _standard: StandardSchemaProps<Type>
+  private readonly _check: TypeCheck<Type>
   constructor(check: TypeCheck<Type>) {
-    this.#standard = new StandardSchemaProps<Type>(check)
-    this.#check = check
+    this._standard = new StandardSchemaProps<Type>(check)
+    this._check = check
   }
   /** Standard Schema Interface */
   public get ['~standard'](): StandardSchemaProps<Type> {
-    return this.#standard
+    return this._standard
   }
   /** Returns the code used by this validator. */
   public Code(): string {
-    return this.#check.Code()
+    return this._check.Code()
   }
   /** Parses this value. Do not use this function for high throughput validation */
   public Parse(value: unknown): t.StaticDecode<Type> {
-    return Value.Parse(this.#check.Schema(), value)
+    return Value.Parse(this._check.Schema(), value)
   }
   /** Checks if this value matches the type */
   public Check(value: unknown): value is t.Static<Type> {
-    return this.#check.Check(value)
+    return this._check.Check(value)
   }
   /** Returns errors for this value */
   public Errors(value: unknown): ValueErrorIterator {
-    return this.#check.Errors(value)
+    return this._check.Errors(value)
   }
 }
 // ------------------------------------------------------------------

@@ -90,7 +90,6 @@ export function TypeBox(...args: any[]): never {
   options) as never
 }
 
-
 /** Creates a TypeBox type from Syntax or another Type */
 export function Type<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TTypeBox<Parameter, Type>
 /** Creates a TypeBox type from Syntax or another Type */
