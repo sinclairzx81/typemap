@@ -2,7 +2,7 @@
 
 <h1>TypeMap</h1>
 
-<p>Unified Syntax and Type Compiler for Runtime Type Systems</p>
+<p>Unified Syntax, Mapping and Compiler System for Runtime Type Systems</p>
 
 <img src="./typemap.png" />
 
@@ -24,14 +24,12 @@ $ npm install @sinclair/typemap --save
 
 ## Usage
 
-Create and Compile Runtime Types using TypeScript syntax.
+Create Types with TypeScript syntax.
 
 ```typescript
 import { Zod, Compile } from '@sinclair/typemap'
 
-const T = Zod(`string`) // ZodString
-
-const R = Compile(T).Check('Hello from TypeMap')
+const result = Zod(`string`).parse('Hello World')
 ```
 
 ## Overview
