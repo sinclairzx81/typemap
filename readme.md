@@ -348,5 +348,5 @@ Results show the approximate elapsed time to complete the given iterations
 
 ## Contribute
 
-This project is open to community contributions. Please ensure you submit an open issue before creating a pull request. TypeMap encourages open community discussion before accepting new features.
+This project is open to community contributions. Please ensure you submit an open issue before creating a pull request. TypeBox and associated projects preference open community discussion before accepting new features.
 
