@@ -24,10 +24,10 @@ $ npm install @sinclair/typemap --save
 
 ## Usage
 
-Create Types with TypeScript syntax.
+Runtime Types from TypeScript Syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgLQgEzgXzgMyhEOAcgAEBnYAOwGMAbAQ2CgHoYBPMAUxHrCICh+1CJTLwonMgFda8ALwp0ACgAGYqFQDmKgJQA6MPShlOSogAlOtWhDgB1aLTREdQA))
 
 ```typescript
-import { Zod, Compile } from '@sinclair/typemap'
+import { Zod } from '@sinclair/typemap'
 
 const result = Zod(`string`).parse('Hello World')
 ```
@@ -39,8 +39,6 @@ TypeMap is a syntax frontend and compiler backend for the [TypeBox](https://gith
 TypeMap is built as an advanced adapter system for the TypeBox project. It enables Valibot and Zod to be integrated on TypeBox validation infrastructure as well as enabling TypeBox to be integrated on Zod infrastructure via reverse type mapping.
 
 License: MIT
-
-
 
 ## Contents
 
@@ -64,9 +62,7 @@ License: MIT
 
 ## Example
 
-Construct types for TypeBox, Valibot and Zod using a common TypeScript syntax
-
-[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAagIYA2wARhDIQFoQAmcAvnAGZQQhwDkAAgGdgAOwDGZEsCgB6GOgwgSYXgChVMmXAAKJKIIxwAyqhEwSuOAB8deg8XIBXQ+rEQRg+ACU4AXjgMjAAUvJ5QogDm1nAijiCUGFC8AJQAdGB2GCGpOSlw+QVwmnBuHt4AXHBhkdGx8YnqxQDC3CDuxqbmlmiYcF4YYFAYBmYkMMDuru6exn5wAAYIqvm4lXUJUPjLcKhrcRtb+QBee-VQqizzU2Uocz3YeEFGyYWvb+8f+cWlM8iVyAB5SgAKwwYhgAB4lp8YbC4TDiit-gA5faJQ7wzFYz6InYotGbbbY4nE3EnFCos5Ekk0uHFFgAPmuMyIc1IFGoMCeL1psO+03gREqQNB4KMYgAFooSFDqbz5a9cas4JSNuKpUoITlUgyMQr9QVcbsVQT1dKtTldXKDfKyZVVYkzZrtUybTb6YQXepVD94HQ5oFuW6cVpfQFKoERWDIdDgwqlRGmA7CXH41p8sbAsm9amaXaAkmCdbc1iPXAXUA)
+Use a TypeScript syntax to create types for TypeBox, Valibot and Zod ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAagIYA2wARhDIQFoQAmcAvnAGZQQhwDkAAgGdgAOwDGZEsCgB6GOgwgSYXgChVMmXAAKJKIIxwAyqhEwSuOAB8deg8XIBXQ+rEQRg+ACU4AXjgMjAAUvJ5QogDm1nAijiCUGFC8AJQAdGB2GCGpOSlw+QVwmnBuHt4AXHBhkdGx8YnqxQDC3CDuxqbmlmiYcF4YYFAYBmYkMMDuru6exn5wAAYIqvm4lXUJUPjLcKhrcRtb+QBee-VQqizzU2Uocz3YeEFGyYWvb+8f+cWlM8iVyAB5SgAKwwYhgAB4lp8YbC4TDiit-gA5faJQ7wzFYz6InYotGbbbY4nE3EnFCos5Ekk0uHFFgAPmuMyIc1IFGoMCeL1psO+03gREqQNB4KMYgAFooSFDqbz5a9cas4JSNuKpUoITlUgyMQr9QVcbsVQT1dKtTldXKDfKyZVVYkzZrtUybTb6YQXepVD94HQ5oFuW6cVpfQFKoERWDIdDgwqlRGmA7CXH41p8sbAsm9amaXaAkmCdbc1iPXAXUA))
 
 ```typescript
 import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
@@ -103,23 +99,21 @@ const Z = Zod(S)                                    // const Z: ZodObject<{
                                                     // }, ...>
 ```
 
-Transform types between TypeBox, Valibot and Zod
-
-[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAagIYA2wARhDIQFoQAmcAvnAGZQQhwDkAAgGdgAOwDGZEsCgB6GOgwgSYXgChVYiCMHwAUoK0BlMQAtFJOAF4UCnLgAUpCtRj2GjewAMEquHFwAXHAiAK4glBhQ+L5wqEGh4ZHRfgBe8WERUKosngCU+UA)
+Parse and map between TypeBox, Valibot and Zod types ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAagIYA2wARhDIQFoQAmcAvnAGZQQhwDkAAgGdgAOwDGZEsCgB6GOgwgSYXgChVMmXADKqETBK44AWgB8cBszPFyVGifNpMOXOrEQRg+MjgBeFAouABSkFNQwQZZBAAYIqnBwuABccCIAriCUGFD48XCoKemZ2bkJAF6FGVlQqizRAJSNQA))
 
 ```typescript
 import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
 
-const JsonSchema = TypeBox(Valibot(Zod(`{
+// Syntax -> Zod -> Valibot -> TypeBox
+
+const T = TypeBox(Valibot(Zod(`{
   x: number,
   y: number,
   z: number
 }`)))
 ```
 
-Compile Zod and Valibot on TypeBox validation infrastructure
-
-[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199&ssl=17&ssc=3&pln=1&pc=1#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFADQkWHABehYiDLiIAE0EDWrFGjCYcALQVwAKlyxC6EGpXjI4AXjXpsACnEA6CACMAVljox7SOP4DAoOCAlTgTMwsALjgANUYMYHlGGGgAHj0AeQ8vGDS-AX8ADxjnGgBXEFcsKHsASgAaEOaW1tDVYpi9ADlK6qgmwMK4DlKnCqqa+sG22dmw-1H9XsmB4fExif7pud3WhYkulf6BXDq6vcur-zDcAD47gOHr3YEI8zgAJWsUJ2QACy8AGtfC89mEAJIwGopYCmSgxACMAAYAPrIjHojHDEpwREzMGEm6sYZLABMBKJYLCOnkzRiABYMciQJQ4PY+GBiEU6usYgBmKlCsIGbgAWT4gUZLLZ-g5YC5EB5pzqQA)
+Compile Valibot and Zod types on TypeBox validation infrastructure. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199&ssl=17&ssc=3&pln=1&pc=1#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFADQkWHABehYiDLiIAE0EDWrFGjCYcALQVwAKlyxC6EGpXjI4AXjXpsACnEA6CACMAVljox7SOP4DAoOCAlTgTMwsALjgANUYMYHlGGGgAHj0AeQ8vGDS-AX8ADxjnGgBXEFcsKHsASgAaEOaW1tDVYpi9ADlK6qgmwMK4DlKnCqqa+sG22dmw-1H9XsmB4fExif7pud3WhYkulf6BXDq6vcur-zDcAD47gOHr3YEI8zgAJWsUJ2QACy8AGtfC89mEAJIwGopYCmSgxACMAAYAPrIjHojHDEpwREzMGEm6sYZLABMBKJYLCOnkzRiABYMciQJQ4PY+GBiEU6usYgBmKlCsIGbgAWT4gUZLLZ-g5YC5EB5pzqQA))
 
 ```typescript
 import { Compile } from '@sinclair/typemap'
@@ -188,75 +182,62 @@ const D = Zod('string[]')                  // const D: z.ZodArray<...> (Syntax)
 
 ## Syntax
 
-TypeMap provides an optional syntax that can be used to construct runtime type representations. Syntax mapping is based on [Syntax Type](https://github.com/sinclairzx81/typebox?#syntax) provided by TypeBox.
+TypeMap provides a built in TypeScript syntax parser that can be used to create runtime types. Parsing is implemented at runtime as well as in the TypeScript type system.
 
 ### Types
 
-Pass a constant string parameter with an embedded TypeScript type annotion to construct a type. If there is a syntax error, the function return type will be `never`.
-
-[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgLQgEzgXzgMyhEOAcgAEBnYAOwGMAbAQ2CgHoYBPMAUxHrCICh+zZnADCUTvRic49FOjjsusyhgAK9KGRnAYg6hEpl4EsgFda8ALzy0ACiJIAHgC44ARixEAlADowmtp2zm6emN5AA)
+Syntax types can be created by passing a string parameter to any ibrary mapping function. TypeMap supports most TypeScript annotation syntax. If the string contains a syntax error, the function will return a `never` type. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA84C+cAZlBCHAOQACAzsAHYDGANgIbBQD0M6GIbMJQBQwphAa14yOAF4UfHLgAUlJLgBccAIyFKASjhGjXLnHGTpW5AHkARgCsMTGAB511gDLAYGKGxZXbQA+QmDRCyk4AGU5BUwlVQ0uA2M0tNNzCSjo6wA5DAA3PyA))
 
 ```typescript
-import { Zod } from '@sinclair/typemap'
+import { TypeBox } from '@sinclair/typemap'
 
-// Create a Zod type and Parse it
+const T = TypeBox('{ x: 1 }')     // const T: TObject<{ x: TLiteral<1> }>
 
-const result = Zod('{ x: 1 }').parse({ x: 1 })
+const S = TypeBox(':/')           // const S: TNever
 ```
 
 ### Options
 
-Options can be passed on the last parameter of a syntax type. TypeMap understands Json Schema keyword constraints. Known constraints will be mapped to analogs structures for the target library if possible.
+Options can be passed on the last parameter of a type. TypeMap will translate known Json Schema keywords into appropriate runtime representations if possible. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAWhACZwC+cAZlBCHAOQACAzsAHYDGANgIbAoAehjoMIPmEYAoaUKFwuEDq3jIAXCgDKMKJwDmcALyI4ozJsaq9HfY0LVoEmJfECejSrKUq1xlGI4uAAUVroG9qaOUM6uEsAelACUsvKKyqpwWv4AXgB0EABGAFYYXDDBSLia+RwAriCFGFDBScl51sDlrd4Z8NkmJKShVZr1jc2UkUh8pKTAMMDKfDwACnSYsMAYrJrUK6wYyUA))
 
 ```typescript
-import { Zod } from '@sinclair/typemap'
+import { TypeBox, Zod } from '@sinclair/typemap'
 
-// const T = z.string().email()
+// const T: TString = { type: 'string', format: 'email' }
 
-const T = Zod('string', {
-  format: 'email' 
-})
+const T = TypeBox('string', { format: 'email' })
 
 // const S = z.object({ x: z.number() }).strict()
 
-const S = Zod('{ x: number }', { 
-  additionalProperties: false 
-})
-
+const S = Zod('{ x: number }', { additionalProperties: false })
 ```
 
 ### Parameters
 
-Syntax types can be parameterized to accept exterior types. The following injects a Zod type into a Valibot vector structure.
-
-[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgNQIYBtgCMIwDRwBaEAJnAL5wBmUEIcA5AAIDOwAdgMbqrBQD0MAJ5gApiFRgGAKGn9+cAMIR2LGFACuneABVZnFWrg64AXiKkAFA3YaQWUVAYBKWfLgAFVCxbG4MCDgAZX1DeCCzFAxsXEskE3ICAAMkAA8ALmMCIUydAgAvXIok5yA)
+Types can be parameterized to accept exterior types. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgNQIYBtgCMIwDRwBaEAJnAL5wBmUEIcA5AAIDOwAdgMbqrBQD0MAJ5gApiFRgGAKGmcI7FvAAqcALwoM2XAAoG7AK4gsoqAwCUcK9f784AUQAeMU8GhxlI0bPmL4AZXUiUh0kVXICAAMkRwAuDwpIy1tgkgB5LAArUU4YAB4Y+OISADkjEygKAiQAOjqKAD4gA))
 
 ```typescript
 import { Valibot, Zod } from '@sinclair/typemap'
 
-// Construct T
+const T = Valibot('number')      // Exterior Type
 
-const T = Zod('number')
-
-// Pass T to S
-
-const S = Valibot({ T }, `{ x: T, y: T, z: T }`)
+const S = Zod({ T }, `{ x: T }`) // ZodObject<{ x: ZodNumber }, { ... }>
 ```
 
 ### Generics
 
-Using type parameters, you can construct generic via functions.
-
-[Example Link](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAagIYA2wARhDIQFoQAmcAvnAGZQQhwDkAAgGdgAOwDGZEsCgB6GOgwgSYXgChVMmXADiGERijAxxDGJjQUCuAB84AMQCu4mMAgj1Yt4PhFT5qHAAvHAAPMhwGLgweoyCcBCUAFZ+AHwAFMgAXCgAlEEpxORUNGlI4SyEqnBwAAZIuNnIhKiNhABejaw1qjnqmnAAcg4glAYmZhZomB5e8EMjBr4TAcFL-hkKOLhpvCLDo1C8Ob0aWgDKMIYiAObj-pbTqp4i3nAXV9drFqt+0GkMjB23g+RxyQA)
+Use functions to create generic types ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAagIYA2wARhDIQFoQAmcAvnAGZQQhwDkAAgGdgAOwDGZEsCgB6GOgwgSYXgChVMmXADiGERijAxxDGJjQUCuAB84AMQCu4mMAgj1Yt4PhFT5qHAAvHAAPMhwGLgweoyCcBCUAFZ+AHwAFMgAXCgAlEEpxORUNGlI4SyEAAZIqnB1uNnIhLV1qI3NdXAAXo1wqiyVOeqacAByDiCUBiZmFmiYHl7w45MGvrMBwev+GQo4uGm8IhNTULw5QxpaAMowhiIA5jP+lguqniLecLf3D9sWWz80DSDEYh28v3OOSAA))
 
 ```typescript
 import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
 
 // Generic Vector Type | Function
 
-const Vector = <T extends object>(T: T) => Valibot({ T }, 
-  `{ x: T, y: T, z: T }`
-)
+const Vector = <T extends object>(T: T) => Valibot({ T }, `{ 
+   x: T, 
+   y: T, 
+   z: T 
+}`)
 
 // Number Vector Type
 
@@ -269,7 +250,7 @@ const StringVector = Vector(Zod('string'))
 
 ## Static
 
-Use Static to uniformly infer for syntax and library types 
+Use Static to infer for library and syntax types 
 
 ```typescript
 import { type Static } from '@sinclair/typemap'
@@ -287,12 +268,12 @@ type S = Static<typeof S>                           // string[]
 
 ## Compile
 
-Use the Compile function to compile Zod and Valibot on TypeBox validation infrastructure.
+Use Compile to build Zod and Valibot on TypeBox validation infrastructure. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApgGjgLQgBM4BfOAMyjTgHIABAZ2ADsBjDAQ2CgHoYAnmCwhOYWgCgJvXijRhMWOABUhWKWwgtG8AGpwAvHPTYAFISKmABgglx7ADwBccFgFcQAIyxQcd+wIu7l4+fvZwAF5BHt5QEqRWAJSJUjIqagCyYi7IABZYbADWcABibuwwwFpwpiWcOikSmtrwAEoAjIZwugB0eQWFpkjOcO14gXAATHhRcADMZI1pAMownCxEnFAky2z5oi66nBjAmzBKZRVVLDV1DRpaOnCtk126ANq0AH4665vbtAAuj0AG7HU6cc5DOAjMZwCbTSIuBakRJAA))
 
 ```typescript
 import { Compile, Zod } from '@sinclair/typemap'
 
-// Compile Zod Type
+// Compile Type
 
 const V = Compile(Zod(`{
    x: number,
@@ -300,11 +281,11 @@ const V = Compile(Zod(`{
    z: number
 }`))
 
-// TypeMap Check Function
+// TypeMap: Check Function (Fast)
 
 const R1 = V.Check({ x: 1, y: 2, z: 3 })
 
-// Standard Schema Interface Check Function
+// Standard Schema: Validate Function (Fast)
 
 const R2 = V['~standard'].validate({ x: 1, y: 2, z: 3 })
 ```
