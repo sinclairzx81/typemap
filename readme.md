@@ -313,9 +313,9 @@ const R2 = V['~standard'].validate({ x: 1, y: 2, z: 3 })
 
 ## Benchmark
 
-This project manages a benchmark that evaluates type-check performance using Zod, Valibot, and TypeBox validators. The benchmark is set up to run 10 million check operations per library-validator pairing and reports the elapsed time taken to complete.
+This project manages a small benchmark that compares validation performance using Zod, Valibot, and TypeBox validators. For more comprehensive community benchmarks, refer to the [runtime-type-benchmarks](https://github.com/moltar/typescript-runtime-type-benchmarks) project.
 
-### Type
+### Test
 
 Benchmarks are run for the following type.
 
@@ -325,7 +325,7 @@ type T = { x: number, y: string, z: boolean }
 
 ### Results
 
-Results show validate performance for the type.
+Results show the approximate elapsed time to complete the given iterations
 
 ```typescript
 ┌─────────┬────────────────┬────────────────────┬────────────┬────────────┐
@@ -344,7 +344,7 @@ Results show validate performance for the type.
 └─────────┴────────────────┴────────────────────┴────────────┴────────────┘
 ```
 
-For community benchmarks, refer to the [runtime-type-benchmarks](https://github.com/moltar/typescript-runtime-type-benchmarks) project.
+
 
 ## Contribute
 
