@@ -24,16 +24,16 @@ $ npm install @sinclair/typemap --save
 
 ## Usage
 
-Parse and Compile Types from TypeScript syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199&ssl=3&ssc=61&pln=1&pc=1#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFAC6EGpXhQslAK4Z4AXhRowmLAApS4qLQDmcAD5wasjKQCUAOgAKjKJXWkAElgwYIcAOrQMAE3NA))
+Parse and Compile Types from TypeScript syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFAC6EGpXhQslAK4Z4AXhRowmLAApS4qLQDmcAD5wasjKQCUAOgAKjKJXWkAElgwYIcAOrQMAE3MDWVjhg4MAgUhCIyMjwqNi48ICgiJi42MAUUkAAUgy4MFt7OEoOGhhGAA90rOzcuxwAN0YMaSxE6JaIzOyRMQkpWRgALgKYbRo9Q2NXOEUnFzdPbz8gA))
 
 ```typescript
 import { Compile } from '@sinclair/typemap'
 
-const result = Compile('{ port: number }').Parse({ port: 3000 })
-//     │                  │                         │ 
-//     │                  └── parse syntax          └─── parse value
+const result = Compile('string | null').Parse('Hello World')
+//     │                 │                      │ 
+//     │                 └── parse syntax       └─── parse value
 //     │
-//     └── const result: { port: nummer } = { port: 3000 }
+//     └── const result: string | null = 'Hello World'
 ```
 
 ## Overview
