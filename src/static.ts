@@ -26,6 +26,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
+import { Validator } from './compile/validator'
 import * as s from '@sinclair/typebox/syntax'
 import * as t from '@sinclair/typebox'
 import * as v from 'valibot'
@@ -37,6 +38,7 @@ type BaseSchema = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
 // prettier-ignore
 export type Static<Type extends object | string> = (
   Type extends string ? s.StaticParseAsType<{}, Type> :
+  Type extends Validator<infer Type extends t.TSchema> ? t.Static<Type> :
   Type extends t.TSchema ? t.Static<Type> : 
   Type extends BaseSchema ? v.InferInput<Type> : 
   Type extends z.ZodTypeAny ? z.infer<Type> :
