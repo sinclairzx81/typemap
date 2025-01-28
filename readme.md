@@ -34,9 +34,9 @@ const result = Compile('string | null').Parse('Hello World')
 
 ## Overview
 
-TypeMap is a syntax frontend and compiler backend for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) type libraries. It provides a common TypeScript syntax for type construction, a runtime compiler for high-performance validation and enables types written in one library to be translated to another. 
+TypeMap is a syntax frontend and compiler backend for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) type libraries. It provides a common TypeScript syntax for type construction, a runtime compiler for high-performance validation and provides type translation from one library to another.
 
-TypeMap is built as an advanced adapter and integration system for the TypeBox project. It is designed to integrate and accelerate remote libraries by mapping them to TypeBox and Json Schema compatible infrastructure as well as allowing TypeBox to integrate on Zod specific infrastructure via reverse type mapping. This library is also written to offer high-performance validation for systems that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
+TypeMap is built as an advanced adapter and integration mechanism for the TypeBox project. It is designed to integrate and accelerate remote libraries by mapping them to TypeBox and Json Schema compatible infrastructure as well as allowing TypeBox to integrate on Zod specific infrastructure via reverse type mapping. This library is also written to offer high-performance validation for systems that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
 
 License: MIT
 
@@ -147,7 +147,7 @@ const R = C.Check({                                 // Iterations: 10_000_000
 
 ## Mapping
 
-TypeMap is principally a runtime mapping library used for type translation. It provides a mapping function for each translatable library which is used to translate types and schematics into that library. If no translation is possible, these functions return a never representation specific to the library being mapped.
+TypeMap is principally a runtime mapping library used for type translation. It provides a mapping function per translatable library which is used to map remote types and schematics into that library. If no translation is possible, these functions return a never representation specific to the library being mapped.
 
 ### TypeBox
 
@@ -174,7 +174,6 @@ const S = Valibot('string[]')                       // const S: v.ArraySchema<..
 const T = Valibot(t.Number())                       // const T: v.NumberSchema     (TypeBox)
 const V = Valibot(v.string())                       // const V: v.StringSchema     (Valibot)
 const Z = Valibot(z.boolean())                      // const Z: v.BooleanSchema    (Zod)
-
 ```
 
 ### Zod
@@ -188,7 +187,6 @@ const S = Zod('string[]')                           // const S: z.ZodArray<...> 
 const T = Zod(t.Number())                           // const T: z.ZodNumber     (TypeBox)
 const V = Zod(v.string())                           // const V: z.ZodString     (Valibot)
 const Z = Zod(z.boolean())                          // const Z: z.ZodBoolean    (Zod)
-
 ```
 
 ## Syntax
@@ -289,26 +287,26 @@ type S = Static<typeof S>                           // string[]
 
 ## Compile
 
-Use Compile to build Zod and Valibot on TypeBox validation infrastructure. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApgGjgLQgBM4BfOAMyjTgHIABAZ2ADsBjDAQ2CgHoYAnmCwhOYWgCgJvXijRhMWOABUhWKWwgtG8AGpwAvHPTYAFISKmABgglx7ADwBccFgFcQAIyxQcd+wIu7l4+fvZwAF5BHt5QEqRWAJSJUjIqagCyYi7IABZYbADWcABibuwwwFpwpiWcOikSmtrwAEoAjIZwugB0eQWFpkjOcO14gXAATHhRcADMZI1pAMownCxEnFAky2z5oi66nBjAmzBKZRVVLDV1DRpaOnCtk126ANq0AH4665vbtAAuj0AG7HU6cc5DOAjMZwCbTSIuBakRJAA))
+Use the `Compile` function to compile Zod and Valibot on TypeBox validation infrastructure. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApgGjgLQgBM4BfOAMyjTgHIABAZ2ADsBjDAQ2CgHoYAnmCwhOYWgCgJvXijRhMWOABUhWKWwgtG8AGpwAvHPTYAFISKmABgglx7ADwBccFgFcQAIyxQcd+wIu7l4+fvZwAF5BHt5QEqRWAJSJUjIqagCyYi7IABZYbADWcABibuwwwFpwpiWcOikSmtrwAEoAjIZwugB0eQWFpkjOcO14gXAATHhRcADMZI1pAMownCxEnFAky2z5oi66nBjAmzBKZRVVLDV1DRpaOnCtk126ANq0AH4665vbtAAuj0AG7HU6cc5DOAjMZwCbTSIuBakRJAA))
 
 ```typescript
 import { Compile, Zod } from '@sinclair/typemap'
 
-// Compile Type
+// Compile Validator From Zod
 
-const V = Compile(Zod(`{
+const validator = Compile(Zod(`{
    x: number,
    y: number,
    z: number
 }`))
 
-// TypeMap: Check Function (Fast)
+const R1 = validator.Check({ x: 1, y: 2, z: 3 })
 
-const R1 = V.Check({ x: 1, y: 2, z: 3 })
+// Standard Schema
+//
+// ... which should have been named 'Standard Validator'
 
-// Standard Schema: Validate Function (Fast)
-
-const R2 = V['~standard'].validate({ x: 1, y: 2, z: 3 })
+const R2 = validator['~standard'].validate({ x: 1, y: 2, z: 3 })
 ```
 
 ## Benchmark

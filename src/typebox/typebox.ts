@@ -81,13 +81,13 @@ export function TypeBox<Type extends object | string>(type: Type, options?: TSyn
 // prettier-ignore
 export function TypeBox(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)
-  return t.CloneType(
+  return (
     t.ValueGuard.IsString(type) ? TypeBoxFromSyntax(ContextFromParameter(parameter), type, options) :
     g.IsTypeBox(type) ? TypeBoxFromTypeBox(type) :
     g.IsValibot(type) ? TypeBoxFromValibot(type) :
     g.IsZod(type) ? TypeBoxFromZod(type) :
-    t.Never(),
-  options) as never
+    t.Never()
+  ) as never
 }
 
 /** Creates a TypeBox type from Syntax or another Type */

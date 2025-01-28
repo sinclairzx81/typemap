@@ -26,79 +26,17 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { TypeCompiler, TypeCheck, ValueErrorIterator } from '@sinclair/typebox/compiler'
+import { TypeCompiler, TypeCheck } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
-import { TypeBox, TTypeBox } from '../typebox/typebox'
 import { IsEvalSupported } from './environment'
-import { StandardSchemaV1 } from './standard'
-import * as t from '@sinclair/typebox'
+import { Validator } from './validator'
 
-// ------------------------------------------------------------------
-// StandardSchemaProps
-// ------------------------------------------------------------------
-export class StandardSchemaProps<Type extends t.TSchema> implements StandardSchemaV1.Props<Type, t.Static<Type>> {
-  readonly #check: TypeCheck<Type>
-  constructor(check: TypeCheck<Type>) {
-    this.#check = check
-  }
-  // ----------------------------------------------------------------
-  // StandardSchemaV1.Props<Type, t.Static<Type>>
-  // ----------------------------------------------------------------
-  public get vendor(): '@sinclair/typemap' {
-    return '@sinclair/typemap'
-  }
-  public get version(): 1 {
-    return 1
-  }
-  public get types(): { input: Type; output: t.Static<Type> } {
-    return { input: this.#check.Schema(), output: null }
-  }
-  public validate(value: unknown): StandardSchemaV1.Result<t.Static<Type>> {
-    return this.#check.Check(value) ? this.#createValue(value) : this.#createIssues(value)
-  }
-  // ----------------------------------------------------------------
-  // Internal
-  // ----------------------------------------------------------------
-  #createIssues(value: unknown) {
-    const errors = [...Value.Errors(this.#check.Schema(), value)]
-    const issues: StandardSchemaV1.Issue[] = errors.map((error) => ({ ...error, path: [error.path] }))
-    return { issues }
-  }
-  #createValue(value: unknown) {
-    return { value }
-  }
-}
-// ------------------------------------------------------------------
-// Validator<TSchema>
-// ------------------------------------------------------------------
-export class Validator<Type extends t.TSchema> implements StandardSchemaV1<Type, t.Static<Type>> {
-  private readonly _standard: StandardSchemaProps<Type>
-  private readonly _check: TypeCheck<Type>
-  constructor(check: TypeCheck<Type>) {
-    this._standard = new StandardSchemaProps<Type>(check)
-    this._check = check
-  }
-  /** Standard Schema Interface */
-  public get ['~standard'](): StandardSchemaProps<Type> {
-    return this._standard
-  }
-  /** Returns the code used by this validator. */
-  public Code(): string {
-    return this._check.Code()
-  }
-  /** Parses this value. Do not use this function for high throughput validation */
-  public Parse(value: unknown): t.StaticDecode<Type> {
-    return Value.Parse(this._check.Schema(), value)
-  }
-  /** Checks if this value matches the type */
-  public Check(value: unknown): value is t.Static<Type> {
-    return this._check.Check(value)
-  }
-  /** Returns errors for this value */
-  public Errors(value: unknown): ValueErrorIterator {
-    return this._check.Errors(value)
-  }
-}
+import { type TTypeBox, TypeBox } from '../typebox/typebox'
+import { type TSyntaxOptions } from '../options'
+import { type TParameter } from '../typebox/typebox'
+import * as t from '@sinclair/typebox'
+import * as g from '../guard'
+
 // ------------------------------------------------------------------
 // CompileDynamic
 // ------------------------------------------------------------------
@@ -107,17 +45,32 @@ function CompileDynamic<Type extends t.TSchema>(type: Type, references: t.TSchem
   return new TypeCheck(type, references, value => Value.Check(type, references, value), TypeCompiler.Code(type, references))  
 }
 // ------------------------------------------------------------------
+// ResolveTypeCheck
+// ------------------------------------------------------------------
+function ResolveTypeCheck<Type extends t.TSchema>(type: Type): TypeCheck<Type> {
+  return IsEvalSupported() ? TypeCompiler.Compile(type) : CompileDynamic(type)
+}
+// ------------------------------------------------------------------
 // Compile
 // ------------------------------------------------------------------
 /** Compiles a type for high performance validation */
 // prettier-ignore
-type TCompile<Type extends object | string,
-  Schema extends t.TSchema = TTypeBox<{}, Type>,
-> = Validator<Schema>
+type TCompile<Paramter extends TParameter, Type extends object | string,
+  Schema extends t.TSchema = TTypeBox<Paramter, Type>,
+  Result = Validator<Schema>
+> = Result
+
+/** Compiles a type for high performance validation */
+export function Compile<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TCompile<Parameter, Type>
+/** Compiles a type for high performance validation */
+export function Compile<Type extends string>(type: Type, options?: TSyntaxOptions): TCompile<{}, Type>
+/** Compiles a type for high performance validation */
+export function Compile<Type extends object>(type: Type, options?: TSyntaxOptions): TCompile<{}, Type>
 /** Compiles a type for high performance validation */
 // prettier-ignore
-export function Compile<Type extends object | string>(type: Type): TCompile<Type> {
-  const schema = TypeBox(type)
-  const check = IsEvalSupported() ? TypeCompiler.Compile(schema) : CompileDynamic(schema)
-  return new Validator(check)
+export function Compile(...args: any[]): never {
+  const [parameter, type, options] = g.Signature(args)
+  const schema = t.ValueGuard.IsString(type) ? TypeBox(parameter, type, options) : TypeBox(type)
+  const check = ResolveTypeCheck(schema)
+  return new Validator(check) as never
 }
