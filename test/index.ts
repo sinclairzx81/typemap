@@ -1,3 +1,4 @@
+import './compile'
 import './options'
 import './parameters'
 import './typebox-from-zod'
