@@ -160,10 +160,10 @@ Use the `TypeBox` function to translate types and syntax into TypeBox types.
 ```typescript
 import { TypeBox } from '@sinclair/typemap'
 
-const S = type('string[]')                          // const S: TArray<TString> (Syntax)
-const T = type(t.Number())                          // const T: TNumber         (TypeBox)
-const V = type(v.string())                          // const V: TString         (Valibot)
-const Z = type(z.boolean())                         // const Z: TBoolean        (Zod)
+const S = TypeBox('string[]')                          // const S: TArray<TString> (Syntax)
+const T = TypeBox(t.Number())                          // const T: TNumber         (TypeBox)
+const V = TypeBox(v.string())                          // const V: TString         (Valibot)
+const Z = TypeBox(z.boolean())                         // const Z: TBoolean        (Zod)
 
 ```
 
