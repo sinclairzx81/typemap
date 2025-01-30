@@ -24,18 +24,18 @@ $ npm install @sinclair/typemap --save
 
 ## Usage
 
-Parse and Compile Types from TypeScript syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgLQgEzgXzgMyhEOAcgAEBnYAOwGMAbAQ2CgHoYBPMAUxHrCICg4Q4SNHD+1CJTLwonMgFda8ALwp0ACiIyoVAOZwAPnEpLaRAJQA6MPShlOWgCodOAIQgAPOAHV6ZOAAJTjlLfmZmUUAgUjFYmNiEsRjwyJF4xKF0jMTAFFJAAFICuFt7TjgAN3paBU4U6OzM+oTatMb8vKK7BwAuOAAvKx19DWtoDX7TWlphi1Fm4Si5oTa4SWlZeSUYHsHKA2MJ2jg1ImDJiF9oWjQiIA))
+Runtime Types from TypeScript syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgLQgEzgXzgMyhEOAcgAEBnYAOwGMAbAQ2CgHoYBPMAUxHrCICg4Q4SNHD+1CJTLwonMgFda8ALwp0ACiIyoVAOZwAPnEpLaRAJQA6MPShlOWgBKdatCLnyEAKh04AhCAAPS35mZlFAIFIxGOiY+LFosIiROIShNPSEwBRSQABSfLhbe044ADd6WgVOZKisjLr4mtSGvNy4ehkALjgALysdfQ1raA0+0zchi1Em4UiZoVa4SWlZeSUYboHKA2Nx2jg1Ihc3DzwCOF8uQJCgA))
 
 ```typescript
 import { Zod } from '@sinclair/typemap'
                   
-const result = Zod('string | null').parse('TypeBox Was Here')
+const result = Zod('string | null').parse('Hello from TypeBox')
 //     │             │                      │ 
 //     │             │                      └─── parse value
 //     │             │                    
-//     │             └── parse: z.string().or(z.null())     
+//     │             └── ast: z.string().or(z.null())     
 //     │
-//     └── const result: string | null = 'Hello World'
+//     └── const result: string | null = 'Hello from TypeBox'
 ```
 
 ## Overview
