@@ -52,23 +52,15 @@ export type TValibot<Parameter extends TParameter, Type extends object | string,
 )> = Result
 
 /** Creates a Valibot type from Syntax or another Type */
-// @ts-ignore
 export function Valibot<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TValibot<Parameter, Type>
 /** Creates a Valibot type from Syntax or another Type */
-// @ts-ignore
 export function Valibot<Type extends string>(type: Type, options?: TSyntaxOptions): TValibot<{}, Type>
 /** Creates a Valibot type from Syntax or another Type */
-// @ts-ignore
 export function Valibot<Type extends object>(type: Type, options?: TSyntaxOptions): TValibot<{}, Type>
 /** Creates a Valibot type from Syntax or another Type */
-// prettier-ignore
 export function Valibot(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)
   return (
-    g.IsSyntax(type) ? ValibotFromSyntax(ContextFromParameter(parameter), type, options) :
-    g.IsTypeBox(type) ? ValibotFromTypeBox(type) :
-    g.IsValibot(type) ? ValibotFromValibot(type) :
-    g.IsZod(type) ? ValibotFromZod(type as any) :
-    v.never()
+    g.IsSyntax(type) ? ValibotFromSyntax(ContextFromParameter(parameter), type, options) : g.IsTypeBox(type) ? ValibotFromTypeBox(type) : g.IsValibot(type) ? ValibotFromValibot(type) : g.IsZod(type) ? ValibotFromZod(type as any) : v.never()
   ) as never
 }

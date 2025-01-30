@@ -183,34 +183,6 @@ function FromRecord(type: t.TRecord): c.BaseSchema {
   )
 }
 // ------------------------------------------------------------------
-// Optional
-// ------------------------------------------------------------------
-// prettier-ignore
-type TFromOptional<Type extends t.TOptional<t.TSchema>,
-  NonOptional extends t.TSchema = t.TOptionalWithFlag<Type, false>,
-  Mapped extends c.BaseSchema = TFromType<NonOptional>,
-  Result = v.OptionalSchema<Mapped, c.BaseError>
-> = Result
-function FromOptional(type: t.TOptional<t.TSchema>): c.BaseSchema {
-  const non_optional = t.Optional(type, false)
-  const mapped = FromType(non_optional)
-  return v.optional(mapped)
-}
-// ------------------------------------------------------------------
-// Readonly
-// ------------------------------------------------------------------
-// prettier-ignore
-type TFromReadonly<Type extends t.TReadonly<t.TSchema>,
-  NonReadonly extends t.TSchema = t.TReadonlyWithFlag<Type, false>,
-  Mapped extends c.BaseSchema = TFromType<NonReadonly>,
-  Result = Mapped // no readonly mapping
-> = Result
-function FromReadonly(type: t.TReadonly<t.TSchema>): c.BaseSchema {
-  const non_optional = t.Readonly(type, false)
-  const mapped = FromType(non_optional)
-  return mapped // no readonly mapping
-}
-// ------------------------------------------------------------------
 // Never
 // ------------------------------------------------------------------
 type TFromNever<Result = v.NeverSchema<c.BaseError>> = Result
@@ -342,43 +314,49 @@ function FromTypes(types: t.TSchema[]): c.BaseSchema[] {
 // ------------------------------------------------------------------
 // Type
 // ------------------------------------------------------------------
-
 // prettier-ignore
-type TFromType<Type extends t.TSchema> = (
-  // Modifiers
-  Type extends t.TReadonly<t.TSchema> ? TFromReadonly<Type> :
-  Type extends t.TOptional<t.TSchema> ? TFromOptional<Type> :
-  // Types
-  Type extends t.TAny ? TFromAny :
-  Type extends t.TArray<infer Type extends t.TSchema> ? TFromArray<Type> :
-  Type extends t.TBigInt ? TFromBigInt :
-  Type extends t.TBoolean ? TFromBoolean :
-  Type extends t.TDate ? TFromDate :
-  Type extends t.TFunction<infer Parameters extends t.TSchema[], infer ReturnType extends t.TSchema> ? TFromFunction<Parameters, ReturnType> :
-  Type extends t.TInteger ? TFromInteger :
-  Type extends t.TIntersect<infer Types extends t.TSchema[]> ? TFromIntersect<Types> :
-  Type extends t.TLiteral<infer Value extends t.TLiteralValue> ? TFromLiteral<Value> :
-  Type extends t.TNull ? TFromNull :
-  Type extends t.TNever ? TFromNever :
-  Type extends t.TNumber ? TFromNumber :
-  Type extends t.TObject<infer Properties extends t.TProperties> ? TFromObject<Properties> :
-  Type extends t.TPromise<infer Type extends t.TSchema> ? TFromPromise<Type> :
-  Type extends t.TRecord<infer Key extends t.TSchema, infer Value extends t.TSchema> ? TFromRecord<Key, Value> :
-  Type extends t.TRegExp ? TFromRegExp :
-  Type extends t.TString ? TFromString :
-  Type extends t.TSymbol ? TFromSymbol :
-  Type extends t.TTuple<infer Types extends t.TSchema[]> ? TFromTuple<Types> :
-  Type extends t.TUndefined ? TFromUndefined :
-  Type extends t.TUnion<infer Types extends t.TSchema[]> ? TFromUnion<Types> :
-  Type extends t.TUnknown ? TFromUnknown :
-  Type extends t.TVoid ? TFromVoid :
-  v.NeverSchema<c.BaseError>
-)
+type TFromType<Type extends t.TSchema,
+  // Type Mapping
+  Mapped extends v.BaseSchema<any, any, any> = (
+    Type extends t.TAny ? TFromAny :
+    Type extends t.TArray<infer Type extends t.TSchema> ? TFromArray<Type> :
+    Type extends t.TBigInt ? TFromBigInt :
+    Type extends t.TBoolean ? TFromBoolean :
+    Type extends t.TDate ? TFromDate :
+    Type extends t.TFunction<infer Parameters extends t.TSchema[], infer ReturnType extends t.TSchema> ? TFromFunction<Parameters, ReturnType> :
+    Type extends t.TInteger ? TFromInteger :
+    Type extends t.TIntersect<infer Types extends t.TSchema[]> ? TFromIntersect<Types> :
+    Type extends t.TLiteral<infer Value extends t.TLiteralValue> ? TFromLiteral<Value> :
+    Type extends t.TNull ? TFromNull :
+    Type extends t.TNever ? TFromNever :
+    Type extends t.TNumber ? TFromNumber :
+    Type extends t.TObject<infer Properties extends t.TProperties> ? TFromObject<Properties> :
+    Type extends t.TPromise<infer Type extends t.TSchema> ? TFromPromise<Type> :
+    Type extends t.TRecord<infer Key extends t.TSchema, infer Value extends t.TSchema> ? TFromRecord<Key, Value> :
+    Type extends t.TRegExp ? TFromRegExp :
+    Type extends t.TString ? TFromString :
+    Type extends t.TSymbol ? TFromSymbol :
+    Type extends t.TTuple<infer Types extends t.TSchema[]> ? TFromTuple<Types> :
+    Type extends t.TUndefined ? TFromUndefined :
+    Type extends t.TUnion<infer Types extends t.TSchema[]> ? TFromUnion<Types> :
+    Type extends t.TUnknown ? TFromUnknown :
+    Type extends t.TVoid ? TFromVoid :
+    v.NeverSchema<c.BaseError>
+  ),
+  // Modifier Mapping
+  IsReadonly extends boolean = Type extends t.TReadonly<t.TSchema> ? true : false,
+  IsOptional extends boolean = Type extends t.TOptional<t.TSchema> ? true : false,
+  Result extends v.BaseSchema<any, any, any> = (
+    [IsReadonly, IsOptional] extends [true, true] ? v.OptionalSchema<Mapped, c.BaseError> :
+    [IsReadonly, IsOptional] extends [false, true] ? v.OptionalSchema<Mapped, c.BaseError> :
+    [IsReadonly, IsOptional] extends [true, false] ? Mapped :
+    Mapped
+  )
+> = Result
 // prettier-ignore
 function FromType(type: t.TSchema): c.BaseSchema {
-  return  (
-    t.KindGuard.IsReadonly(type) ? FromReadonly(type) :
-    t.KindGuard.IsOptional(type) ? FromOptional(type) :
+  // Type Mapping
+  const mapped = (
     t.KindGuard.IsAny(type) ? FromAny(type) :
     t.KindGuard.IsArray(type) ? FromArray(type) :
     t.KindGuard.IsBigInt(type) ? FromBigInt(type) :
@@ -404,6 +382,16 @@ function FromType(type: t.TSchema): c.BaseSchema {
     t.KindGuard.IsVoid(type) ? FromVoid(type) :
     v.never()
   )
+  // Modifier Mapping
+  const isOptional = t.KindGuard.IsOptional(type)
+  const isReadonly = t.KindGuard.IsReadonly(type)
+  const result = (
+    isOptional && isReadonly ? v.optional(mapped) :
+    isOptional && !isReadonly ? v.optional(mapped) :
+    !isOptional && isReadonly ? mapped :
+    mapped
+  )
+  return result
 }
 // ------------------------------------------------------------------
 // ValibotFromTypeBox
