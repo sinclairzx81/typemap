@@ -24,23 +24,25 @@ $ npm install @sinclair/typemap --save
 
 ## Usage
 
-Parse and Compile Types from TypeScript syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFAC6EGpXhQslAK4Z4AXhRowmLAApS4qLQDmcAD5wasjKQCUAOgAKjKJXWkAElgwYIcAOrQMAE3MDWVjhg4MAgUhCIyMjwqNi48ICgiJi42MAUUkAAUgy4MFt7OEoOGhhGAA90rOzcuxwAN0YMaSxE6JaIzOyRMQkpWRgALgKYbRo9Q2NXOEUnFzdPbz8gA))
+Parse and Compile Types from TypeScript syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgLQgEzgXzgMyhEOAcgAEBnYAOwGMAbAQ2CgHoYBPMAUxHrCICg4Q4SNHD+1CJTLwonMgFda8ALwp0ACiIyoVAOZwAPnEpLaRAJQA6MPShlOWgCodOAIQgAPOAHV6ZOAAJTjlLfmZmUUAgUjFYmNiEsRjwyJF4xKF0jMTAFFJAAFICuFt7TjgAN3paBU4U6OzM+oTatMb8vKK7BwAuOAAvKx19DWtoDX7TWlphi1Fm4Si5oTa4SWlZeSUYHsHKA2MJ2jg1ImDJiF9oWjQiIA))
 
 ```typescript
-import { Compile } from '@sinclair/typemap'
-
-const result = Compile('string | null').Parse('Hello World')
-//     │                 │                      │ 
-//     │                 └── parse syntax       └─── parse value
+import { Zod } from '@sinclair/typemap'
+                  
+const result = Zod('string | null').parse('TypeBox Was Here')
+//     │             │                      │ 
+//     │             │                      └─── parse value
+//     │             │                    
+//     │             └── parse: z.string().or(z.null())     
 //     │
 //     └── const result: string | null = 'Hello World'
 ```
 
 ## Overview
 
-TypeMap is an syntax frontend and compiler backend for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) type libraries. It provides a common TypeScript syntax for type construction across libraries, a runtime compiler for high-performance validation and provides type translation from one library to another.
+TypeMap is an syntax frontend and compiler backend for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) libraries. It provides a common TypeScript syntax for type construction, a runtime compiler for high-performance validation and provides type translation from one library to another. TypeMap is built using components provided by the TypeBox library and infrastructure.
 
-TypeMap is written to be an advanced adapter and type translation system for the TypeBox project. It is designed specifically to integrate and accelerate remote type libraries on Json Schema compatible infrastructure as well as to enable TypeBox schematics to be remapped to remote type library infrastructure. This project also provides high-performance validation for frameworks that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
+TypeMap is written to be an advanced adapter and type translation system for the [TypeBox](https://github.com/sinclairzx81/typebox) project. It is designed specifically to integrate and accelerate remote type libraries on Json Schema compatible infrastructure as well as to enable TypeBox schematics to be remapped to remote type library infrastructure. This project also provides high-performance validation for frameworks that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
 
 License: MIT
 
@@ -60,6 +62,7 @@ License: MIT
   - [Parameters](#Parameters)
   - [Generics](#Generics)
 - [Static](#Static)
+- [TreeShake](#TreeShake)
 - [Compile](#Compile)
 - [Benchmark](#Benchmark)
 - [Contribute](#Contribute)
@@ -151,7 +154,7 @@ const R = C.Check({                                 // Iterations: 10_000_000
 
 ## Mapping
 
-TypeMap is primarily a mapping system used for type translation. It provides a mapping function per library which is used to translate remote types into types specific to that library. If no translation is possible, these functions return a `never` representation specific to the library being mapped.
+TypeMap is primarily a mapping system intended for type translation. It provides mapping functions per library which is used to translate remote types into types specific to that library. All mapping functions make a best attempt to retain semantics from each library. If no translation is possible, these functions return a `never` representation specific to the library being mapped.
 
 ### TypeBox
 
@@ -195,7 +198,9 @@ const Z = Zod(z.boolean())                          // const Z: z.ZodBoolean    
 
 ## Syntax
 
-TypeMap provides a TypeScript syntax parser that can be used to create library types. TypeScript parsing is implemented at runtime as well as in the TypeScript type system. It is provided as a convenient means of creating and composing library types under a common syntax. Be mindful, syntax parsing in the type system can reduce inference performance. 
+TypeMap provides a TypeScript syntax parser that can be used to create library types. TypeScript parsing is implemented at runtime as well as in the TypeScript type system. It offers a convenient means of creating cross library types without having to author across multiple type builder API. Please be mindful using this feature, while syntax parsing has the potential to dramatically improve developer experience, advanced DX mapping in the type system usually has an inference overhead, and parsing in the type system may significantly reduce inference performance. Use with consideration.
+
+Technical Reference [ParseBox](https://github.com/sinclairzx81/parsebox) > [Syntax Types](https://github.com/sinclairzx81/typebox?tab=readme-ov-file#syntax)
 
 ### Types
 
@@ -287,10 +292,26 @@ const V = v.string()                                // Valibot
 const Z = z.boolean()                               // Zod
 const S = 'string[]'                                // Syntax
 
+type S = Static<typeof S>                           // string[]
 type T = Static<typeof T>                           // number
 type V = Static<typeof V>                           // string
 type Z = Static<typeof Z>                           // boolean 
-type S = Static<typeof S>                           // string[]
+```
+
+## TreeShake
+
+TypeMap exports the top-level TypeBox, Valibot, and Zod functions, which broadly translate any type. However, applications are most likely going to be interested in translating between two libraries (at most) and in one specific direction (e.g., Zod to TypeBox). TypeMap provides specific functions that perform only a particular translation. Using these specific mapping functions allows bundlers to tree-shake unused type libraries.
+
+```typescript
+import { TypeBoxFromZod } from '@sinclair/typemap'  // Bundle TypeBox | Zod, Tree Shake Valibot
+
+import * as z from 'zod'
+
+const T = TypeBoxFromZod(z.object({                 // const T: TObject<{
+  x: z.number(),                                    //  x: TNumber;
+  y: z.number(),                                    //  y: TNumber;
+  z: z.number()                                     //  z: TNumber;
+}))                                                 // }>
 ```
 
 ## Compile
