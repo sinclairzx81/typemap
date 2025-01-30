@@ -2,7 +2,7 @@
 
 <h1>TypeMap</h1>
 
-<p>Unified Syntax, Mapping and Compiler System for Runtime Types</p>
+<p>Uniform Syntax, Compiler and Mapping for Runtime Types</p>
 
 <img src="./typemap.png" />
 
@@ -24,25 +24,25 @@ $ npm install @sinclair/typemap --save
 
 ## Usage
 
-Runtime Types from TypeScript syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgLQgEzgXzgMyhEOAcgAEBnYAOwGMAbAQ2CgHoYBPMAUxHrCICg4Q4SNHD+1CJTLwonMgFda8ALwp0ACiIyoVAOZwAPnEpLaRAJQA6MPShlOWgBKdatCLnyEAKh04AhCAAPS35mZlFAIFIxGOiY+LFosIiROIShNPSEwBRSQABSfLhbe044ADd6WgVOZKisjLr4mtSGvNy4ehkALjgALysdfQ1raA0+0zchi1Em4UiZoVa4SWlZeSUYboHKA2Nx2jg1Ihc3DzwCOF8uQJCgA))
+Parse and Compile Types from TypeScript Syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFBxhI0WJEC6EGpXhQslAK4Z4AXhRowmLAApSsqLQDmcAD5wayjKQCUAOgAKjKJV2kAElgwYIcACpcWACyfLYCrKxigECk4rHRcQnx4ZGiMYmxaekJgCikgACk+XBOLjgAaowYiljJ8Vk1tWLVqfWieblwAIKyAFz+AKo0wNIAPADafgDKMIY0RgA0-gByVgC6AHzCjSJRm8KtcFIycgrKMD0GxmYWVnDqHl4+-oEh-EA))
 
 ```typescript
-import { Zod } from '@sinclair/typemap'
+import { Compile } from '@sinclair/typemap'
                   
-const result = Zod('string | null').parse('Hello from TypeBox')
-//     │             │                      │ 
-//     │             │                      └─── parse value
-//     │             │                    
-//     │             └── ast: z.string().or(z.null())     
+const result = Compile('string | null').Parse('Hello TypeMap')
+//     │                  │                      │ 
+//     │                  │                      └─── Parse Value
+//     │                  │                    
+//     │                  └── Ast: TUnion<[TString, TNull]>  
 //     │
-//     └── const result: string | null = 'Hello from TypeBox'
+//     └── const result: string | null = 'Hello TypeMap'
 ```
 
 ## Overview
 
-TypeMap is an syntax frontend and compiler backend for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) libraries. It provides a common TypeScript syntax for type construction, a runtime compiler for high-performance validation and provides type translation from one library to another. TypeMap is developed using components provided by the TypeBox library and infrastructure.
+TypeMap is an syntax frontend and compiler backend for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) libraries. It provides a common TypeScript syntax for type construction, a runtime compiler for high-performance validation and provides type translation from one library to another.
 
-TypeMap is written to be an advanced adapter and type translation system for the [TypeBox](https://github.com/sinclairzx81/typebox) project. It is built specifically to integrate and accelerate remote type libraries on Json Schema compatible infrastructure as well as to enable TypeBox schematics to be remapped to remote type library infrastructure. This project also provides high-performance validation for frameworks that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
+TypeMap is written to be an advanced type translation system for the [TypeBox](https://github.com/sinclairzx81/typebox) project. It is built to integrate and accelerate remote type libraries on Json Schema compatible infrastructure as well as to integrate TypeBox into remote type library infrastructure via reverse type remapping. This project also provides high-performance validation for frameworks that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
 
 License: MIT
 
@@ -75,17 +75,15 @@ Use TypeScript syntax to create types for TypeBox, Valibot and Zod ([Example](ht
 ```typescript
 import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
 
-// Parse Syntax | Parse Value 
-
-const R = Zod('string | number').parse('...')       // const R: string | number
-
-// TypeScript Syntax
+// Syntax
 
 const S = `{
   x: number,
   y: number,
   z: number
 }`
+
+// Runtime Types
 
 const T = TypeBox(S)                                // const T: TObject<{
                                                     //   x: TNumber,
@@ -201,11 +199,9 @@ const Z = Zod(z.boolean())                          // const Z: z.ZodBoolean    
 
 TypeMap provides a TypeScript syntax parser that can be used to create library types. TypeScript parsing is implemented at runtime as well as in the TypeScript type system. It offers a convenient means of creating cross library types without having to author across multiple type builder API.
 
-Technical Reference [ParseBox](https://github.com/sinclairzx81/parsebox) > [Syntax Types](https://github.com/sinclairzx81/typebox?tab=readme-ov-file#syntax)
-
 ### Types
 
-Syntax types can be created by passing a string parameter to any library mapping function. TypeMap supports most TypeScript annotation syntax. If the string contains a syntax error, the function will return a `never` type. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA84C+cAZlBCHAOQACAzsAHYDGANgIbBQD0M6GIbMJQBQwphAa14yOAF4UfHLgAUlJLgBccAIyFKASjhHjJ02aNcucQCjkgeD+44ydK3IA8gCMAVhiYwAPEjC5sEhoWHmlsaaKAAywDAYUGwsftoAfEHhWdnhkQQZYhJScADKcgqYSqoAhLUGOVmRgDLkDkXwJS4AchgAbolAA))
+Syntax types can be created by passing a string parameter to any library mapping function. TypeMap supports most TypeScript annotation syntax. If the string contains a syntax error, the function will return a `never` type. ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA84C+cAZlBCHAOQACAzsAHYDGANgIbBQD0M6GIbMJQBQwphAa14yOAF4UfHLgAUlJLgBccAIyFKASjhHjJ02aNcuccZOlbkAeQBGAKwxMYAHiTDzf-wGB5pbGmigAMsAwGFBsLJ7aAHy+QalpQSEEyWISUnAAynIKmEqqAIQVBumpITZ5+fYAchgAbjFwALQFqAwwbPgAolBkUEA))
 
 ```typescript
 import { TypeBox } from '@sinclair/typemap'
@@ -214,7 +210,7 @@ const T = TypeBox('{ x: 1 }')                       // const T: TObject<{
                                                     //   x: TLiteral<1>
                                                     // }>
 
-const S = TypeBox('!!!')                            // const S: TNever
+const S = TypeBox('!!!')                            // const S: TNever - Syntax Error
 ```
 
 ### Options
@@ -283,21 +279,25 @@ const S = Vector(Zod('string'))                     // const S: TObject<{
 
 ### Performance
 
-Syntax parsing has the potential to dramatically improve developer experience, however the level of parsing required to achieve this feature can (and likely will) have a impact on overall inference performance. One should approach this feature with some mindfulness to the inference overhead required to infer.
+TypeMap implements type level syntax parsing in the TypeScript type system. This feature puts a lot of additional demand on the TypeScript language service above and beyond the compute required to infer the underlying type library. One should approach this feature with some mindfulness to the computational overhead required parse and infer types from syntax. The following link can be used to test infer performance. 
 
-This project is open to optimization research via the [ParseBox](https://github.com/sinclairzx81/parsebox) project. Use the following code to gauge current inference performance ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAyjAIYzADGcAvnAGZQQhwDkAAgM7AB2lANqWBQA9DHQYQpMKwBQsyhB6d4AYQgBXHjCio4AXhQScuABQADWXDYA5DAHc4ALQylBPACZzrAHzYBBDRUoN2BSbzg-VlVSHlIPcKtItgBVHmAYDA9iMkzOCKiiTRgACzgAaWhXVjgkqIApaViC22h7UlQa2XMASnlFZXh-Dw8oDE5OAyNME1MkdS0dPRpCcwQk4IwMGAAuOGDeAHMkygzUPYOeY+tIFUUPDAudI5PNbV09hffUWRpe-qUKjgAFEpMB+FM0DM8KZWJdDqxCEh6NApLs2JIhPwajQ+gpAfAUpwMFBIcYYUhhqNxpxCKCsbRVutrEESQBJDxPKBHfBJVlQOIgR77Z5XJKY8F7engpLxakTPZUsYTX7-WQiERwAB0Ovk9C0lAoSjgmCgKKgUj4GFMADc3BphSRyFQADziTAQehwIkkgB8PUQSSSdv4DrgGrgeXgrC1NV49BJGCtcBKiesvyAA))
+([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgFQJ5gKYCEIA8A0cAyjAIYzADGcAvnAGZQQhwDkAAgM7AB2lANqWBQA9DHQYQpMKwBQskSLgBBMGH5VywCDxQTO8yjs7wAwhACuPGFFRwAvHsw5cACgAGsuGwByGAO5wAFoYpII8ACascAA+XmzKFiZQYcCk0TFw8axEljAAFnAA0tChGVnerABS0qQ85dmmdaQR6bEVbACqPMAwGBHEZH2cDZU+0P6kqBnZRP79GPWx8a4IdABkcMm8AOYAlLLuB7JGPCYqERFQGJycDk7YeKtw5lY2djSE7gjxyRgYMAAXFsbLt4pReqhgdseDt4pATEYIhhoaDYeDLNZbMDXljULIaEdDMZ4J1OBgoABJAaONDOJ6sGE7ViEJD0aBSIFsCwWYBRWjHU7nACiUmA-HudMebkZaOZrIYHPIwNYkiE-GiNEFJLgZIpkokLmeeqpEUIovVhGUl2ut1oXx+3iSFOpwJN1Pw8WdUB4pBAKJBUDB3jV4uBFvF8RaVxunGB1pjt3B13I-WBABFUwSiScdQAlCD8DAG+luTyVFogXjJcjQUZsfq9OvtbJgCwAIw0nHyFLkOaF8CIqBMkhNJelxvJUEIBaL9rg7jHm0dcCYRbjcFnGAA2gBdbPHRRwAAKFPZUCkfGLyBuMHk9CslAoOjgmCg58vlAwrm9wJIWkoAAecRMAgehiGHPoQBNAA+PZEHiL0pzgI9nTYAA6aIYAgOBhngXh6H1N8PzqL8CSAA))
 
 ```typescript
 import { TypeBox, Static } from '@sinclair/typemap'
 
+// Application Types
+
 const Country = TypeBox(`
-  'New Zealand'
-  | 'Australia'
-  | 'Canada'
-  | 'United States'
-  | 'South Korea' 
-  | 'Japan'
-  | 'Norway' 
+  'New Zealand' |
+  'Australia' | 
+  'South Korea' | 
+  'Japan' | 
+  'Canada' | 
+  'United States' | 
+  'Norway' |
+  'Sweden' |
+  ({} & string)
 `)
 
 const Address = TypeBox({ Country }, `{
@@ -307,20 +307,33 @@ const Address = TypeBox({ Country }, `{
   country: Country
 }`)
 
+const UserId = TypeBox('string', { format: 'uuid' })
+
 const Email = TypeBox('string', { format: 'email' })
 
-const User = TypeBox({ Address, Email }, `{
-  userId: string,
+const User = TypeBox({ UserId, Email, Address }, `{
+  userId: UserId,
   username: string
   email: Email
   address: Address
+  created: Date
 }`)
 
-// ...
+const Role = TypeBox(`
+  'adminstrator' | 
+  'editor' | 
+  'publisher'
+`)
 
-function performance(value: Static<typeof User>) {
+const SystemUser = TypeBox({ User, Role }, `User & {
+  roles: Role[]
+}`)
+
+// Performance Test
+
+function performance(user: Static<typeof SystemUser>) {
   
-  value // test '.' inference here  
+  user // use '.' to test infer performance
 }
 ```
 

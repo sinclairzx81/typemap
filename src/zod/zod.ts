@@ -45,7 +45,6 @@ import { TParameter, TContextFromParameter, ContextFromParameter } from '../type
 export type TZod<Parameter extends TParameter, Type extends object | string, Result extends z.ZodTypeAny | z.ZodEffects<any> = (
   Type extends g.SyntaxType ? TZodFromSyntax<TContextFromParameter<Parameter>, Type> :
   Type extends g.TypeBoxType ? TZodFromTypeBox<Type> :
-  // @ts-ignore 
   Type extends g.ValibotType ? TZodFromValibot<Type> :
   Type extends g.ZodType ? TZodFromZod<Type> :
   z.ZodNever
@@ -58,7 +57,14 @@ export function Zod<Type extends string>(type: Type, options?: TSyntaxOptions): 
 /** Creates a Zod type from Syntax or another Type */
 export function Zod<Type extends object>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
 /** Creates a Zod type from Syntax or another Type */
+// prettier-ignore
 export function Zod(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)
-  return (g.IsSyntax(type) ? ZodFromSyntax(ContextFromParameter(parameter), type, options) : g.IsTypeBox(type) ? ZodFromTypeBox(type) : g.IsValibot(type) ? ZodFromValibot(type) : g.IsZod(type) ? ZodFromZod(type) : z.never()) as never
+  return (
+    g.IsSyntax(type) ? ZodFromSyntax(ContextFromParameter(parameter), type, options) : 
+    g.IsTypeBox(type) ? ZodFromTypeBox(type) : 
+    g.IsValibot(type) ? ZodFromValibot(type) : 
+    g.IsZod(type) ? ZodFromZod(type) : 
+    z.never()
+  ) as never
 }
