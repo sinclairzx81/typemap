@@ -31,13 +31,21 @@ import * as v from 'valibot'
 import * as z from 'zod'
 
 // ------------------------------------------------------------------
+// Syntax
+// ------------------------------------------------------------------
+/** Structural Type for Syntax */
+export type SyntaxType = string
+
+export function IsSyntax(value: unknown): value is string {
+  return t.ValueGuard.IsString(value)
+}
+
+// ------------------------------------------------------------------
 // TypeBox
 // ------------------------------------------------------------------
-/** Returns true if the given value is a TypeBox type */
-// prettier-ignore
-export type TIsTypeBox<Type extends unknown> = (
-  Type extends t.TSchema ? true : false
-)
+/** Structural Type for TypeBox */
+export type TypeBoxType = t.TSchema
+
 /** Returns true if the given value is a TypeBox type */
 export function IsTypeBox(type: unknown): type is t.TSchema {
   return t.KindGuard.IsSchema(type)
@@ -45,15 +53,9 @@ export function IsTypeBox(type: unknown): type is t.TSchema {
 // ------------------------------------------------------------------
 // Valibot
 // ------------------------------------------------------------------
-/** Returns true if the given value is a Valibot type */
-// prettier-ignore
-export type TIsValibot<Type extends unknown> = (
-  Type extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
-    ? Type extends { '~standard': { vendor: 'valibot' } }
-      ? true
-      : false
-    : false
-)
+/** Structural Type for Valibot */
+export type ValibotType = v.BaseSchema<any, any, v.BaseIssue<any>>
+
 /** Returns true if the given value is a Valibot type */
 // prettier-ignore
 export function IsValibot(type: unknown): type is v.AnySchema {
@@ -68,6 +70,9 @@ export function IsValibot(type: unknown): type is v.AnySchema {
 // ------------------------------------------------------------------
 // Zod
 // ------------------------------------------------------------------
+/** Structural Type for Zod */
+export type ZodType = z.ZodTypeAny | z.ZodEffects<any>
+
 /** Returns true if the given value is a Zod type */
 // prettier-ignore
 export type TIsZod<Type extends unknown> = (

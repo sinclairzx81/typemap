@@ -26,9 +26,41 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-export { type Static } from './static'
 export { type TSyntaxOptions } from './options'
+
+// ------------------------------------------------------------------
+// Static
+// ------------------------------------------------------------------
+export { type Static } from './static'
+
+// ------------------------------------------------------------------
+// Compile
+// ------------------------------------------------------------------
 export * from './compile/compile'
-export * from './typebox/typebox'
-export * from './valibot/valibot'
-export * from './zod/zod'
+
+// ------------------------------------------------------------------
+// TypeBox
+// ------------------------------------------------------------------
+export * from './typebox/typebox-from-syntax'
+export * from './typebox/typebox-from-typebox'
+export * from './typebox/typebox-from-valibot'
+export * from './typebox/typebox-from-zod'
+export { type TTypeBox, TypeBox } from './typebox/typebox'
+
+// ------------------------------------------------------------------
+// Valibot
+// ------------------------------------------------------------------
+export * from './valibot/valibot-from-syntax'
+export * from './valibot/valibot-from-typebox'
+export * from './valibot/valibot-from-valibot'
+export * from './valibot/valibot-from-zod'
+export { type TValibot, Valibot } from './valibot/valibot'
+
+// ------------------------------------------------------------------
+// Zod
+// ------------------------------------------------------------------
+export * from './zod/zod-from-syntax'
+export * from './zod/zod-from-typebox'
+export * from './zod/zod-from-valibot'
+export * from './zod/zod-from-zod'
+export { type TZod, Zod } from './zod/zod'

@@ -28,11 +28,14 @@ THE SOFTWARE.
 
 import * as t from '@sinclair/typebox'
 
+// ------------------------------------------------------------------
+// TypeBoxFromTypeBox
+// ------------------------------------------------------------------
+
 // prettier-ignore
-export type TTypeBoxFromTypeBox<Type extends unknown> = (
-  Type extends t.TSchema ? Type : t.TNever
-)
+export type TTypeBoxFromTypeBox<Type extends t.TSchema> = Type
+
 // prettier-ignore
-export function TypeBoxFromTypeBox<Type extends unknown, Result extends TTypeBoxFromTypeBox<Type> = TTypeBoxFromTypeBox<Type>>(type: Type): Result {
+export function TypeBoxFromTypeBox<Type extends t.TSchema, Result extends TTypeBoxFromTypeBox<Type> = TTypeBoxFromTypeBox<Type>>(type: Type): Result {
   return (t.KindGuard.IsSchema(type) ? type : t.Never()) as never
 }

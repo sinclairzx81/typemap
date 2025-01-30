@@ -175,16 +175,30 @@ function FromRecord(type: t.TRecord): z.ZodTypeAny {
 // ------------------------------------------------------------------
 // Optional
 // ------------------------------------------------------------------
-type TFromOptional<Type extends t.TSchema, Result = z.ZodOptional<TFromType<Type>>> = Result
+// prettier-ignore
+type TFromOptional<Type extends t.TOptional<t.TSchema>,
+  NonOptional extends t.TSchema = t.TOptionalWithFlag<Type, false>,
+  Mapped extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<NonOptional>,
+  Result = z.ZodOptional<Mapped>
+> = Result
 function FromOptional(type: t.TOptional<t.TSchema>): z.ZodTypeAny {
-  return z.optional(FromType(t.Optional(type, false)))
+  const non_optional = t.Optional(type, false)
+  const mapped = FromType(non_optional)
+  return z.optional(mapped)
 }
 // ------------------------------------------------------------------
 // Readonly
 // ------------------------------------------------------------------
-type TFromReadonly<Type extends t.TSchema, Result = z.ZodReadonly<TFromType<Type>>> = Result
+// prettier-ignore
+type TFromReadonly<Type extends t.TReadonly<t.TSchema>,
+  NonReadonly extends t.TSchema = t.TReadonlyWithFlag<Type, false>,
+  Mapped extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<NonReadonly>,
+  Result = z.ZodReadonly<Mapped>
+> = Result
 function FromReadonly(type: t.TReadonly<t.TSchema>): z.ZodTypeAny {
-  return FromType(t.Readonly(type, false))
+  const non_readonly = t.Readonly(type, false)
+  const mapped = FromType(non_readonly)
+  return mapped // no mapping
 }
 // ------------------------------------------------------------------
 // Never
@@ -316,8 +330,10 @@ function FromTypes(types: t.TSchema[]): z.ZodTypeAny[] {
 // ------------------------------------------------------------------
 // prettier-ignore
 type TFromType<Type extends t.TSchema> = (
-  Type extends t.TReadonly<infer Type extends t.TSchema> ? TFromReadonly<Type> :
-  Type extends t.TOptional<infer Type extends t.TSchema> ? TFromOptional<Type> :
+  // Modifiers
+  Type extends t.TReadonly<t.TSchema> ? TFromReadonly<Type> :
+  Type extends t.TOptional<t.TSchema> ? TFromOptional<Type> :
+  // Types
   Type extends t.TAny ? TFromAny :
   Type extends t.TArray<infer Type extends t.TSchema> ? TFromArray<Type> :
   Type extends t.TBigInt ? TFromBigInt :
@@ -381,9 +397,9 @@ function FromType(type: t.TSchema): z.ZodTypeAny {
 // ZodFromTypeBox
 // ------------------------------------------------------------------
 // prettier-ignore
-export type TZodFromTypeBox<Type extends object | string> = (
-  Type extends t.TSchema ? TFromType<Type> : z.ZodNever
-)
-export function ZodFromTypeBox<Type extends object | string>(type: Type): TZodFromTypeBox<Type> {
+export type TZodFromTypeBox<Type extends t.TSchema,
+  Result extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<Type>
+> = Result
+export function ZodFromTypeBox<Type extends t.TSchema>(type: Type): TZodFromTypeBox<Type> {
   return (t.KindGuard.IsSchema(type) ? FromType(type) : z.never()) as never
 }

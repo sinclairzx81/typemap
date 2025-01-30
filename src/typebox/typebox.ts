@@ -67,10 +67,10 @@ export function ContextFromParameter<Parameter extends TParameter>(parameter: Pa
 /** Creates a TypeBox type from Syntax or another Type */
 // prettier-ignore
 export type TTypeBox<Parameter extends TParameter, Type extends object | string, Result = (
-  Type extends string ? TTypeBoxFromSyntax<TContextFromParameter<Parameter>, Type> :
-  g.TIsTypeBox<Type> extends true ? TTypeBoxFromTypeBox<Type> :
-  g.TIsValibot<Type> extends true ? TTypeBoxFromValibot<Type> :
-  g.TIsZod<Type> extends true ? TTypeBoxFromZod<Type> :
+  Type extends g.SyntaxType ? TTypeBoxFromSyntax<TContextFromParameter<Parameter>, Type> :
+  Type extends g.TypeBoxType ? TTypeBoxFromTypeBox<Type> :
+  Type extends g.ValibotType ? TTypeBoxFromValibot<Type> :
+  Type extends g.ZodType ? TTypeBoxFromZod<Type> :
   t.TNever
 )> = Result
 /** Creates a TypeBox type from Syntax or another Type */
@@ -82,7 +82,7 @@ export function TypeBox<Type extends object | string>(type: Type, options?: TSyn
 export function TypeBox(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)
   return (
-    t.ValueGuard.IsString(type) ? TypeBoxFromSyntax(ContextFromParameter(parameter), type, options) :
+    g.IsSyntax(type) ? TypeBoxFromSyntax(ContextFromParameter(parameter), type, options) :
     g.IsTypeBox(type) ? TypeBoxFromTypeBox(type) :
     g.IsValibot(type) ? TypeBoxFromValibot(type) :
     g.IsZod(type) ? TypeBoxFromZod(type) :

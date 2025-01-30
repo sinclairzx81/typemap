@@ -28,19 +28,27 @@ THE SOFTWARE.
 
 import { type TTypeBoxFromZod, TypeBoxFromZod } from '../typebox/typebox-from-zod'
 import { type TValibotFromTypeBox, ValibotFromTypeBox } from './valibot-from-typebox'
+
 import * as t from '@sinclair/typebox'
 import * as v from 'valibot'
+import * as z from 'zod'
+
+// ------------------------------------------------------------------
+// ValibotFromZod
+// ------------------------------------------------------------------
 
 // prettier-ignore
-export type TValibotFromZod<
-  Type extends object | string,
-  Schema extends t.TSchema = TTypeBoxFromZod<Type>,
-  Result extends v.BaseSchema<any, any, any> = TValibotFromTypeBox<Schema> 
+export type TValibotFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>,
+  TypeBox extends t.TSchema = t.TNever,
+  Result = TValibotFromTypeBox<TypeBox> 
 > = Result
 
 // prettier-ignore
-export function ValibotFromZod<Type extends object | string>(type: Type): TValibotFromZod<Type> {
+export function ValibotFromZod<
+  Type extends z.ZodTypeAny | z.ZodEffects<any>,
+  Result extends v.BaseSchema<any, any, any> = TValibotFromZod<Type>
+>(type: Type): Result {
   const schema = TypeBoxFromZod(type)
   const result = ValibotFromTypeBox(schema)
-  return result
+  return result as never
 }

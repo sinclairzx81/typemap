@@ -30,7 +30,7 @@ import { TTypeBoxFromSyntax, TypeBoxFromSyntax } from '../typebox/typebox-from-s
 import { ValibotFromTypeBox, TValibotFromTypeBox } from './valibot-from-typebox'
 
 import * as t from '@sinclair/typebox'
-import * as c from './common'
+import * as v from 'valibot'
 
 // ------------------------------------------------------------------
 // ValibotFromSyntax
@@ -38,7 +38,7 @@ import * as c from './common'
 // prettier-ignore
 export type TValibotFromSyntax<Context extends t.TProperties, Type extends string, 
   Schema extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
-  Result extends c.BaseSchema = TValibotFromTypeBox<Schema>
+  Result extends v.BaseSchema<any, any, any> = TValibotFromTypeBox<Schema>
 > = Result
 
 // prettier-ignore

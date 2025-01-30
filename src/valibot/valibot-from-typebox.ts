@@ -185,16 +185,30 @@ function FromRecord(type: t.TRecord): c.BaseSchema {
 // ------------------------------------------------------------------
 // Optional
 // ------------------------------------------------------------------
-type TFromOptional<Type extends t.TSchema, Result = v.OptionalSchema<TFromType<Type>, c.BaseError>> = Result
+// prettier-ignore
+type TFromOptional<Type extends t.TOptional<t.TSchema>,
+  NonOptional extends t.TSchema = t.TOptionalWithFlag<Type, false>,
+  Mapped extends c.BaseSchema = TFromType<NonOptional>,
+  Result = v.OptionalSchema<Mapped, c.BaseError>
+> = Result
 function FromOptional(type: t.TOptional<t.TSchema>): c.BaseSchema {
-  return v.optional(FromType(t.Optional(type, false)))
+  const non_optional = t.Optional(type, false)
+  const mapped = FromType(non_optional)
+  return v.optional(mapped)
 }
 // ------------------------------------------------------------------
 // Readonly
 // ------------------------------------------------------------------
-type TFromReadonly<Type extends t.TSchema, Result = TFromType<Type>> = Result
+// prettier-ignore
+type TFromReadonly<Type extends t.TReadonly<t.TSchema>,
+  NonReadonly extends t.TSchema = t.TReadonlyWithFlag<Type, false>,
+  Mapped extends c.BaseSchema = TFromType<NonReadonly>,
+  Result = Mapped // no readonly mapping
+> = Result
 function FromReadonly(type: t.TReadonly<t.TSchema>): c.BaseSchema {
-  return FromType(t.Readonly(type, false))
+  const non_optional = t.Readonly(type, false)
+  const mapped = FromType(non_optional)
+  return mapped // no readonly mapping
 }
 // ------------------------------------------------------------------
 // Never
@@ -317,17 +331,24 @@ function FromVoid(type: t.TVoid): c.BaseSchema {
 // ------------------------------------------------------------------
 // Types
 // ------------------------------------------------------------------
-type TFromTypes<Types extends t.TSchema[], Result extends c.BaseSchema[] = []> = Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]] ? TFromTypes<Right, [...Result, TFromType<Left>]> : Result
+// prettier-ignore
+type TFromTypes<Types extends t.TSchema[], Result extends c.BaseSchema[] = []> = 
+  Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]] 
+    ? TFromTypes<Right, [...Result, TFromType<Left>]> 
+    : Result
 function FromTypes(types: t.TSchema[]): c.BaseSchema[] {
   return types.map((type) => FromType(type))
 }
 // ------------------------------------------------------------------
 // Type
 // ------------------------------------------------------------------
+
 // prettier-ignore
 type TFromType<Type extends t.TSchema> = (
-  Type extends t.TReadonly<infer Type extends t.TSchema> ? TFromReadonly<Type> :
-  Type extends t.TOptional<infer Type extends t.TSchema> ? TFromOptional<Type> :
+  // Modifiers
+  Type extends t.TReadonly<t.TSchema> ? TFromReadonly<Type> :
+  Type extends t.TOptional<t.TSchema> ? TFromOptional<Type> :
+  // Types
   Type extends t.TAny ? TFromAny :
   Type extends t.TArray<infer Type extends t.TSchema> ? TFromArray<Type> :
   Type extends t.TBigInt ? TFromBigInt :
@@ -388,10 +409,10 @@ function FromType(type: t.TSchema): c.BaseSchema {
 // ValibotFromTypeBox
 // ------------------------------------------------------------------
 // prettier-ignore
-export type TValibotFromTypeBox<Type extends object | string, Result extends c.BaseSchema = (
-  Type extends t.TSchema ? TFromType<Type> : v.NeverSchema<c.BaseError>
-)> = Result
+export type TValibotFromTypeBox<Type extends t.TSchema, 
+  Result extends c.BaseSchema = TFromType<Type>
+> = Result
 // prettier-ignore
-export function ValibotFromTypeBox<Type extends object | string>(type: Type): TValibotFromTypeBox<Type> {
-  return (t.KindGuard.IsSchema(type) ? FromType(type) : v.never()) as never
+export function ValibotFromTypeBox<Type extends t.TSchema>(type: Type): TValibotFromTypeBox<Type> {
+  return FromType(type) as never
 }

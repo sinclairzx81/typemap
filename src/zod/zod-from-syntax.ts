@@ -34,6 +34,7 @@ import * as z from 'zod'
 // ------------------------------------------------------------------
 // ZodFromSyntax
 // ------------------------------------------------------------------
+
 // prettier-ignore
 export type TZodFromSyntax<Context extends t.TProperties, Type extends string,
   Schema extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,

@@ -33,7 +33,6 @@ import { type TZodFromZod, ZodFromZod } from './zod-from-zod'
 import { type TSyntaxOptions } from '../options'
 
 import * as g from '../guard'
-import * as t from '@sinclair/typebox'
 import * as z from 'zod'
 
 import { TParameter, TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
@@ -43,26 +42,30 @@ import { TParameter, TContextFromParameter, ContextFromParameter } from '../type
 // ------------------------------------------------------------------
 /** Creates a Zod type from Syntax or another Type */
 // prettier-ignore
-export type TZod<Parameter extends TParameter, Type extends object | string, Result = (
-  Type extends string ? TZodFromSyntax<TContextFromParameter<Parameter>, Type> :
-  g.TIsTypeBox<Type> extends true ? TZodFromTypeBox<Type> :
-  g.TIsValibot<Type> extends true ? TZodFromValibot<Type> :
-  g.TIsZod<Type> extends true ? TZodFromZod<Type> :
+export type TZod<Parameter extends TParameter, Type extends object | string, Result extends z.ZodTypeAny | z.ZodEffects<any> = (
+  Type extends g.SyntaxType ? TZodFromSyntax<TContextFromParameter<Parameter>, Type> :
+  Type extends g.TypeBoxType ? TZodFromTypeBox<Type> :
+  // @ts-ignore 
+  Type extends g.ValibotType ? TZodFromValibot<Type> :
+  Type extends g.ZodType ? TZodFromZod<Type> :
   z.ZodNever
 )> = Result
 
 /** Creates a Zod type from Syntax or another Type */
+// @ts-ignore 
 export function Zod<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TZod<Parameter, Type>
 /** Creates a Zod type from Syntax or another Type */
+// @ts-ignore 
 export function Zod<Type extends string>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
 /** Creates a Zod type from Syntax or another Type */
+// @ts-ignore 
 export function Zod<Type extends object>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
 /** Creates a Zod type from Syntax or another Type */
 // prettier-ignore
 export function Zod(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)
   return (
-    t.ValueGuard.IsString(type) ? ZodFromSyntax(ContextFromParameter(parameter), type, options) : 
+    g.IsSyntax(type) ? ZodFromSyntax(ContextFromParameter(parameter), type, options) : 
     g.IsTypeBox(type) ? ZodFromTypeBox(type) : 
     g.IsValibot(type) ? ZodFromValibot(type) : 
     g.IsZod(type) ? ZodFromZod(type) : 
