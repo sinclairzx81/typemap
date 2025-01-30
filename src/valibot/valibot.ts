@@ -43,11 +43,11 @@ import { TParameter, TContextFromParameter, ContextFromParameter } from '../type
 // ------------------------------------------------------------------
 /** Creates a Valibot type from Syntax or another Type */
 // prettier-ignore
-export type TValibot<Parameter extends TParameter, Type extends object | string, Result = (
-  Type extends string ? TValibotFromSyntax<TContextFromParameter<Parameter>, Type> :
-  g.TIsTypeBox<Type> extends true ? TValibotFromTypeBox<Type> :
-  g.TIsValibot<Type> extends true ? TValibotFromValibot<Type> :
-  g.TIsZod<Type> extends true ? TValibotFromZod<Type> :
+export type TValibot<Parameter extends TParameter, Type extends object | string, Result extends g.ValibotType = (
+  Type extends g.SyntaxType ? TValibotFromSyntax<TContextFromParameter<Parameter>, Type> :
+  Type extends t.TSchema ? TValibotFromTypeBox<Type> :
+  Type extends g.ValibotType ? TValibotFromValibot<Type> :
+  Type extends g.ZodType ? TValibotFromZod<Type> :
   v.NeverSchema<c.BaseError>
 )> = Result
 
@@ -58,14 +58,9 @@ export function Valibot<Type extends string>(type: Type, options?: TSyntaxOption
 /** Creates a Valibot type from Syntax or another Type */
 export function Valibot<Type extends object>(type: Type, options?: TSyntaxOptions): TValibot<{}, Type>
 /** Creates a Valibot type from Syntax or another Type */
-// prettier-ignore
 export function Valibot(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)
   return (
-    t.ValueGuard.IsString(type) ? ValibotFromSyntax(ContextFromParameter(parameter), type, options) :
-    g.IsTypeBox(type) ? ValibotFromTypeBox(type) :
-    g.IsValibot(type) ? ValibotFromValibot(type) :
-    g.IsZod(type) ? ValibotFromZod(type as any) :
-    v.never()
+    g.IsSyntax(type) ? ValibotFromSyntax(ContextFromParameter(parameter), type, options) : g.IsTypeBox(type) ? ValibotFromTypeBox(type) : g.IsValibot(type) ? ValibotFromValibot(type) : g.IsZod(type) ? ValibotFromZod(type as any) : v.never()
   ) as never
 }

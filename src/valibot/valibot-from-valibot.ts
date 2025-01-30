@@ -26,15 +26,18 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import * as Guard from '../guard'
 import * as v from 'valibot'
-import * as c from './common'
+
+// ------------------------------------------------------------------
+// ValibotFromValibot
+// ------------------------------------------------------------------
 
 // prettier-ignore
-export type TValibotFromValibot<Type extends object | string,
-  Result extends c.BaseSchema = Type extends c.BaseSchema ? Type : v.NeverSchema<c.BaseError>
+export type TValibotFromValibot<Type extends v.BaseSchema<any, any, any>,
+  Result extends v.BaseSchema<any, any, any> = Type
 > = Result
+
 // prettier-ignore
-export function ValibotFromValibot<Type extends object | string>(type: Type): TValibotFromValibot<Type> {
-  return (Guard.IsValibot(type) ? type : undefined) as never
+export function ValibotFromValibot<Type extends v.BaseSchema<any, any, any>>(type: Type): TValibotFromValibot<Type> {
+  return type
 }

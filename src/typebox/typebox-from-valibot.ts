@@ -239,7 +239,7 @@ function FromBoolean(type: BaseSchema): t.TSchema {
 // Custom
 // ------------------------------------------------------------------
 t.TypeRegistry.Set<TCustom>('ValibotCustom', (schema, value) => v.safeParse(schema.schema, value).success)
-export interface TCustom<Type extends v.CustomSchema<any, any> = v.CustomSchema<any, any>> extends t.TSchema {
+interface TCustom<Type extends v.CustomSchema<any, any> = v.CustomSchema<any, any>> extends t.TSchema {
   [t.Kind]: 'ValibotCustom'
   static: v.InferOutput<this['type']>
   type: Type
@@ -279,54 +279,54 @@ function FromEnum<Type extends BaseSchema>(type: Type): t.TSchema {
 // ------------------------------------------------------------------
 // File
 // ------------------------------------------------------------------
-t.TypeRegistry.Set<TFile>('ValibotFile', (schema, value) => {
+t.TypeRegistry.Set<TValibotFile>('ValibotFile', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TFile<Type extends v.FileSchema<any> = v.FileSchema<any>> extends t.TSchema {
+export interface TValibotFile<Type extends v.FileSchema<any> = v.FileSchema<any>> extends t.TSchema {
   [t.Kind]: 'ValibotFile'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _File(type: v.FileSchema<any>, options?: t.SchemaOptions): TFile {
+function _File(type: v.FileSchema<any>, options?: t.SchemaOptions): TValibotFile {
   return t.CreateType({ [t.Kind]: 'ValibotFile', type }, options) as never
 }
-type TFromFile<Type extends v.FileSchema<any>> = t.Ensure<TFile<Type>>
+type TFromFile<Type extends v.FileSchema<any>> = t.Ensure<TValibotFile<Type>>
 function FromFile(type: BaseSchema): t.TSchema {
   return _File(type as v.FileSchema<any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Function
 // ------------------------------------------------------------------
-t.TypeRegistry.Set<TFunction>('ValibotFunction', (schema, value) => {
+t.TypeRegistry.Set<TValibotFunction>('ValibotFunction', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TFunction<Type extends v.FunctionSchema<any> = v.FunctionSchema<any>> extends t.TSchema {
+export interface TValibotFunction<Type extends v.FunctionSchema<any> = v.FunctionSchema<any>> extends t.TSchema {
   [t.Kind]: 'ValibotFunction'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _Function<Type extends v.FunctionSchema<any>>(type: Type, options?: t.SchemaOptions): TFunction<Type> {
+function _Function<Type extends v.FunctionSchema<any>>(type: Type, options?: t.SchemaOptions): TValibotFunction<Type> {
   return t.CreateType({ [t.Kind]: 'ValibotFunction', type }, options) as never
 }
-type TFromFunction<Type extends v.FunctionSchema<any>> = t.Ensure<TFunction<Type>>
+type TFromFunction<Type extends v.FunctionSchema<any>> = t.Ensure<TValibotFunction<Type>>
 function FromFunction(type: BaseSchema): t.TSchema {
   return _Function(type as v.FunctionSchema<any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Instance
 // ------------------------------------------------------------------
-t.TypeRegistry.Set<TInstance>('ValibotInstance', (schema, value) => {
+t.TypeRegistry.Set<TValibotInstance>('ValibotInstance', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TInstance<Type extends v.InstanceSchema<v.Class, any> = v.InstanceSchema<v.Class, any>> extends t.TSchema {
+export interface TValibotInstance<Type extends v.InstanceSchema<v.Class, any> = v.InstanceSchema<v.Class, any>> extends t.TSchema {
   [t.Kind]: 'ValibotInstance'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function Instance<Type extends v.InstanceSchema<v.Class, any>>(type: Type, options?: t.SchemaOptions): TInstance<Type> {
+function Instance<Type extends v.InstanceSchema<v.Class, any>>(type: Type, options?: t.SchemaOptions): TValibotInstance<Type> {
   return t.CreateType({ [t.Kind]: 'ValibotInstance', type }, options) as never
 }
-type TFromInstance<Type extends v.InstanceSchema<v.Class, any>> = t.Ensure<TInstance<Type>>
+type TFromInstance<Type extends v.InstanceSchema<v.Class, any>> = t.Ensure<TValibotInstance<Type>>
 function FromInstance(type: BaseSchema): t.TSchema {
   return Instance(type as v.InstanceSchema<v.Class, any>, Options(type))
 }
@@ -375,54 +375,54 @@ function FromLooseObject(type: BaseSchema): t.TSchema {
 // ------------------------------------------------------------------
 // LooseTuple
 // ------------------------------------------------------------------
-t.TypeRegistry.Set<TLooseTuple>('ValibotLooseTuple', (schema, value) => {
+t.TypeRegistry.Set<TValibotLooseTuple>('ValibotLooseTuple', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TLooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any> = v.LooseTupleSchema<BaseSchema[], any>> extends t.TSchema {
+export interface TValibotLooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any> = v.LooseTupleSchema<BaseSchema[], any>> extends t.TSchema {
   [t.Kind]: 'ValibotLooseTuple'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function LooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any>>(type: Type, schema?: t.SchemaOptions): TLooseTuple<Type> {
+function LooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any>>(type: Type, schema?: t.SchemaOptions): TValibotLooseTuple<Type> {
   return t.CreateType({ [t.Kind]: 'ValibotLooseTuple', type }) as never
 }
-type TFromLooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any>> = t.Ensure<TLooseTuple<Type>>
+type TFromLooseTuple<Type extends v.LooseTupleSchema<BaseSchema[], any>> = t.Ensure<TValibotLooseTuple<Type>>
 function FromLooseTuple(type: BaseSchema): t.TSchema {
   return LooseTuple(type as v.LooseTupleSchema<BaseSchema[], any>, Options(type))
 }
 // ------------------------------------------------------------------
 // Map
 // ------------------------------------------------------------------
-t.TypeRegistry.Set<TMap>('ValibotMap', (schema, value) => {
+t.TypeRegistry.Set<TValibotMap>('ValibotMap', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TMap<Type extends v.MapSchema<BaseSchema, BaseSchema, any> = v.MapSchema<BaseSchema, BaseSchema, any>> extends t.TSchema {
+export interface TValibotMap<Type extends v.MapSchema<BaseSchema, BaseSchema, any> = v.MapSchema<BaseSchema, BaseSchema, any>> extends t.TSchema {
   [t.Kind]: 'ValibotMap'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _Map<Type extends v.MapSchema<BaseSchema, BaseSchema, any>>(type: Type, options?: t.SchemaOptions): TMap<Type> {
+function _Map<Type extends v.MapSchema<BaseSchema, BaseSchema, any>>(type: Type, options?: t.SchemaOptions): TValibotMap<Type> {
   return t.CreateType({ [t.Kind]: 'ValibotMap', type }) as never
 }
-type TFromMap<Type extends v.MapSchema<BaseSchema, BaseSchema, any>> = t.Ensure<TMap<Type>>
+type TFromMap<Type extends v.MapSchema<BaseSchema, BaseSchema, any>> = t.Ensure<TValibotMap<Type>>
 function FromMap(type: BaseSchema): t.TSchema {
   return _Map(type as v.MapSchema<BaseSchema, BaseSchema, any>, Options(type))
 }
 // ------------------------------------------------------------------
 // NaN
 // ------------------------------------------------------------------
-t.TypeRegistry.Set<TNaN>('ValibotNaN', (schema, value) => {
+t.TypeRegistry.Set<TValibotNaN>('ValibotNaN', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TNaN<Type extends v.NanSchema<any> = v.NanSchema<any>> extends t.TSchema {
+export interface TValibotNaN<Type extends v.NanSchema<any> = v.NanSchema<any>> extends t.TSchema {
   [t.Kind]: 'ValibotNaN'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _NaN<Type extends v.NanSchema<any>>(type: Type, options?: t.SchemaOptions): TNaN<Type> {
+function _NaN<Type extends v.NanSchema<any>>(type: Type, options?: t.SchemaOptions): TValibotNaN<Type> {
   return t.CreateType({ [t.Kind]: 'ValibotNaN', type }, options) as never
 }
-type TFromNaN<Type extends v.NanSchema<any>> = t.Ensure<TNaN<Type>>
+type TFromNaN<Type extends v.NanSchema<any>> = t.Ensure<TValibotNaN<Type>>
 function FromNaN(type: BaseSchema): t.TSchema {
   return _NaN(type as v.NanSchema<any>, Options(type))
 }
@@ -555,18 +555,18 @@ function FromPickList(type: BaseSchema): t.TSchema {
 // ------------------------------------------------------------------
 // Promise
 // ------------------------------------------------------------------
-t.TypeRegistry.Set<TPromise>('ValibotPromise', (schema, value) => {
+t.TypeRegistry.Set<TValibotPromise>('ValibotPromise', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TPromise<Type extends v.PromiseSchema<any> = v.PromiseSchema<any>> extends t.TSchema {
+export interface TValibotPromise<Type extends v.PromiseSchema<any> = v.PromiseSchema<any>> extends t.TSchema {
   [t.Kind]: 'ValibotPromise'
   static: v.InferOutput<this['type']>
   type: Type
 }
-function _Promise<Type extends v.PromiseSchema<any>>(type: Type, options?: t.SchemaOptions): TPromise<Type> {
+function _Promise<Type extends v.PromiseSchema<any>>(type: Type, options?: t.SchemaOptions): TValibotPromise<Type> {
   return t.CreateType({ [t.Kind]: 'ValibotPromise', type }, options) as never
 }
-type TFromPromise<Type extends v.PromiseSchema<any>> = t.Ensure<TPromise<Type>>
+type TFromPromise<Type extends v.PromiseSchema<any>> = t.Ensure<TValibotPromise<Type>>
 function FromPromise(type: BaseSchema): t.TSchema {
   return _Promise(type as v.PromiseSchema<any>, Options(type))
 }
@@ -581,18 +581,18 @@ function FromRecord(type: BaseSchema) {
 // ------------------------------------------------------------------
 // Set
 // ------------------------------------------------------------------
-t.TypeRegistry.Set<TInstance>('ValibotSet', (schema, value) => {
+t.TypeRegistry.Set<TValibotInstance>('ValibotSet', (schema, value) => {
   return v.safeParse(schema.schema, value).success
 })
-export interface TSet<Type extends v.SetSchema<BaseSchema, any> = v.SetSchema<BaseSchema, any>> extends t.TSchema {
+export interface TValibotSet<Type extends v.SetSchema<BaseSchema, any> = v.SetSchema<BaseSchema, any>> extends t.TSchema {
   [t.Kind]: 'ValibotSet'
   static: v.InferOutput<this['type']> extends infer Result ? Result : never
   type: Type
 }
-function Set<Type extends v.SetSchema<BaseSchema, any>>(type: Type, options?: t.SchemaOptions): TSet<Type> {
+function Set<Type extends v.SetSchema<BaseSchema, any>>(type: Type, options?: t.SchemaOptions): TValibotSet<Type> {
   return t.CreateType({ [t.Kind]: 'ValibotSet', type }, options) as never
 }
-type TFromSet<Type extends v.SetSchema<BaseSchema, any>> = t.Ensure<TSet<Type>>
+type TFromSet<Type extends v.SetSchema<BaseSchema, any>> = t.Ensure<TValibotSet<Type>>
 function FromSet(type: BaseSchema): t.TSchema {
   return Set(type as v.SetSchema<BaseSchema, any>)
 }
@@ -738,7 +738,7 @@ function FromVoid(type: BaseSchema): t.TSchema {
 // Type
 // ------------------------------------------------------------------
 // prettier-ignore
-export type TFromType<Type extends BaseSchema> = (
+type TFromType<Type extends BaseSchema> = (
   // Pipes - Extract First Type And Remap
   Type extends { pipe: [infer Type extends BaseSchema, ...any[]] } ? TFromType<Type> :
   // Types
@@ -789,7 +789,7 @@ export type TFromType<Type extends BaseSchema> = (
   t.TNever
 )
 // prettier-ignore
-export function FromType<Type extends BaseSchema>(type: Type): TFromType<Type> {
+function FromType<Type extends BaseSchema>(type: Type): TFromType<Type> {
   return (
     type.type === 'any' ? FromAny(type) :
     type.type === 'array' ? FromArray(type) :
@@ -842,11 +842,12 @@ export function FromType<Type extends BaseSchema>(type: Type): TFromType<Type> {
 // TypeBoxFromValibot
 // ------------------------------------------------------------------
 // prettier-ignore
-export type TTypeBoxFromValibot<Type extends unknown> = (
-  Type extends BaseSchema ? TFromType<Type> : t.TNever
-)
+export type TTypeBoxFromValibot<Type extends v.BaseSchema<any, any, any>, 
+  Result extends t.TSchema = TFromType<Type>
+> = Result
+
 /** Converts a Valibot Type to a TypeBox Type */
 // prettier-ignore
-export function TypeBoxFromValibot<Type extends unknown, Result extends TTypeBoxFromValibot<Type> = TTypeBoxFromValibot<Type>>(type: Type): Result {
+export function TypeBoxFromValibot<Type extends v.BaseSchema<any, any, any>, Result extends TTypeBoxFromValibot<Type> = TTypeBoxFromValibot<Type>>(type: Type): Result {
   return (Guard.IsValibot(type) ? FromType(type) : t.Never()) as never
 }

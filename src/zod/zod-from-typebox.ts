@@ -175,16 +175,30 @@ function FromRecord(type: t.TRecord): z.ZodTypeAny {
 // ------------------------------------------------------------------
 // Optional
 // ------------------------------------------------------------------
-type TFromOptional<Type extends t.TSchema, Result = z.ZodOptional<TFromType<Type>>> = Result
+// prettier-ignore
+type TFromOptional<Type extends t.TOptional<t.TSchema>,
+  NonOptional extends t.TSchema = t.TOptionalWithFlag<Type, false>,
+  Mapped extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<NonOptional>,
+  Result = z.ZodOptional<Mapped>
+> = Result
 function FromOptional(type: t.TOptional<t.TSchema>): z.ZodTypeAny {
-  return z.optional(FromType(t.Optional(type, false)))
+  const non_optional = t.Optional(type, false)
+  const mapped = FromType(non_optional)
+  return z.optional(mapped)
 }
 // ------------------------------------------------------------------
 // Readonly
 // ------------------------------------------------------------------
-type TFromReadonly<Type extends t.TSchema, Result = z.ZodReadonly<TFromType<Type>>> = Result
+// prettier-ignore
+type TFromReadonly<Type extends t.TReadonly<t.TSchema>,
+  NonReadonly extends t.TSchema = t.TReadonlyWithFlag<Type, false>,
+  Mapped extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<NonReadonly>,
+  Result = z.ZodReadonly<Mapped>
+> = Result
 function FromReadonly(type: t.TReadonly<t.TSchema>): z.ZodTypeAny {
-  return FromType(t.Readonly(type, false))
+  const non_readonly = t.Readonly(type, false)
+  const mapped = FromType(non_readonly)
+  return mapped // no mapping
 }
 // ------------------------------------------------------------------
 // Never
@@ -315,40 +329,50 @@ function FromTypes(types: t.TSchema[]): z.ZodTypeAny[] {
 // Type
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromType<Type extends t.TSchema> = (
-  Type extends t.TReadonly<infer Type extends t.TSchema> ? TFromReadonly<Type> :
-  Type extends t.TOptional<infer Type extends t.TSchema> ? TFromOptional<Type> :
-  Type extends t.TAny ? TFromAny :
-  Type extends t.TArray<infer Type extends t.TSchema> ? TFromArray<Type> :
-  Type extends t.TBigInt ? TFromBigInt :
-  Type extends t.TBoolean ? TFromBoolean :
-  Type extends t.TDate ? TFromDate :
-  Type extends t.TFunction<infer Parameters extends t.TSchema[], infer ReturnType extends t.TSchema> ? TFromFunction<Parameters, ReturnType> :
-  Type extends t.TInteger ? TFromInteger :
-  Type extends t.TIntersect<infer Types extends t.TSchema[]> ? TFromIntersect<Types> :
-  Type extends t.TLiteral<infer Value extends t.TLiteralValue> ? TFromLiteral<Value> :
-  Type extends t.TNever ? TFromNever :
-  Type extends t.TNull ? TFromNull :
-  Type extends t.TNumber ? TFromNumber :
-  Type extends t.TObject<infer Properties extends t.TProperties> ? TFromObject<Properties> :
-  Type extends t.TPromise<infer Type extends t.TSchema> ? TFromPromise<Type> :
-  Type extends t.TRecord<infer Key extends t.TSchema, infer Value extends t.TSchema> ? TFromRecord<Key, Value> :
-  Type extends t.TRegExp ? TFromRegExp :
-  Type extends t.TString ? TFromString :
-  Type extends t.TSymbol ? TFromSymbol :
-  Type extends t.TTuple<infer Types extends t.TSchema[]> ? TFromTuple<Types> :
-  Type extends t.TUndefined ? TFromUndefined :
-  Type extends t.TUnion<infer Types extends t.TSchema[]> ? TFromUnion<Types> :
-  Type extends t.TUnknown ? TFromUnknown :
-  Type extends t.TVoid ? TFromVoid :
-  z.ZodNever
-)
+type TFromType<Type extends t.TSchema,
+  // Type Mapping
+  Mapped extends z.ZodTypeAny | z.ZodEffects<any> = (
+    Type extends t.TAny ? TFromAny :
+    Type extends t.TArray<infer Type extends t.TSchema> ? TFromArray<Type> :
+    Type extends t.TBigInt ? TFromBigInt :
+    Type extends t.TBoolean ? TFromBoolean :
+    Type extends t.TDate ? TFromDate :
+    Type extends t.TFunction<infer Parameters extends t.TSchema[], infer ReturnType extends t.TSchema> ? TFromFunction<Parameters, ReturnType> :
+    Type extends t.TInteger ? TFromInteger :
+    Type extends t.TIntersect<infer Types extends t.TSchema[]> ? TFromIntersect<Types> :
+    Type extends t.TLiteral<infer Value extends t.TLiteralValue> ? TFromLiteral<Value> :
+    Type extends t.TNever ? TFromNever :
+    Type extends t.TNull ? TFromNull :
+    Type extends t.TNumber ? TFromNumber :
+    Type extends t.TObject<infer Properties extends t.TProperties> ? TFromObject<Properties> :
+    Type extends t.TPromise<infer Type extends t.TSchema> ? TFromPromise<Type> :
+    Type extends t.TRecord<infer Key extends t.TSchema, infer Value extends t.TSchema> ? TFromRecord<Key, Value> :
+    Type extends t.TRegExp ? TFromRegExp :
+    Type extends t.TString ? TFromString :
+    Type extends t.TSymbol ? TFromSymbol :
+    Type extends t.TTuple<infer Types extends t.TSchema[]> ? TFromTuple<Types> :
+    Type extends t.TUndefined ? TFromUndefined :
+    Type extends t.TUnion<infer Types extends t.TSchema[]> ? TFromUnion<Types> :
+    Type extends t.TUnknown ? TFromUnknown :
+    Type extends t.TVoid ? TFromVoid :
+    z.ZodNever
+  ),
+  // Modifier Mapping
+  IsReadonly extends boolean = Type extends t.TReadonly<t.TSchema> ? true : false,
+  IsOptional extends boolean = Type extends t.TOptional<t.TSchema> ? true : false,
+  Result extends z.ZodTypeAny | z.ZodEffects<any> = (
+    [IsReadonly, IsOptional] extends [true, true] ? z.ZodReadonly<z.ZodOptional<Mapped>> :
+    [IsReadonly, IsOptional] extends [false, true] ? z.ZodOptional<Mapped> :
+    [IsReadonly, IsOptional] extends [true, false] ? z.ZodReadonly<Mapped> :
+    Mapped
+  )
+> = Result
 // prettier-ignore
-function FromType(type: t.TSchema): z.ZodTypeAny {
+function FromType(type: t.TSchema): z.ZodTypeAny | z.ZodEffects<any> {
   const constraints: TConstraint<z.ZodTypeAny>[] = []
   if(!t.ValueGuard.IsUndefined(type.description)) constraints.push(input => input.describe(type.description!))
   if(!t.ValueGuard.IsUndefined(type.default)) constraints.push(input => input.default(type.default))
-  return constraints.reduce((type, constraint) => constraint(type), (
+  const mapped = constraints.reduce((type, constraint) => constraint(type), (
     t.KindGuard.IsReadonly(type) ? FromReadonly(type) :
     t.KindGuard.IsOptional(type) ? FromOptional(type) :
     t.KindGuard.IsAny(type) ? FromAny(type) :
@@ -376,14 +400,24 @@ function FromType(type: t.TSchema): z.ZodTypeAny {
     t.KindGuard.IsVoid(type) ? FromVoid(type) :
     z.never()
   ))
+  // Modifier Mapping
+  const isOptional = t.KindGuard.IsOptional(type)
+  const isReadonly = t.KindGuard.IsReadonly(type)
+  const result = (
+    isOptional && isReadonly ? z.optional(mapped) :
+    isOptional && !isReadonly ? z.optional(mapped) :
+    !isOptional && isReadonly ? mapped :
+    mapped
+  )
+  return result
 }
 // ------------------------------------------------------------------
 // ZodFromTypeBox
 // ------------------------------------------------------------------
 // prettier-ignore
-export type TZodFromTypeBox<Type extends object | string> = (
-  Type extends t.TSchema ? TFromType<Type> : z.ZodNever
-)
-export function ZodFromTypeBox<Type extends object | string>(type: Type): TZodFromTypeBox<Type> {
+export type TZodFromTypeBox<Type extends t.TSchema,
+  Result extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<Type>
+> = Result
+export function ZodFromTypeBox<Type extends t.TSchema>(type: Type): TZodFromTypeBox<Type> {
   return (t.KindGuard.IsSchema(type) ? FromType(type) : z.never()) as never
 }

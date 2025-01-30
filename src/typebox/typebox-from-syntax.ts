@@ -32,9 +32,10 @@ import * as t from '@sinclair/typebox'
 // ------------------------------------------------------------------
 // TypeBoxFromSyntax
 // ------------------------------------------------------------------
+
 // prettier-ignore
-export type TTypeBoxFromSyntax<Context extends t.TProperties, Type extends string | object, 
-  Mapped = Type extends string ? StaticParseAsSchema<Context, Type> : t.TNever,
+export type TTypeBoxFromSyntax<Context extends t.TProperties, Type extends string, 
+  Mapped = StaticParseAsSchema<Context, Type>,
   Result extends t.TSchema = Mapped extends t.TSchema ? Mapped : t.TNever
 > = Result
 

@@ -406,11 +406,10 @@ function FromType<Type extends z.ZodType>(type: Type): t.TSchema {
 // TypeBoxFromZod
 // ------------------------------------------------------------------
 // prettier-ignore
-export type TTypeBoxFromZod<Type extends unknown> = (
-  Type extends z.ZodType ? TFromType<Type> : t.TNever
-)
-
+export type TTypeBoxFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>,
+  Result extends t.TSchema = TFromType<Type>
+> = Result
 // prettier-ignore
-export function TypeBoxFromZod<Type extends unknown, Result extends TTypeBoxFromZod<Type> = TTypeBoxFromZod<Type>>(type: Type): Result {
-  return (type instanceof z.ZodType ? FromType(type) : t.Never()) as never
+export function TypeBoxFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>, Result extends TTypeBoxFromZod<Type> = TTypeBoxFromZod<Type>>(type: Type): Result {
+  return FromType(type) as never
 }
