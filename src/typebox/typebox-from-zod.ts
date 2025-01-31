@@ -135,11 +135,7 @@ function FromEffects<Type extends z.ZodEffects<z.ZodTypeAny, unknown>>(type: Typ
 // Enum
 // ------------------------------------------------------------------
 /** prettier-ignore */
-type TFromEnum<Variants extends string[], Result extends t.TLiteral[] = []> = (
-  Variants extends [infer Left extends string, ...infer Right extends string[]] 
-    ? TFromEnum<Right, [...Result, t.TLiteral<Left>]> 
-    : t.TUnion<Result>
-)
+type TFromEnum<Variants extends string[], Result extends t.TLiteral[] = []> = Variants extends [infer Left extends string, ...infer Right extends string[]] ? TFromEnum<Right, [...Result, t.TLiteral<Left>]> : t.TUnion<Result>
 function FromEnum<Def extends z.ZodEnumDef>(def: Def): t.TSchema {
   const variants = def.values.map((value) => t.Literal(value))
   return t.Union(variants)

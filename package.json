@@ -1,7 +1,7 @@
 {
   "name": "@sinclair/typemap",
-  "version": "0.8.7",
-  "description": "Unified Syntax and Type Compiler for Runtime Types",
+  "version": "0.8.8",
+  "description": "Syntax, Compiler and Translation System for Runtime Types",
   "author": "sinclairzx81",
   "license": "MIT",
   "repository": {

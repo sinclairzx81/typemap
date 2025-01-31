@@ -26,24 +26,8 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { type TTypeBoxFromValibot, TypeBoxFromValibot } from '../typebox/typebox-from-valibot'
-import { type TZodFromTypeBox, ZodFromTypeBox } from './zod-from-typebox'
+export type TSyntaxFromSyntax<Type extends string> = Type
 
-import * as t from '@sinclair/typebox'
-import * as v from 'valibot'
-import * as z from 'zod'
-
-/** Creates a Zod type from Valibot */
-// prettier-ignore
-export type TZodFromValibot<Type extends v.BaseSchema<any, any, any>,
-  TypeBox extends t.TSchema = TTypeBoxFromValibot<Type>,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<TypeBox>
-> = Result
-
-/** Creates a Zod type from Valibot */
-// prettier-ignore
-export function ZodFromValibot<Type extends v.BaseSchema<any, any, any>>(type: Type): TZodFromValibot<Type> {
-  const typebox = TypeBoxFromValibot(type)
-  const result = ZodFromTypeBox(typebox)
-  return result
+export function SyntaxFromSyntax<Type extends string>(type: Type): TSyntaxFromSyntax<Type> {
+  return type
 }

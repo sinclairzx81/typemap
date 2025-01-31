@@ -89,6 +89,7 @@ function resolveMetadata() {
     author: packageJson.author,
     license: packageJson.license,
     repository: packageJson.repository,
+    // dependencies: packageJson.dependencies,
     peerDependencies: packageJson.peerDependencies,
     optionalDependencies: packageJson.optionalDependencies,
     // flagged by socket.dev if not present
