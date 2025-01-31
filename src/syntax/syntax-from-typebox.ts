@@ -171,7 +171,7 @@ type TFromObject<Properties extends t.TProperties,
 function FromObject(properties: t.TProperties): string {
   const propertyKeys = globalThis.Object.getOwnPropertyNames(properties)
   const delimited = FromProperties(propertyKeys, properties)
-  const result = FromDelimited(delimited, Comma)
+  const result = FromDelimited(delimited, `${Comma} `)
   return `{ ${result} }`
 }
 // ------------------------------------------------------------------
@@ -185,7 +185,7 @@ type TFromParameters<Parameters extends t.TSchema[], Index extends string = '0',
 )
 function FromParameters(parameters: t.TSchema[]): string {
   const result = parameters.map((parameter, index) => `arg${index}: ${FromType(parameter)}`)
-  return `(${FromDelimited(result, Comma)})`
+  return `(${FromDelimited(result, `${Comma} `)})`
 }
 // ------------------------------------------------------------------
 // Property
@@ -239,6 +239,13 @@ function FromProperties(propertyKeys: PropertyKey[], properties: t.TProperties):
         ): result
     )
   }, [] as string[])
+}
+// ------------------------------------------------------------------
+// Promise
+// ------------------------------------------------------------------
+type TFromPromise<Type extends t.TSchema, Result extends string = `Promise<${TFromType<Type>}>`> = Result
+function FromPromise(type: t.TSchema): string {
+  return `Promise<${FromType(type)}>`
 }
 // ------------------------------------------------------------------
 // String
@@ -318,6 +325,7 @@ type TFromType<Type extends t.TSchema> = (
   Type extends t.TNumber ? TFromNumber<Type> :
   Type extends t.TNull ? TFromNull<Type> :
   Type extends t.TObject<infer Properties extends t.TProperties> ? TFromObject<Properties> :
+  Type extends t.TPromise<infer Type extends t.TSchema> ? TFromPromise<Type> :
   Type extends t.TString ? TFromString<Type> :
   Type extends t.TSymbol ? TFromSymbol<Type> :
   Type extends t.TTuple<infer Types extends t.TSchema[]> ? TFromTuple<Types> :
@@ -342,6 +350,7 @@ function FromType<Type extends t.TSchema>(type: Type): TFromType<Type> {
     t.KindGuard.IsNumber(type) ? FromNumber(type) :
     t.KindGuard.IsNull(type) ? FromNull(type) :
     t.KindGuard.IsObject(type) ? FromObject(type.properties) :
+    t.KindGuard.IsPromise(type) ? FromPromise(type.item) :
     t.KindGuard.IsString(type) ? FromString(type) :
     t.KindGuard.IsSymbol(type) ? FromSymbol(type) :
     t.KindGuard.IsTuple(type) ? FromTuple(type.items || []) :
