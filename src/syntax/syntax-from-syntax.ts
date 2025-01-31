@@ -26,23 +26,8 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { TTypeBoxFromSyntax, TypeBoxFromSyntax } from '../typebox/typebox-from-syntax'
-import { ZodFromTypeBox, TZodFromTypeBox } from './zod-from-typebox'
-import * as t from '@sinclair/typebox'
-import * as z from 'zod'
+export type TSyntaxFromSyntax<Type extends string> = Type
 
-// ------------------------------------------------------------------
-// ZodFromSyntax
-// ------------------------------------------------------------------
-/** Creates a Zod type from Syntax */
-// prettier-ignore
-export type TZodFromSyntax<Context extends t.TProperties, Type extends string,
-  TypeBox extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<TypeBox>
-> = Result
-/** Creates a Zod type from Syntax */
-export function ZodFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TZodFromSyntax<Context, Type> {
-  const typebox = TypeBoxFromSyntax(context, type, options)
-  const result = ZodFromTypeBox(typebox)
-  return result as never
+export function SyntaxFromSyntax<Type extends string>(type: Type): TSyntaxFromSyntax<Type> {
+  return type
 }

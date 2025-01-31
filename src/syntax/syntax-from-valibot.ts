@@ -26,23 +26,23 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { TTypeBoxFromSyntax, TypeBoxFromSyntax } from '../typebox/typebox-from-syntax'
-import { ZodFromTypeBox, TZodFromTypeBox } from './zod-from-typebox'
-import * as t from '@sinclair/typebox'
-import * as z from 'zod'
+import { type TTypeBoxFromValibot, TypeBoxFromValibot } from '../typebox/typebox-from-valibot'
+import { type TSyntaxFromTypeBox, SyntaxFromTypeBox } from './syntax-from-typebox'
 
-// ------------------------------------------------------------------
-// ZodFromSyntax
-// ------------------------------------------------------------------
-/** Creates a Zod type from Syntax */
+import * as t from '@sinclair/typebox'
+import * as v from 'valibot'
+
+/** Creates Syntax from Valibot */
 // prettier-ignore
-export type TZodFromSyntax<Context extends t.TProperties, Type extends string,
-  TypeBox extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<TypeBox>
+export type TSyntaxFromValibot<Type extends v.BaseSchema<any, any, any>,
+  TypeBox extends t.TSchema = TTypeBoxFromValibot<Type>,
+  Result extends string = TSyntaxFromTypeBox<TypeBox>
 > = Result
-/** Creates a Zod type from Syntax */
-export function ZodFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TZodFromSyntax<Context, Type> {
-  const typebox = TypeBoxFromSyntax(context, type, options)
-  const result = ZodFromTypeBox(typebox)
+
+/** Creates Syntax from Valibot */
+// prettier-ignore
+export function SyntaxFromValibot<Type extends v.BaseSchema<any, any, any>>(type: Type): TSyntaxFromValibot<Type> {
+  const typebox = TypeBoxFromValibot(type)
+  const result = SyntaxFromTypeBox(typebox)
   return result as never
 }

@@ -32,15 +32,15 @@ import { type TZodFromValibot, ZodFromValibot } from './zod-from-valibot'
 import { type TZodFromZod, ZodFromZod } from './zod-from-zod'
 import { type TSyntaxOptions } from '../options'
 
+import { type TParameter, type TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
+
 import * as g from '../guard'
 import * as z from 'zod'
-
-import { TParameter, TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
 
 // ------------------------------------------------------------------
 // Zod
 // ------------------------------------------------------------------
-/** Creates a Zod type from Syntax or another Type */
+/** Creates a Zod type by mapping from a remote Type */
 // prettier-ignore
 export type TZod<Parameter extends TParameter, Type extends object | string, Result extends z.ZodTypeAny | z.ZodEffects<any> = (
   Type extends g.SyntaxType ? TZodFromSyntax<TContextFromParameter<Parameter>, Type> :
@@ -50,13 +50,13 @@ export type TZod<Parameter extends TParameter, Type extends object | string, Res
   z.ZodNever
 )> = Result
 
-/** Creates a Zod type from Syntax or another Type */
+/** Creates a Zod type by mapping from a remote Type */
 export function Zod<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TZod<Parameter, Type>
-/** Creates a Zod type from Syntax or another Type */
+/** Creates a Zod type by mapping from a remote Type */
 export function Zod<Type extends string>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
-/** Creates a Zod type from Syntax or another Type */
+/** Creates a Zod type by mapping from a remote Type */
 export function Zod<Type extends object>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
-/** Creates a Zod type from Syntax or another Type */
+/** Creates a Zod type by mapping from a remote Type */
 // prettier-ignore
 export function Zod(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)

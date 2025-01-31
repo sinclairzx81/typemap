@@ -26,23 +26,23 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { TTypeBoxFromSyntax, TypeBoxFromSyntax } from '../typebox/typebox-from-syntax'
-import { ZodFromTypeBox, TZodFromTypeBox } from './zod-from-typebox'
+import { type TTypeBoxFromZod, TypeBoxFromZod } from '../typebox/typebox-from-zod'
+import { type TSyntaxFromTypeBox, SyntaxFromTypeBox } from './syntax-from-typebox'
+
 import * as t from '@sinclair/typebox'
 import * as z from 'zod'
 
-// ------------------------------------------------------------------
-// ZodFromSyntax
-// ------------------------------------------------------------------
-/** Creates a Zod type from Syntax */
+/** Creates Syntax from Zod */
 // prettier-ignore
-export type TZodFromSyntax<Context extends t.TProperties, Type extends string,
-  TypeBox extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<TypeBox>
+export type TSyntaxFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>,
+  TypeBox extends t.TSchema = TTypeBoxFromZod<Type>,
+  Result extends string = TSyntaxFromTypeBox<TypeBox>
 > = Result
-/** Creates a Zod type from Syntax */
-export function ZodFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TZodFromSyntax<Context, Type> {
-  const typebox = TypeBoxFromSyntax(context, type, options)
-  const result = ZodFromTypeBox(typebox)
+
+/** Creates Syntax from Zod */
+// prettier-ignore
+export function SyntaxFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>>(type: Type): TSyntaxFromZod<Type> {
+  const typebox = TypeBoxFromZod(type)
+  const result = SyntaxFromTypeBox(typebox)
   return result as never
 }

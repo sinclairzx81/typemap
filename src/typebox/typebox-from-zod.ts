@@ -28,7 +28,6 @@ THE SOFTWARE.
 
 import * as t from '@sinclair/typebox'
 import * as z from 'zod'
-import * as Guard from '../guard'
 
 // ------------------------------------------------------------------
 // Options
@@ -135,6 +134,7 @@ function FromEffects<Type extends z.ZodEffects<z.ZodTypeAny, unknown>>(type: Typ
 // ------------------------------------------------------------------
 // Enum
 // ------------------------------------------------------------------
+/** prettier-ignore */
 type TFromEnum<Variants extends string[], Result extends t.TLiteral[] = []> = Variants extends [infer Left extends string, ...infer Right extends string[]] ? TFromEnum<Right, [...Result, t.TLiteral<Left>]> : t.TUnion<Result>
 function FromEnum<Def extends z.ZodEnumDef>(def: Def): t.TSchema {
   const variants = def.values.map((value) => t.Literal(value))
@@ -405,11 +405,11 @@ function FromType<Type extends z.ZodType>(type: Type): t.TSchema {
 // ------------------------------------------------------------------
 // TypeBoxFromZod
 // ------------------------------------------------------------------
+/** Creates a TypeBox type from Zod */
+export type TTypeBoxFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>, Result extends t.TSchema = TFromType<Type>> = Result
+
+/** Creates a TypeBox type from Zod */
 // prettier-ignore
-export type TTypeBoxFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>,
-  Result extends t.TSchema = TFromType<Type>
-> = Result
-// prettier-ignore
-export function TypeBoxFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>, Result extends TTypeBoxFromZod<Type> = TTypeBoxFromZod<Type>>(type: Type): Result {
+export function TypeBoxFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>>(type: Type): TTypeBoxFromZod<Type> {
   return FromType(type) as never
 }

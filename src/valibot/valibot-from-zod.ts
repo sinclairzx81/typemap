@@ -36,12 +36,13 @@ import * as z from 'zod'
 // ------------------------------------------------------------------
 // ValibotFromZod
 // ------------------------------------------------------------------
+/** Creates a Valibot type from Zod */
 // prettier-ignore
 export type TValibotFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>,
   TypeBox extends t.TSchema = TTypeBoxFromZod<Type>,
   Result extends v.BaseSchema<any, any, any> = TValibotFromTypeBox<TypeBox> 
 > = Result
-
+/** Creates a Valibot type from Zod */
 // prettier-ignore
 export function ValibotFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>,
   Result extends v.BaseSchema<any, any, any> = TValibotFromZod<Type>

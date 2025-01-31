@@ -106,9 +106,12 @@ function FromInteger(type: t.TInteger): z.ZodTypeAny {
 // ------------------------------------------------------------------
 // Intersect
 // ------------------------------------------------------------------
-type TFromIntersect<Types extends t.TSchema[], Result extends z.ZodTypeAny = z.ZodUnknown> = Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]]
-  ? TFromIntersect<Right, z.ZodIntersection<TFromType<Left>, Result>>
-  : Result
+// prettier-ignore
+type TFromIntersect<Types extends t.TSchema[], Result extends z.ZodTypeAny = z.ZodUnknown> = (
+  Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]]
+    ? TFromIntersect<Right, z.ZodIntersection<TFromType<Left>, Result>>
+    : Result
+)
 function FromIntersect(type: t.TIntersect): z.ZodTypeAny {
   return type.allOf.reduce((result, left) => {
     return z.intersection(FromType(left), result) as never
@@ -124,8 +127,8 @@ function FromLiteral(type: t.TLiteral): z.ZodTypeAny {
 // ------------------------------------------------------------------
 // Object
 // ------------------------------------------------------------------
-type TFromObject<
-  Properties extends t.TProperties,
+// prettier-ignore
+type TFromObject< Properties extends t.TProperties,
   Result = z.ZodObject<{
     [Key in keyof Properties]: TFromType<Properties[Key]>
   }>,
@@ -160,7 +163,12 @@ function FromRegExp(type: t.TRegExp): z.ZodTypeAny {
 // ------------------------------------------------------------------
 // Record
 // ------------------------------------------------------------------
-type TFromRecord<Key extends t.TSchema, Value extends t.TSchema> = TFromType<Key> extends infer ZodKey extends z.KeySchema ? z.ZodRecord<ZodKey, TFromType<Value>> : z.ZodNever
+// prettier-ignore
+type TFromRecord<Key extends t.TSchema, Value extends t.TSchema> = (
+  TFromType<Key> extends infer ZodKey extends z.KeySchema 
+    ? z.ZodRecord<ZodKey, TFromType<Value>> 
+    : z.ZodNever
+)
 // prettier-ignore
 function FromRecord(type: t.TRecord): z.ZodTypeAny {
   const pattern = globalThis.Object.getOwnPropertyNames(type.patternProperties)[0]
@@ -171,34 +179,6 @@ function FromRecord(type: t.TRecord): z.ZodTypeAny {
     pattern === t.PatternStringExact ? z.record(z.string(), value) : 
     z.record(z.string().regex(new RegExp(pattern)), value)
   )
-}
-// ------------------------------------------------------------------
-// Optional
-// ------------------------------------------------------------------
-// prettier-ignore
-type TFromOptional<Type extends t.TOptional<t.TSchema>,
-  NonOptional extends t.TSchema = t.TOptionalWithFlag<Type, false>,
-  Mapped extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<NonOptional>,
-  Result = z.ZodOptional<Mapped>
-> = Result
-function FromOptional(type: t.TOptional<t.TSchema>): z.ZodTypeAny {
-  const non_optional = t.Optional(type, false)
-  const mapped = FromType(non_optional)
-  return z.optional(mapped)
-}
-// ------------------------------------------------------------------
-// Readonly
-// ------------------------------------------------------------------
-// prettier-ignore
-type TFromReadonly<Type extends t.TReadonly<t.TSchema>,
-  NonReadonly extends t.TSchema = t.TReadonlyWithFlag<Type, false>,
-  Mapped extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<NonReadonly>,
-  Result = z.ZodReadonly<Mapped>
-> = Result
-function FromReadonly(type: t.TReadonly<t.TSchema>): z.ZodTypeAny {
-  const non_readonly = t.Readonly(type, false)
-  const mapped = FromType(non_readonly)
-  return mapped // no mapping
 }
 // ------------------------------------------------------------------
 // Never
@@ -321,7 +301,12 @@ function FromVoid(_type: t.TVoid): z.ZodTypeAny {
 // ------------------------------------------------------------------
 // Types
 // ------------------------------------------------------------------
-type TFromTypes<Types extends t.TSchema[], Result extends z.ZodTypeAny[] = []> = Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]] ? TFromTypes<Right, [...Result, TFromType<Left>]> : Result
+// prettier-ignore
+type TFromTypes<Types extends t.TSchema[], Result extends z.ZodTypeAny[] = []> = (
+  Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]] 
+    ? TFromTypes<Right, [...Result, TFromType<Left>]> 
+    : Result
+)
 function FromTypes(types: t.TSchema[]): z.ZodTypeAny[] {
   return types.map((type) => FromType(type))
 }
@@ -373,8 +358,6 @@ function FromType(type: t.TSchema): z.ZodTypeAny | z.ZodEffects<any> {
   if(!t.ValueGuard.IsUndefined(type.description)) constraints.push(input => input.describe(type.description!))
   if(!t.ValueGuard.IsUndefined(type.default)) constraints.push(input => input.default(type.default))
   const mapped = constraints.reduce((type, constraint) => constraint(type), (
-    t.KindGuard.IsReadonly(type) ? FromReadonly(type) :
-    t.KindGuard.IsOptional(type) ? FromOptional(type) :
     t.KindGuard.IsAny(type) ? FromAny(type) :
     t.KindGuard.IsArray(type) ? FromArray(type) :
     t.KindGuard.IsBigInt(type) ? FromBigInt(type) :
@@ -414,10 +397,12 @@ function FromType(type: t.TSchema): z.ZodTypeAny | z.ZodEffects<any> {
 // ------------------------------------------------------------------
 // ZodFromTypeBox
 // ------------------------------------------------------------------
+/** Creates a Zod type from TypeBox */
 // prettier-ignore
 export type TZodFromTypeBox<Type extends t.TSchema,
   Result extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<Type>
 > = Result
+/** Creates a Zod type from TypeBox */
 export function ZodFromTypeBox<Type extends t.TSchema>(type: Type): TZodFromTypeBox<Type> {
-  return (t.KindGuard.IsSchema(type) ? FromType(type) : z.never()) as never
+  return FromType(type) as never
 }

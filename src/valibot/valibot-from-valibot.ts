@@ -31,12 +31,13 @@ import * as v from 'valibot'
 // ------------------------------------------------------------------
 // ValibotFromValibot
 // ------------------------------------------------------------------
-
+/** Creates a Valibot type from Valibot */
 // prettier-ignore
 export type TValibotFromValibot<Type extends v.BaseSchema<any, any, any>,
   Result extends v.BaseSchema<any, any, any> = Type
 > = Result
 
+/** Creates a Valibot type from Valibot */
 // prettier-ignore
 export function ValibotFromValibot<Type extends v.BaseSchema<any, any, any>>(type: Type): TValibotFromValibot<Type> {
   return type

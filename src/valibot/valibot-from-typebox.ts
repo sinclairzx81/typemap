@@ -136,6 +136,7 @@ type TFromObject<Properties extends t.TProperties,
       [Key in keyof Properties]: TFromType<Properties[Key]>
   }, c.BaseError>
 > = Result
+// prettier-ignore
 function FromObject(type: t.TObject): c.BaseSchema {
   const { additionalProperties } = type
   const constraints = CreateConstraints(type)
@@ -279,9 +280,10 @@ function FromUndefined(type: t.TUndefined): c.BaseSchema {
 // Union
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromUnion<Types extends t.TSchema[], Mapped extends c.BaseSchema[] = TFromTypes<Types>, Result = v.UnionSchema<Mapped, c.BaseError>> = (
-  Result  
-)
+type TFromUnion<Types extends t.TSchema[], 
+  Mapped extends c.BaseSchema[] = TFromTypes<Types>, 
+  Result = v.UnionSchema<Mapped, c.BaseError>
+> = Result
 function FromUnion(type: t.TUnion): c.BaseSchema {
   const mapped = FromTypes(type.anyOf) as [c.BaseSchema, c.BaseSchema, ...c.BaseSchema[]]
   return CreateType(v.union(mapped), CreateConstraints(type))
@@ -396,6 +398,7 @@ function FromType(type: t.TSchema): c.BaseSchema {
 // ------------------------------------------------------------------
 // ValibotFromTypeBox
 // ------------------------------------------------------------------
+
 // prettier-ignore
 export type TValibotFromTypeBox<Type extends t.TSchema, 
   Result extends c.BaseSchema = TFromType<Type>

@@ -36,6 +36,7 @@ function shouldSkipSpecifier(captured: string) {
   const specifier = captured.slice(1, captured.length - 1)
   return (
     specifier.includes('.mjs') || // mitigate duplicate rewrite 
+    specifier.startsWith("@sinclair/parsebox") || 
     specifier.startsWith("@sinclair/typebox") || 
     specifier.startsWith("valibot") || 
     specifier.startsWith("zod")

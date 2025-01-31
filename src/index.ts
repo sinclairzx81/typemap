@@ -39,6 +39,15 @@ export { type Static } from './static'
 export * from './compile/compile'
 
 // ------------------------------------------------------------------
+// Syntax
+// ------------------------------------------------------------------
+export * from './syntax/syntax-from-syntax'
+export * from './syntax/syntax-from-typebox'
+export * from './syntax/syntax-from-valibot'
+export * from './syntax/syntax-from-zod'
+export { type TSyntax, Syntax } from './syntax/syntax'
+
+// ------------------------------------------------------------------
 // TypeBox
 // ------------------------------------------------------------------
 export * from './typebox/typebox-from-syntax'

@@ -33,15 +33,17 @@ import * as t from '@sinclair/typebox'
 import * as v from 'valibot'
 import * as z from 'zod'
 
+/** Creates a Zod type from Valibot */
 // prettier-ignore
 export type TZodFromValibot<Type extends v.BaseSchema<any, any, any>,
-  Schema extends t.TSchema = TTypeBoxFromValibot<Type>,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<Schema>
+  TypeBox extends t.TSchema = TTypeBoxFromValibot<Type>,
+  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<TypeBox>
 > = Result
 
+/** Creates a Zod type from Valibot */
 // prettier-ignore
 export function ZodFromValibot<Type extends v.BaseSchema<any, any, any>>(type: Type): TZodFromValibot<Type> {
-  const schema = TypeBoxFromValibot(type)
-  const result = ZodFromTypeBox(schema)
+  const typebox = TypeBoxFromValibot(type)
+  const result = ZodFromTypeBox(typebox)
   return result
 }

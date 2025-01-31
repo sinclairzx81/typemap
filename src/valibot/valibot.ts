@@ -31,17 +31,18 @@ import { type TValibotFromTypeBox, ValibotFromTypeBox } from './valibot-from-typ
 import { type TValibotFromValibot, ValibotFromValibot } from './valibot-from-valibot'
 import { type TValibotFromZod, ValibotFromZod } from './valibot-from-zod'
 import { type TSyntaxOptions } from '../options'
+
+import { type TParameter, type TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
+
 import * as g from '../guard'
 import * as t from '@sinclair/typebox'
 import * as v from 'valibot'
 import * as c from './common'
 
-import { TParameter, TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
-
 // ------------------------------------------------------------------
 // Valibot
 // ------------------------------------------------------------------
-/** Creates a Valibot type from Syntax or another Type */
+/** Creates a Valibot type by mapping from a remote Type */
 // prettier-ignore
 export type TValibot<Parameter extends TParameter, Type extends object | string, Result extends g.ValibotType = (
   Type extends g.SyntaxType ? TValibotFromSyntax<TContextFromParameter<Parameter>, Type> :
@@ -51,13 +52,13 @@ export type TValibot<Parameter extends TParameter, Type extends object | string,
   v.NeverSchema<c.BaseError>
 )> = Result
 
-/** Creates a Valibot type from Syntax or another Type */
+/** Creates a Valibot type by mapping from a remote Type */
 export function Valibot<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TValibot<Parameter, Type>
-/** Creates a Valibot type from Syntax or another Type */
+/** Creates a Valibot type by mapping from a remote Type */
 export function Valibot<Type extends string>(type: Type, options?: TSyntaxOptions): TValibot<{}, Type>
-/** Creates a Valibot type from Syntax or another Type */
+/** Creates a Valibot type by mapping from a remote Type */
 export function Valibot<Type extends object>(type: Type, options?: TSyntaxOptions): TValibot<{}, Type>
-/** Creates a Valibot type from Syntax or another Type */
+/** Creates a Valibot type by mapping from a remote Type */
 // prettier-ignore
 export function Valibot(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)
