@@ -309,7 +309,7 @@ type Z = Static<typeof Z>                           // boolean
 
 ## TreeShake
 
-TypeMap takes TypeBox, Valibot and Zod on as peer dependencies. If bundling for browser environments, it is recommended to import a specific functions that perform a specific type translations. For example the following imports a Zod to TypeBox translation, this by-passes other library imports and will cause Valibot to be omitted from the bundle.
+TypeMap takes TypeBox, Valibot and Zod on as peer dependencies. If bundling for browser environments, it is recommended to import specific functions to handle specific translations. For example the following imports a Zod to TypeBox translation, this by-passes other library imports and will cause Valibot to be omitted from the bundle.
 
 ```typescript
 import { TypeBoxFromZod } from '@sinclair/typemap'  // Include TypeBox & Zod, Tree Shake Valibot
