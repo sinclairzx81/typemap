@@ -841,13 +841,14 @@ function FromType<Type extends BaseSchema>(type: Type): TFromType<Type> {
 // ------------------------------------------------------------------
 // TypeBoxFromValibot
 // ------------------------------------------------------------------
+/** Creates a TypeBox type from Valibot */
 // prettier-ignore
 export type TTypeBoxFromValibot<Type extends v.BaseSchema<any, any, any>, 
   Result extends t.TSchema = TFromType<Type>
 > = Result
 
-/** Converts a Valibot Type to a TypeBox Type */
+/** Creates a TypeBox type from Valibot */
 // prettier-ignore
 export function TypeBoxFromValibot<Type extends v.BaseSchema<any, any, any>, Result extends TTypeBoxFromValibot<Type> = TTypeBoxFromValibot<Type>>(type: Type): Result {
-  return (Guard.IsValibot(type) ? FromType(type) : t.Never()) as never
+  return FromType(type) as never
 }

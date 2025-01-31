@@ -31,11 +31,12 @@ import * as t from '@sinclair/typebox'
 // ------------------------------------------------------------------
 // TypeBoxFromTypeBox
 // ------------------------------------------------------------------
-
+/** Creates a TypeBox type from TypeBox */
 // prettier-ignore
 export type TTypeBoxFromTypeBox<Type extends t.TSchema> = Type
 
+/** Creates a TypeBox type from TypeBox */
 // prettier-ignore
-export function TypeBoxFromTypeBox<Type extends t.TSchema, Result extends TTypeBoxFromTypeBox<Type> = TTypeBoxFromTypeBox<Type>>(type: Type): Result {
-  return (t.KindGuard.IsSchema(type) ? type : t.Never()) as never
+export function TypeBoxFromTypeBox<Type extends t.TSchema>(type: Type): TTypeBoxFromTypeBox<Type> {
+  return t.CloneType(type)
 }

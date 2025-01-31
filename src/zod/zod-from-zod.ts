@@ -26,17 +26,16 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import * as Guard from '../guard'
 import * as z from 'zod'
 
-type BaseType = z.ZodTypeAny | z.ZodEffects<any>
-
+/** Creates a Zod type from Zod */
 // prettier-ignore
-export type TZodFromZod<Type extends object,
-  Result extends BaseType = Type extends BaseType ? Type : z.ZodNever
+export type TZodFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>,
+  Result = Type
 > = Result
 
+/** Creates a Zod type from Zod */
 // prettier-ignore
-export function ZodFromZod<Type extends object>(type: Type): TZodFromZod<Type> {
-  return (Guard.IsZod(type) ? type : z.never()) as never
+export function ZodFromZod<Type extends z.ZodTypeAny | z.ZodEffects<any>>(type: Type): TZodFromZod<Type> {
+  return type as never
 }

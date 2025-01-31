@@ -35,15 +35,16 @@ import * as v from 'valibot'
 // ------------------------------------------------------------------
 // ValibotFromSyntax
 // ------------------------------------------------------------------
+/** Creates a Valibot type from Syntax */
 // prettier-ignore
 export type TValibotFromSyntax<Context extends t.TProperties, Type extends string, 
-  Schema extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
-  Result extends v.BaseSchema<any, any, any> = TValibotFromTypeBox<Schema>
+  TypeBox extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
+  Result extends v.BaseSchema<any, any, any> = TValibotFromTypeBox<TypeBox>
 > = Result
-
+/** Creates a Valibot type from Syntax */
 // prettier-ignore
 export function ValibotFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TValibotFromSyntax<Context, Type> {
-  const schema = TypeBoxFromSyntax(context, type, options)
-  const result = ValibotFromTypeBox(schema)
+  const typebox = TypeBoxFromSyntax(context, type, options)
+  const result = ValibotFromTypeBox(typebox)
   return result as never
 }

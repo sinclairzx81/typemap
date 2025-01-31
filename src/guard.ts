@@ -30,22 +30,25 @@ import * as t from '@sinclair/typebox'
 import * as v from 'valibot'
 import * as z from 'zod'
 
+/** Structural Type for Syntax */
+export type SyntaxType = string
+/** Structural Type for TypeBox */
+export type TypeBoxType = t.TSchema
+/** Structural Type for Valibot */
+export type ValibotType = v.BaseSchema<any, any, v.BaseIssue<any>>
+/** Structural Type for Zod */
+export type ZodType = z.ZodTypeAny | z.ZodEffects<any>
+
 // ------------------------------------------------------------------
 // Syntax
 // ------------------------------------------------------------------
-/** Structural Type for Syntax */
-export type SyntaxType = string
-
+/** Returns true if the given value is a Syntax type */
 export function IsSyntax(value: unknown): value is string {
   return t.ValueGuard.IsString(value)
 }
-
 // ------------------------------------------------------------------
 // TypeBox
 // ------------------------------------------------------------------
-/** Structural Type for TypeBox */
-export type TypeBoxType = t.TSchema
-
 /** Returns true if the given value is a TypeBox type */
 export function IsTypeBox(type: unknown): type is t.TSchema {
   return t.KindGuard.IsSchema(type)
@@ -53,9 +56,6 @@ export function IsTypeBox(type: unknown): type is t.TSchema {
 // ------------------------------------------------------------------
 // Valibot
 // ------------------------------------------------------------------
-/** Structural Type for Valibot */
-export type ValibotType = v.BaseSchema<any, any, v.BaseIssue<any>>
-
 /** Returns true if the given value is a Valibot type */
 // prettier-ignore
 export function IsValibot(type: unknown): type is v.AnySchema {
@@ -70,14 +70,6 @@ export function IsValibot(type: unknown): type is v.AnySchema {
 // ------------------------------------------------------------------
 // Zod
 // ------------------------------------------------------------------
-/** Structural Type for Zod */
-export type ZodType = z.ZodTypeAny | z.ZodEffects<any>
-
-/** Returns true if the given value is a Zod type */
-// prettier-ignore
-export type TIsZod<Type extends unknown> = (
-  Type extends z.ZodTypeAny ? true : false
-)
 /** Returns true if the given value is a Zod type */
 // prettier-ignore
 export function IsZod(type: unknown): type is z.ZodTypeAny {
@@ -92,20 +84,25 @@ export function IsZod(type: unknown): type is z.ZodTypeAny {
 // ------------------------------------------------------------------
 // Signature
 // ------------------------------------------------------------------
+// (parameter, syntax, options)
 function Signature1(args: any[]) {
   return args.length === 3 && t.ValueGuard.IsObject(args[0]) && t.ValueGuard.IsString(args[1]) && t.ValueGuard.IsObject(args[2])
 }
+// (syntax, options)
 function Signature2(args: any[]) {
   return args.length === 2 && t.ValueGuard.IsString(args[0]) && t.ValueGuard.IsObject(args[1])
 }
+// (parameter, options)
 function Signature3(args: any[]) {
   return args.length === 2 && t.ValueGuard.IsObject(args[0]) && t.ValueGuard.IsString(args[1])
 }
+// (syntax | type)
 function Signature4(args: any[]) {
   return args.length === 1 && (t.ValueGuard.IsString(args[0]) || t.ValueGuard.IsObject(args[0]))
 }
+/** Resolve common mapping signature parameters */
+// prettier-ignore
 export function Signature(args: any[]): [parameter: Record<PropertyKey, object>, type: string | object, options: object] {
-  // prettier-ignore
   return (
     Signature1(args) ? [args[0], args[1], args[2]] :
     Signature2(args) ? [{}, args[0], args[1]] :

@@ -35,13 +35,13 @@ import * as t from '@sinclair/typebox'
 
 // prettier-ignore
 export type TTypeBoxFromSyntax<Context extends t.TProperties, Type extends string, 
-  Mapped = StaticParseAsSchema<Context, Type>,
-  Result extends t.TSchema = Mapped extends t.TSchema ? Mapped : t.TNever
+  TypeBox = StaticParseAsSchema<Context, Type>,
+  Result extends t.TSchema = TypeBox extends t.TSchema ? TypeBox : t.TNever
 > = Result
 
 /** Creates a TypeBox Type From Syntax */
 export function TypeBoxFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TTypeBoxFromSyntax<Context, Type> {
-  const parsed = t.ValueGuard.IsString(type) ? Parse(context, type, options) : t.Never()
-  const result = t.KindGuard.IsSchema(parsed) ? parsed : t.Never()
+  const typebox = t.ValueGuard.IsString(type) ? Parse(context, type, options) : t.Never()
+  const result = t.KindGuard.IsSchema(typebox) ? typebox : t.Never()
   return result as never
 }

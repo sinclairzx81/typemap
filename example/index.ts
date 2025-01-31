@@ -1,9 +1,5 @@
 import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
 
-// Parse Syntax | Parse Value 
-
-const R = Zod('string | number').parse('...')       // const R: string | number
-
 // Syntax Type
 
 const S = `{

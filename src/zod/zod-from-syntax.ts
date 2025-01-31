@@ -34,15 +34,15 @@ import * as z from 'zod'
 // ------------------------------------------------------------------
 // ZodFromSyntax
 // ------------------------------------------------------------------
-
+/** Creates a Zod type from Syntax */
 // prettier-ignore
 export type TZodFromSyntax<Context extends t.TProperties, Type extends string,
-  Schema extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<Schema>
+  TypeBox extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
+  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<TypeBox>
 > = Result
-
+/** Creates a Zod type from Syntax */
 export function ZodFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TZodFromSyntax<Context, Type> {
-  const schema = TypeBoxFromSyntax(context, type, options)
-  const result = ZodFromTypeBox(schema)
+  const typebox = TypeBoxFromSyntax(context, type, options)
+  const result = ZodFromTypeBox(typebox)
   return result as never
 }
