@@ -153,7 +153,7 @@ const R = C.Check({                                 // Iterations: 10_000_000
 
 ## Mapping
 
-TypeMap is mostly designed for runtime type translation. It provides a single mapping functions per library which is used to translate remote types into types specific to that library. All mapping functions make a best attempt to retain semantics from each library. If no translation is possible, these functions return a `never` representation specific to the library being mapped.
+TypeMap is designed for runtime type translation. It provides a single mapping functions per library which is used to translate remote types into types specific to that library. All mapping functions make a best attempt to retain semantics from each library. If no translation is possible, these functions return a `never` representation specific to the library being mapped.
 
 ### Syntax
 
@@ -309,7 +309,7 @@ type Z = Static<typeof Z>                           // boolean
 
 ## TreeShake
 
-TypeMap takes TypeBox, Valibot and Zod as dependencies. If bundling for browser environments, you can import  specific mapping functions that perform a specific translation. The following imports a specific Zod to TypeBox translation, Valibot will be omitted from the bundle.
+TypeMap takes TypeBox, Valibot and Zod on as peer dependencies. If bundling for browser environments, it is recommended to import a specific functions that perform a specific type translations. For example the following imports a Zod to TypeBox translation, this by-passes other library imports and will cause Valibot to be omitted from the bundle.
 
 ```typescript
 import { TypeBoxFromZod } from '@sinclair/typemap'  // Include TypeBox & Zod, Tree Shake Valibot
