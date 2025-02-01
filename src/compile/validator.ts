@@ -34,7 +34,7 @@ import * as t from '@sinclair/typebox'
 // ------------------------------------------------------------------
 // StandardSchemaProps<Input, Output>
 // ------------------------------------------------------------------
-export class StandardSchemaProps<Type extends t.TSchema> implements StandardSchemaV1.Props<Type, t.Static<Type>> {
+export class StandardSchemaProps<Type extends t.TSchema> implements StandardSchemaV1.Props<t.Static<Type>, t.Static<Type>> {
   private readonly _check: TypeCheck<Type>
   constructor(check: TypeCheck<Type>) {
     this._check = check
@@ -48,11 +48,11 @@ export class StandardSchemaProps<Type extends t.TSchema> implements StandardSche
   public get version(): 1 {
     return 1
   }
-  public get types(): { input: Type; output: t.Static<Type> } {
-    return { input: this._check.Schema(), output: null }
+  public get types(): { input: t.Static<Type>; output: t.Static<Type> } {
+    throw Error('types is a phantom property used for inference only.')
   }
   public validate(value: unknown): StandardSchemaV1.Result<t.Static<Type>> {
-    return this._check.Check(value) ? this._createValue(value) : this._createIssues(value)
+    return (this._check.Check(value) ? this._createValue(value) : this._createIssues(value)) as never
   }
   // ----------------------------------------------------------------
   // Internal
@@ -69,7 +69,7 @@ export class StandardSchemaProps<Type extends t.TSchema> implements StandardSche
 // ------------------------------------------------------------------
 // Validator<TSchema>
 // ------------------------------------------------------------------
-export class Validator<Type extends t.TSchema> implements StandardSchemaV1<Type, t.Static<Type>> {
+export class Validator<Type extends t.TSchema> implements StandardSchemaV1<t.Static<Type>, t.Static<Type>> {
   private readonly _standard: StandardSchemaProps<Type>
   private readonly _check: TypeCheck<Type>
   constructor(check: TypeCheck<Type>) {
