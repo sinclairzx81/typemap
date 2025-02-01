@@ -1,28 +1,25 @@
-import { TypeBox, Valibot, Zod } from '@sinclair/typemap'
+import { TypeBox } from '@sinclair/typemap'
 
-// Syntax Type
+import * as z from 'zod'
 
-const S = `{
-  x: number,
-  y: number,
-  z: number
-}`
+const Z = z.object({                                // const Z: z.ZodObject<{
+  x: z.number(),                                    //   x: z.ZodNumber;
+  y: z.number(),                                    //   y: z.ZodNumber;
+  z: z.number()                                     //   z: z.ZodNumber;
+}).strict()                                         // }, "strict", ...>
 
-const T = TypeBox(S)                                // const T: TObject<{
-                                                    //   x: TNumber,
-                                                    //   y: TNumber,
-                                                    //   z: TNumber
-                                                    // }>
+// TypeBox represents types as Json Schema
 
-const V = Valibot(S)                                // const V: ObjectSchema<{
-                                                    //   x: NumberSchema<...>,
-                                                    //   y: NumberSchema<...>,
-                                                    //   z: NumberSchema<...>
-                                                    // }, ...>
+const T = TypeBox(Z)                                // const T = {
+                                                    //   type: 'object',
+                                                    //   required: ['x', 'y', 'z'],
+                                                    //   additionalProperties: false,
+                                                    //   properties: {
+                                                    //     x: { type: 'number' },
+                                                    //     y: { type: 'number' },
+                                                    //     z: { type: 'number' }
+                                                    //   }
+                                                    // }
 
 
-const Z = Zod(S)                                    // const Z: ZodObject<{
-                                                    //   x: ZodNumber,
-                                                    //   y: ZodNumber,
-                                                    //   z: ZodNumber
-                                                    // }, ...>
+console.log(T)
