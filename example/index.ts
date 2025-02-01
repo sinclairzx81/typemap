@@ -1,25 +1,37 @@
-import { TypeBox } from '@sinclair/typemap'
+import { TypeBox, Valibot, Zod, Syntax, Compile } from '@sinclair/typemap'
 
-import * as z from 'zod'
+// ------------------------------------------------------------------
+// Syntax Types
+// ------------------------------------------------------------------
 
-const Z = z.object({                                // const Z: z.ZodObject<{
-  x: z.number(),                                    //   x: z.ZodNumber;
-  y: z.number(),                                    //   y: z.ZodNumber;
-  z: z.number()                                     //   z: z.ZodNumber;
-}).strict()                                         // }, "strict", ...>
+const S = `{
+  x: number,
+  y: number,
+  z: number
+}`
 
-// TypeBox represents types as Json Schema
+// ------------------------------------------------------------------
+// Runtime Types
+// ------------------------------------------------------------------
 
-const T = TypeBox(Z)                                // const T = {
-                                                    //   type: 'object',
-                                                    //   required: ['x', 'y', 'z'],
-                                                    //   additionalProperties: false,
-                                                    //   properties: {
-                                                    //     x: { type: 'number' },
-                                                    //     y: { type: 'number' },
-                                                    //     z: { type: 'number' }
-                                                    //   }
-                                                    // }
+const T = TypeBox(S)                                // const T: TObject<{ ... }>
 
+const V = Valibot(S)                                // const V: ObjectSchema<{ ... }, ...>
 
-console.log(T)
+const Z = Zod(S)                                    // const Z: ZodObject<{ ... }, ...>
+
+// ------------------------------------------------------------------
+// Reverse Syntax
+// ------------------------------------------------------------------
+
+const X = Syntax(Z)                                 // const X: "{ x: number, y: number, z: number }"
+
+// ------------------------------------------------------------------
+// Compile
+// ------------------------------------------------------------------
+
+const C = Compile(X)                                // const C: Validator<TObject<{
+                                                    //  x: TNumber;
+                                                    //  y: TNumber;
+                                                    //  z: TNumber;
+                                                    // }>>
