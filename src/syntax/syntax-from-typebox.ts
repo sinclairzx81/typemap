@@ -70,7 +70,7 @@ type TFromArray<Type extends t.TSchema,
   Result extends string = `${TFromType<Type>}[]`
 > = Result
 function FromArray(type: t.TSchema): string {
-  return `${type}[]`
+  return `${FromType(type)}[]`
 }
 // ------------------------------------------------------------------
 // BigInt
@@ -272,7 +272,7 @@ type TFromTuple<Types extends t.TSchema[], Result extends string[] = []> = (
 )
 function FromTuple(types: t.TSchema[]): string {
   const result = types.map((type) => FromType(type))
-  return `[${FromDelimited(result, Comma)}]`
+  return `[${FromDelimited(result, `${Comma} `)}]`
 }
 // ------------------------------------------------------------------
 // Undefined
