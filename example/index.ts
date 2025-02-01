@@ -35,3 +35,13 @@ const C = Compile(X)                                // const C: Validator<TObjec
                                                     //  y: TNumber;
                                                     //  z: TNumber;
                                                     // }>>
+
+// ------------------------------------------------------------------
+// Validate | Standard
+// ------------------------------------------------------------------
+
+const R = C['~standard'].validate(null)              // const R: StandardSchemaV1.Result<{
+                                                     //   x: number;
+                                                     //   y: number;
+                                                     //   z: number;
+                                                     // }>        
