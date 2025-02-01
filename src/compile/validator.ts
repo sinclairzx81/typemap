@@ -28,19 +28,23 @@ THE SOFTWARE.
 
 import { TypeCheck, ValueErrorIterator } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
-import { StandardSchemaV1 } from './standard'
 import * as t from '@sinclair/typebox'
+import * as s from './standard'
 
 // ------------------------------------------------------------------
 // StandardSchemaProps<Input, Output>
 // ------------------------------------------------------------------
-export class StandardSchemaProps<Type extends t.TSchema> implements StandardSchemaV1.Props<t.Static<Type>, t.Static<Type>> {
-  private readonly _check: TypeCheck<Type>
+// prettier-ignore
+export class StandardSchemaProps<Type extends t.TSchema, Static = t.Static<Type>, 
+  Input extends Static = Static,
+  Output extends Static = Static
+> implements s.StandardSchemaV1.Props<Input, Output> {
+  private readonly __check: TypeCheck<Type>
   constructor(check: TypeCheck<Type>) {
-    this._check = check
+    this.__check = check
   }
   // ----------------------------------------------------------------
-  // StandardSchemaV1.Props<Type, t.Static<Type>>
+  // StandardSchemaV1.Props<Input, Output>
   // ----------------------------------------------------------------
   public get vendor(): '@sinclair/typemap' {
     return '@sinclair/typemap'
@@ -48,52 +52,54 @@ export class StandardSchemaProps<Type extends t.TSchema> implements StandardSche
   public get version(): 1 {
     return 1
   }
-  public get types(): { input: t.Static<Type>; output: t.Static<Type> } {
+  public get types(): { input: Input; output: Output } {
     throw Error('types is a phantom property used for inference only.')
   }
-  public validate(value: unknown): StandardSchemaV1.Result<t.Static<Type>> {
-    return (this._check.Check(value) ? this._createValue(value) : this._createIssues(value)) as never
+  public validate(value: unknown): s.StandardSchemaV1.Result<Output> {
+    return (
+      this.__check.Check(value) ? this.__createValue(value) : this.__createIssues(value)
+    ) as never
   }
   // ----------------------------------------------------------------
   // Internal
   // ----------------------------------------------------------------
-  private _createIssues(value: unknown) {
-    const errors = [...Value.Errors(this._check.Schema(), value)]
-    const issues: StandardSchemaV1.Issue[] = errors.map((error) => ({ ...error, path: [error.path] }))
+  private __createIssues(value: unknown) {
+    const errors = [...Value.Errors(this.__check.Schema(), value)]
+    const issues: s.StandardSchemaV1.Issue[] = errors.map((error) => ({ ...error, path: [error.path] }))
     return { issues }
   }
-  private _createValue(value: unknown) {
+  private __createValue(value: unknown) {
     return { value }
   }
 }
 // ------------------------------------------------------------------
 // Validator<TSchema>
 // ------------------------------------------------------------------
-export class Validator<Type extends t.TSchema> implements StandardSchemaV1<t.Static<Type>, t.Static<Type>> {
-  private readonly _standard: StandardSchemaProps<Type>
-  private readonly _check: TypeCheck<Type>
+export class Validator<Type extends t.TSchema> implements s.StandardSchemaV1<t.Static<Type>, t.Static<Type>> {
+  private readonly __standard: StandardSchemaProps<Type>
+  private readonly __check: TypeCheck<Type>
   constructor(check: TypeCheck<Type>) {
-    this._standard = new StandardSchemaProps<Type>(check)
-    this._check = check
+    this.__standard = new StandardSchemaProps<Type>(check)
+    this.__check = check
   }
   /** Standard Schema Interface */
   public get ['~standard'](): StandardSchemaProps<Type> {
-    return this._standard
+    return this.__standard as never
   }
   /** Returns the code used by this validator. */
   public Code(): string {
-    return this._check.Code()
+    return this.__check.Code()
   }
   /** Parses this value. Do not use this function for high throughput validation */
   public Parse(value: unknown): t.StaticDecode<Type> {
-    return Value.Parse(this._check.Schema(), value)
+    return Value.Parse(this.__check.Schema(), value)
   }
   /** Checks if this value matches the type */
   public Check(value: unknown): value is t.Static<Type> {
-    return this._check.Check(value)
+    return this.__check.Check(value)
   }
   /** Returns errors for this value */
   public Errors(value: unknown): ValueErrorIterator {
-    return this._check.Errors(value)
+    return this.__check.Errors(value)
   }
 }
