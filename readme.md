@@ -2,7 +2,7 @@
 
 <h1>TypeMap</h1>
 
-<p>Syntax, Compiler and Translation System for Runtime Types</p>
+<p>Syntax Compiler and Translation System for Runtime Types</p>
 
 <img src="./typemap.png" />
 
@@ -24,25 +24,27 @@ $ npm install @sinclair/typemap --save
 
 ## Usage
 
-Parse and Compile Types from TypeScript Syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApnAhgZzgBUBPMHAXzgDMo04ByAAX2ADsBjDXYKAehhksIXGAYAoOFOkzZ08Rwht88KFnwBXDPAC8xIQAoGKqOwDmcAD5w2WjAwCUAOgAKuKPixGAElgwYIOAB1aAwAE0dxPj5ZQCBSOQSpeMSUmXiomLTUuOzswBRSQABSIrg3DxwANVwMDSwMnNykhoS6rKbCguIAVTZgJQAeAG0iAGUYUzYzABpiADk7AF0APhbpWJWpdrhFZVV1LRgALjgTcysbOzg9Bl9-QJCocIYgA))
+Parse and Compile Types from TypeScript Syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199&ts=5.8.0-beta#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFBxhI0WJEC6EGpXgA3RhmAATRjGhwAvCjRhMWABQADJAA8AXHBoBXEACMsUADRwOlm-cd4jASjitWOCkZeUUVNWhLADUw1XUoAB4AFQB5OwArLDoYBIQhcQLCouKS4QCRCzgkgDlbB2d80qbmpvLhNyrazyhGlr7+kXLcAD5hgUlpWTgoLEprDHhtBSU46AA6ZAALLIBrAyQBwcDGSkR8yoBGF0Obgra4So96p3yOgCZbz7F7jqfHAVwfi+wNEQyAA))
 
 ```typescript
-import { Compile as Type } from '@sinclair/typemap'
+import { Compile } from '@sinclair/typemap'
                   
-const result = Type('string | null').Parse('Hello World')
-//     │               │                      │ 
-//     │               │                      └─── Parse Value
-//     │               │                    
-//     │               └── TUnion<[TString, TNull]> | Abstract Type
-//     │
-//     └── const result: string | null = 'Hello World'
+const validator = Compile(`{ x: number, y: number }`) // const validator: Validator<TObject<{
+                                                      //   x: TNumber,
+                                                      //   y: TNumber
+                                                      // }>>
+
+const result = validator.Check({                      // as {
+  x: 1,                                               //   x: number,
+  y: 2                                                //   y: number
+})                                                    // }
 ```
 
 ## Overview
 
 TypeMap is a syntax frontend and compiler backend for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) runtime type libraries. It offers a common TypeScript syntax for type construction, a runtime compiler for high-performance validation and type translation from one library to another.
 
-TypeMap is written as an advanced type translation system for the [TypeBox](https://github.com/sinclairzx81/typebox) project. It is designed to accelerate remote type libraries on TypeBox infrastructure as well as to integrate TypeBox into remote type library infrastructure via reverse type remapping. This project also provides high-performance validation for frameworks that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
+TypeMap is written as an advanced type mapping system for the TypeBox project. It is designed to accelerate remote type libraries on TypeBox infrastructure as well enabling TypeBox to integrate with remote type library infrastructure via reverse type remapping. This project also offers high-performance validation for frameworks that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
 
 License: MIT
 
