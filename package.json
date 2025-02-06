@@ -1,6 +1,6 @@
 {
   "name": "@sinclair/typemap",
-  "version": "0.8.13",
+  "version": "0.8.14",
   "description": "Syntax Compiler and Translation System for Runtime Types",
   "author": "sinclairzx81",
   "license": "MIT",
@@ -18,7 +18,7 @@
     "publish": "hammer task publish"
   },
   "peerDependencies": {
-    "@sinclair/typebox": "^0.34.15",
+    "@sinclair/typebox": "^0.34.16",
     "valibot": "^1.0.0-beta.15",
     "zod": "^3.24.1"
   },
