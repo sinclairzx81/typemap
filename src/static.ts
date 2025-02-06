@@ -37,7 +37,7 @@ type BaseSchema = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
 /** Statically infers a type */
 // prettier-ignore
 export type Static<Type extends object | string> = (
-  Type extends string ? s.StaticParseAsType<{}, Type> :
+  Type extends string ? s.TSyntax<{}, Type> :
   Type extends Validator<infer Type extends t.TSchema> ? t.Static<Type> :
   Type extends t.TSchema ? t.Static<Type> : 
   Type extends BaseSchema ? v.InferInput<Type> : 
