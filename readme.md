@@ -28,16 +28,20 @@ Parse and Compile Types from TypeScript Syntax ([Example](https://www.typescript
 
 ```typescript
 import { Compile } from '@sinclair/typemap'
-                  
-const validator = Compile(`{ x: number, y: number }`) // const validator: Validator<TObject<{
-                                                      //   x: TNumber,
-                                                      //   y: TNumber
+
+// Compile Types With Syntax
+
+const validator = Compile(`{ a: string, b: string }`) // const validator: Validator<TObject<{
+                                                      //   a: TString,
+                                                      //   b: TString
                                                       // }>>
 
-const result = validator.Check({                      // as {
-  x: 1,                                               //   x: number,
-  y: 2                                                //   y: number
-})                                                    // }
+// Validate with Standard Schema
+
+const result = validator['~standard'].validate({      // const result: StandardSchemaV1.Result<{
+  a: 'hello',                                         //   a: string,
+  b: 'world'                                          //   b: string
+})                                                    // }>
 ```
 
 ## Overview
