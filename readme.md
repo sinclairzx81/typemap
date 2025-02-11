@@ -24,7 +24,7 @@ $ npm install @sinclair/typemap --save
 
 ## Usage
 
-Parse and Compile Types from TypeScript Syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199&ts=5.8.0-beta#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFBxhI0WJEC6EGpXgA3RhmAATRjGhwAvCjRhMWABQADJAA8AXHBoBXEACMsUADRwOlm-cd4jASjitWOCkZeUUVNWhLADUw1XUoAB4AFQB5OwArLDoYBIQhcQLCouKS4QCRCzgkgDlbB2d80qbmpvLhNyrazyhGlr7+kXLcAD5hgUlpWTgoLEprDHhtBSU46AA6ZAALLIBrAyQBwcDGSkR8yoBGF0Obgra4So96p3yOgCZbz7F7jqfHAVwfi+wNEQyAA))
+Parse and Compile Types from TypeScript Syntax ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199&ts=5.8.0-beta#code/JYWwDg9gTgLgBAbzgYQuYAbApnAvnAMyjTgHIABAZ2ADsBjDAQ2CgHoYBPMLERsUgFADWrFGjCYcAFS5ZKcAOrAYACzgBlDjRiMAHkLoQaleADdGGYABNGMaHAC8Y9NgAUAAySMAXHBNRaAHMAGjgAI19-ILx3AEo4EThDYzMLa1toXwA1NJs7KAAeKQB5MIArLDoYAoQBOHqGxqbmlta2tsT6nzgpdRgAmhC69pHRsZbO8N9e-qDh8YXFidFcAD5VoUScyzycAHdlNT7GGhsoKw06FR5GAyMTOCg5AFcMeCdzHYyoAG1SAD8TCczlZSABdAB0n3SMCwriQTUSyQeT0orxgvmOp0Y53UVxuWQAjBCAEovN41YbdUjXDAYCCkUJLZmI0RdSKzQbBYYRMh7aAYUEs4UNSa8qKDAS4eIi2WtRJrIA))
 
 ```typescript
 import { Compile } from '@sinclair/typemap'
