@@ -18,7 +18,7 @@
     "publish": "hammer task publish"
   },
   "peerDependencies": {
-    "@sinclair/typebox": "^0.34.18",
+    "@sinclair/typebox": "^0.34.24",
     "valibot": "^1.0.0-rc.0",
     "zod": "^3.24.1"
   },
