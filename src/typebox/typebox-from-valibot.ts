@@ -262,7 +262,7 @@ function FromDate(type: BaseSchema): t.TSchema {
 // Enum
 // ------------------------------------------------------------------
 t.TypeRegistry.Set<TValibotEnum>('ValibotEnum', (schema, value) => {
-  return v.safeParse(schema.schema, value).success
+  return v.safeParse(schema.type, value).success
 })
 export interface TValibotEnum<Type extends v.EnumSchema<v.Enum, any> = v.EnumSchema<v.Enum, any>> extends t.TSchema {
   [t.Kind]: 'ValibotEnum'
@@ -272,7 +272,10 @@ export interface TValibotEnum<Type extends v.EnumSchema<v.Enum, any> = v.EnumSch
 function ValibotEnum<Type extends v.EnumSchema<v.Enum, any>>(type: Type, options?: t.SchemaOptions): TValibotEnum<Type> {
   return t.CreateType({ [t.Kind]: 'ValibotEnum', type }, options) as never
 }
-type TFromEnum<Enum extends v.EnumSchema<v.Enum, any>> = TValibotEnum<Enum>
+// prettier-ignore
+type TFromEnum<Enum extends v.EnumSchema<v.Enum, any>, 
+  Result = TValibotEnum<Enum>
+> = Result
 function FromEnum<Type extends BaseSchema>(type: Type): t.TSchema {
   return ValibotEnum(type as never as v.EnumSchema<v.Enum, any>, Options(type))
 }
@@ -749,7 +752,7 @@ type TFromType<Type extends BaseSchema> = (
   Type extends v.BooleanSchema<any> ? TFromBoolean<Type> :
   Type extends v.CustomSchema<unknown, any> ? TFromCustom<Type> :
   Type extends v.DateSchema<any> ? TFromDate<Type> :
-  Type extends v.EnumSchema<v.Enum, any> ? TFromEnum<Type> :
+  Type extends v.EnumSchema<any, any> ? TFromEnum<Type> : // note: unable to match on v.Enum parameter. use any and push type through for mapping
   Type extends v.FileSchema<any> ? TFromFile<Type> :
   Type extends v.FunctionSchema<any> ? TFromFunction<Type> :
   Type extends v.InstanceSchema<v.Class, any> ? TFromInstance<Type> :
