@@ -32,4 +32,4 @@ import * as v from 'valibot'
 export type BaseConstraint = v.BaseValidation<any, unknown, v.BaseIssue<unknown>> | v.BaseMetadata<any> | v.RegexAction<any, any>
 export type BaseRecordKey = v.BaseSchema<string, string | number | symbol, v.BaseIssue<unknown>>
 export type BaseSchema = v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>
-export type BaseError = v.ErrorMessage<any>
+export type BaseError = undefined // v.ErrorMessage<any>
