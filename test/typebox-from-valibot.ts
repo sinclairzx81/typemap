@@ -423,4 +423,13 @@ describe('TypeBox from Valibot', () => {
     const T = TypeBox(v.void())
     Assert.IsTrue(TypeGuard.IsVoid(T))
   })
+  // ----------------------------------------------------------------
+  // Pipe
+  // ----------------------------------------------------------------
+  it('Should map Pipe', () => {
+    const S = v.pipe(v.literal('hello'), v.length(5))
+    const T = TypeBox(S)
+    Assert.IsTrue(TypeGuard.IsLiteral(T))
+    Assert.IsEqual(T.const, 'hello')
+  })
 })
