@@ -743,7 +743,7 @@ function FromVoid(type: BaseSchema): t.TSchema {
 // prettier-ignore
 type TFromType<Type extends BaseSchema> = (
   // Pipes - Extract First Type And Remap
-  Type extends { pipe: [infer Type extends BaseSchema, ...any[]] } ? TFromType<Type> :
+  Type extends { pipe: readonly [infer Type extends BaseSchema, ...any[]] } ? TFromType<Type> :
   // Types
   Type extends v.AnySchema ? TFromAny<Type> :
   Type extends v.ArraySchema<infer Type extends BaseSchema, any> ? TFromArray<Type> :
