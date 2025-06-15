@@ -42,6 +42,8 @@ function Options(type: z.ZodType): t.SchemaOptions {
 const check = (type: z.ZodType, value: unknown) => type.safeParse(value).success
 // Register formats for Zod4 validators
 // Note: In Zod v4, string formats are top-level functions rather than methods
+// Types defined in zod/v4: 
+// // "email" | "url" | "emoji" | "uuid" | "guid" | "nanoid" | "cuid" | "cuid2" | "ulid" | "xid" | "ksuid" | "datetime" | "date" | "time" | "duration" | "ipv4" | "ipv6" | "cidrv4" | "cidrv6" | "base64" | "base64url" | "json_string" | "e164" | "lowercase" | "uppercase" | "regex" | "jwt" | "starts_with" | "ends_with" | "includes";
 t.FormatRegistry.Set('base64', (value) => check(z.base64(), value))
 t.FormatRegistry.Set('base64url', (value) => check(z.base64url(), value))
 t.FormatRegistry.Set('cidrv4', (value) => check(z.cidrv4(), value))
@@ -60,7 +62,6 @@ t.FormatRegistry.Set('nanoid', (value) => check(z.nanoid(), value))
 t.FormatRegistry.Set('ulid', (value) => check(z.ulid(), value))
 t.FormatRegistry.Set('url', (value) => check(z.url(), value))
 t.FormatRegistry.Set('uuid', (value) => check(z.uuid(), value))
-
 // ------------------------------------------------------------------
 // Any
 // ------------------------------------------------------------------
@@ -211,24 +212,142 @@ function FromRecord(type: z.ZodRecord): t.TSchema {
 // String
 // ------------------------------------------------------------------
 type TFromString<Result = t.TString> = Result
-function FromString(type: z.ZodString): t.TSchema {
-  const constraints: Record<string, any> = {}
-  
-  // Handle string constraints
-  if (type.minLength !== null) {
-    constraints.minLength = type.minLength
-  }
-  
-  if (type.maxLength !== null) {
-    constraints.maxLength = type.maxLength
-  }
-  
-  if (type.format !== null) {
-    constraints.format = type.format
-  }
-  
-  return t.String({ ...Options(type), ...constraints })
+
+function IsStringDef(def: z.core.$ZodTypeDef): def is z.core.$ZodStringDef {
+  return 'type' in def && def.type === 'string';
 }
+function IsStringInternals(type: z.ZodType): type is z.ZodType & {_zod: z.core.$ZodStringInternals<unknown>} {
+  return IsStringDef(type.def) && IsStringDef(type._zod.def);
+}
+
+function IsStringFormatDef(def: z.core.$ZodStringDef): def is z.core.$ZodStringFormatDef {
+  return 'format' in def && typeof def.format === 'string'
+    && ('pattern' in def ? def.pattern instanceof RegExp : true);
+}
+
+function FromStringLike(
+  type: z.ZodType & { _zod: z.core.$ZodStringInternals<unknown> }
+): t.TSchema {
+  const def = type._zod.def;
+  const _zod = type._zod as z.core.$ZodStringInternals<unknown>;
+  const coerce = def.coerce;
+  const checkPatterns =
+    def.checks && def.checks.length > 0 ? getExtraPatterns(def.checks) : [];
+  // bag parsing
+  const bag = _zod.bag;
+  const bagPatterns = bag?.patterns ? Array.from(bag.patterns) : [];
+  const minLength = bag?.minimum;
+  const maxLength = bag?.maximum;
+  // string format
+  const format = IsStringFormatDef(def)
+    ? (def.format ?? bag?.format)
+    : bag?.format;
+  const fmtPattern = IsStringFormatDef(def) ? def.pattern : undefined;
+  const contentEncoding = bag?.contentEncoding;
+  const pattern = combineRegExpHack(
+    fmtPattern,
+    ...checkPatterns,
+    ...bagPatterns
+  );
+  const options: t.StringOptions = {
+    ...Options(type),
+    pattern,
+    minLength,
+    maxLength,
+    format,
+    contentEncoding,
+    coerce,
+  };
+  return t.String(options);
+}
+
+
+// ------------------------------------------------------------------
+// String Formats
+// ------------------------------------------------------------------
+//
+// | Format         | Special Properties in Internals (if any)         |
+// |----------------|--------------------------------------------------|
+// | email          | None                                             |
+// | url            | `hostname?: RegExp`, `protocol?: RegExp`         |
+// | emoji          | None                                             |
+// | uuid           | `version?: "v1" \| "v2" \| "v3" \| "v4" \| "v5" \| "v6" \| "v7" \| "v8"` |
+// | guid           | None                                             |
+// | nanoid         | None                                             |
+// | cuid           | None                                             |
+// | cuid2          | None                                             |
+// | ulid           | None                                             |
+// | xid            | None                                             |
+// | ksuid          | None                                             |
+// | datetime       | `precision: number \| null`, `offset: boolean`, `local: boolean` |
+// | date           | None                                             |
+// | time           | `precision?: number \| null`                     |
+// | duration       | None                                             |
+// | ipv4           | `version?: "v4"`                                 |
+// | ipv6           | `version?: "v6"`                                 |
+// | cidrv4         | `version?: "v4"`                                 |
+// | cidrv6         | `version?: "v6"`                                 |
+// | base64         | None                                             |
+// | base64url      | None                                             |
+// | json_string    | None (not defined as a schema in your list, only as a format) |
+// | e164           | None                                             |
+// | lowercase      | None (see $ZodCheckLowerCase)                    |
+// | uppercase      | None (see $ZodCheckUpperCase)                    |
+// | regex          | `pattern: RegExp` (see $ZodCheckRegex)           |
+// | jwt            | `alg?: util.JWTAlgorithm`                        |
+// | starts_with    | `prefix: string` (see $ZodCheckStartsWith)        |
+// | ends_with      | `suffix: string` (see $ZodCheckEndsWith)          |
+// | includes       | `includes: string`, `position?: number` (see $ZodCheckIncludes) |
+
+// **Notes:**
+// - For formats like `lowercase`, `uppercase`, `regex`, `starts_with`, `ends_with`, and `includes`, these are implemented as checks (see `$ZodCheckLowerCase`, `$ZodCheckUpperCase`, etc.), not as schemas in your main list.
+// - All other formats are implemented as schemas with Internals extending `$ZodStringFormatInternals`, and any special properties are listed above.
+
+/* Perhaps TypeBox has a better way to handle this, but I can only find one 'pattern' singular string */
+function getExtraPatterns(checks: z.core.$ZodCheck[]): string[]{
+  return checks.map(item => {
+    const check = item._zod.def.check;
+    if(check === 'regex') return (item._zod.def as z.core.$ZodCheckRegexDef).pattern?.source;
+    if(check === 'lowercase') return '^[^A-Z]*$'; // Matches lowercase letters
+    if(check === 'uppercase') return '^[^a-z]*$'; // Matches uppercase letters
+    if(check === 'starts_with') return `^${(item._zod.def as z.core.$ZodCheckStartsWithDef).prefix}`;
+    if(check === 'ends_with') return `${(item._zod.def as z.core.$ZodCheckEndsWithDef).suffix}$`;
+    if(check === 'includes') return `.*${(item._zod.def as z.core.$ZodCheckIncludesDef).includes}.*`;
+    // TODO - warn or something if we hit an unknown check
+    return undefined;
+  }).filter(x => x !== undefined ).filter(x=>!!x);
+}
+function combineRegExpHack(...patterns: (string|RegExp|undefined)[]) : string | undefined {
+  // Filter out undefined patterns
+  const validPatterns = Array.from(new Set(patterns.filter(p => p !== undefined)
+      .map(p => (p instanceof RegExp ? p.source : p as string))));
+  if (validPatterns.length === 0) return undefined;
+  if (validPatterns.length === 1) return validPatterns[0];
+  const result = combinePatternsHack(validPatterns)
+  // console.warn('Combining multiple patterns into a single regex. This may not behave as expected.', validPatterns, result);  
+  return result
+}
+// In writing this implementation, it seems that the typebox-from-zod3 might not work right for example
+// z.ipv4().startsWith('192.168.')
+// we should test this... 
+// TODO - Verify behavior when there is both a startsWith and endsWith check
+function combinePatternsHack(patterns: string[]): string {
+  // regex does not support 'and'. but it does support 'or' and 'not', so we can use de Morgan's Law:
+  //      (A & B & C) = !(!A | !B | !C) 
+  // and combine patterns with zero-width negative lookahead
+  // const anyDoesNotMatch = patterns.map(p => `(?:(?!${p}).)*`).join('|');
+  // const allMatch = `^(?:(?!${anyDoesNotMatch}).)*$`;
+  // another approach is to use zero-width positive lookahead, but this is more complex
+  // but for this to work, each inner pattern must be anchored to the start and end of the string
+  const adjustedPatterns = patterns.map(p => {
+    const fromStart = !p.startsWith('^') && !p.startsWith('.*') ? '.*' : '';
+    const fromEnd = !p.endsWith('$') && !p.endsWith('.*') ? '.*' : '';
+    return fromStart||fromEnd ? `${fromStart}${p}${fromEnd}` : p;
+  });
+  const allMatch = `^${adjustedPatterns.map(p => `(?=${p})`).join('')}.*$`;
+  return allMatch;
+}
+
 // ------------------------------------------------------------------
 // Tuple
 // ------------------------------------------------------------------
@@ -289,29 +408,6 @@ type TFromType<Type extends z.ZodType> =
   Type extends z.ZodDefault<infer T extends z.ZodType> ? TFromDefault<T> :
   t.TSchema
 
-// ------------------------------------------------------------------
-// String Formats
-// ------------------------------------------------------------------
-// Helper function to create string with format
-function StringWithFormat(type: z.ZodType, format: string): t.TSchema {
-  return t.String({ ...Options(type), format })
-}
-
-// Function to handle any string format validator
-function FromStringFormat(type: z.ZodType): t.TSchema {
-  // Get the constructor name which should contain the format name
-  const constructorName = type.constructor.name;
-  
-  // Extract format from constructor name, e.g. "ZodEmail" -> "email"
-  if (constructorName.startsWith('Zod') || constructorName.startsWith('$Zod')) {
-    // Remove "Zod" or "$Zod" prefix and convert to lowercase
-    const format = constructorName.replace(/^\$?Zod(ISO)?/, '').toLowerCase();
-    return StringWithFormat(type, format);
-  }
-  
-  // Fallback to just a string if we can't determine the format
-  return t.String(Options(type));
-}
 
 // ------------------------------------------------------------------
 // Transform & Pipe
@@ -330,6 +426,12 @@ function FromPipe(type: z.ZodPipe<any, any>): t.TSchema {
 
 // prettier-ignore
 function FromType(type: z.ZodType): t.TSchema {
+  if(type instanceof z.ZodString 
+    || type instanceof z.ZodStringFormat
+    || IsStringInternals(type)) {
+    return FromStringLike(type);
+  }
+  
   if (type instanceof z.ZodAny) return FromAny(type)
   if (type instanceof z.ZodArray) return FromArray(type)
   if (type instanceof z.ZodBigInt) return FromBigInt(type)
@@ -344,33 +446,13 @@ function FromType(type: z.ZodType): t.TSchema {
   if (type instanceof z.ZodOptional) return FromOptional(type)
   if (type instanceof z.ZodPipe) return FromPipe(type)
   if (type instanceof z.ZodRecord) return FromRecord(type)
-  if (type instanceof z.ZodString) return FromString(type)
+  // if (type instanceof z.ZodString) return FromString(type)
   if (type instanceof z.ZodTransform) return FromTransform(type)
   if (type instanceof z.ZodTuple) return FromTuple(type)
   if (type instanceof z.ZodUnion) return FromUnion(type)
   if (type instanceof z.ZodUnknown) return FromUnknown(type)
   if (type instanceof z.ZodUndefined) return FromUndefined(type)
   if (type instanceof z.ZodDefault) return FromDefault(type)
-
-  // Handle all string format validators registered with FormatRegistry
-  // Check if the type is an instance of a format validator by checking if its constructor name
-  // suggests it's a string format validator (e.g., ZodEmail, ZodUUID, etc.)
-  const constructorName = type.constructor.name;
-  if ((constructorName.startsWith('Zod') || constructorName.startsWith('$Zod')) && 
-      constructorName !== 'ZodType' && 
-      constructorName !== 'ZodString' &&
-      constructorName !== 'ZodNumber' &&
-      constructorName !== 'ZodObject' &&
-      constructorName !== 'ZodArray') {
-    // Try to handle it as a string format if it looks like one
-    // This should catch ZodEmail, ZodUUID, ZodURL, etc.
-    if (typeof (type as any).regex === 'object' || 
-        typeof (type as any).check === 'function' ||
-        type instanceof z.ZodStringFormat) {
-      return FromStringFormat(type);
-    }
-  }
-
   return t.Never()
 }
 
