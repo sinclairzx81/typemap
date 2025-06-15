@@ -26,16 +26,23 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
+import { type TTypeBoxFromZod4, TypeBoxFromZod4 } from '../typebox/typebox-from-zod4'
+import { type TSyntaxFromTypeBox, SyntaxFromTypeBox } from './syntax-from-typebox'
+
+import * as t from '@sinclair/typebox'
 import { z } from 'zod/v4'
 
-/** Creates a Zod v4 type from Zod v4 */
+/** Creates Syntax from Zod v4 */
 // prettier-ignore
-export type TZod4FromZod4<Type extends z.ZodTypeAny,
-  Result extends z.ZodTypeAny = Type
+export type TSyntaxFromZod4<Type extends z.ZodTypeAny,
+  TypeBox extends t.TSchema = TTypeBoxFromZod4<Type>,
+  Result extends string = TSyntaxFromTypeBox<TypeBox>
 > = Result
 
-/** Creates a Zod v4 type from Zod v4 */
+/** Creates Syntax from Zod v4 */
 // prettier-ignore
-export function Zod4FromZod4<Type extends z.ZodTypeAny>(type: Type): TZod4FromZod4<Type> {
-  return type as never
+export function SyntaxFromZod4<Type extends z.ZodTypeAny>(type: Type): TSyntaxFromZod4<Type> {
+  const typebox = TypeBoxFromZod4(type)
+  const result = SyntaxFromTypeBox(typebox)
+  return result as never
 }

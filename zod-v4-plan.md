@@ -33,14 +33,11 @@ This document outlines the tasks needed to add Zod v4 support to TypeMap. The im
   - Update for Zod v4 API changes
   - Implement `TZod4FromValibot` and `Zod4FromValibot`
 
-- [x] Create `/src/zod4/zod4-from-zod.ts`
-  - Base this on `/src/zod/zod-from-zod.ts`
-  - Adjust to convert from Zod v3 to Zod v4
-  - Implement `TZod4FromZod` and `Zod4FromZod`
+- [ ] ~~Create `/src/zod4/zod4-from-zod.ts`~~ (Out of scope - see Project Scope section)
 
 - [x] Create `/src/zod4/zod4-from-zod4.ts`
   - Base this on `/src/zod/zod-from-zod.ts`
-  - Adjust to handle Zod v4 types
+  - Identity conversion for Zod v4 types
   - Implement `TZod4FromZod4` and `Zod4FromZod4`
 
 ## 3. Create Converters from Zod4 to Other Types
@@ -70,88 +67,71 @@ This document outlines the tasks needed to add Zod v4 support to TypeMap. The im
 
 - [x] Update `/src/guard.ts` to include Zod4 type detection
   - Add `IsZod4Type` function to detect Zod4 types
-- [ ] Find a property besides `~standard` to differentiate between z and z4, because unfortunately, it seems that the z4 `~standard` was set to be the same as the z3 `~standard` : They are both set to `{vendor: "zod", version: 1}`
+- [x] Find a property besides `~standard` to differentiate between z and z4, because unfortunately, it seems that the z4 `~standard` was set to be the same as the z3 `~standard` : They are both set to `{vendor: "zod", version: 1}`
 
-#### V4 (`node_modules/zod/dist/esm/v4/core/schemas.js`)
+### 4.1. Differentiating Between Zod v3 and Zod v4
 
-```js
-    inst["~standard"] = {
-        validate: (value) => {
-            try {
-                const r = safeParse(inst, value);
-                return r.success ? { value: r.data } : { issues: r.error?.issues };
-            }
-            catch (_) {
-                return safeParseAsync(inst, value).then((r) => (r.success ? { value: r.data } : { issues: r.error?.issues }));
-            }
-        },
-        vendor: "zod",
-        version: 1,
-    };
-```
+After analyzing both Zod v3 and Zod v4 objects through `test/test-zod-detection.ts`, we found several reliable differences:
 
-#### V3  (`node_modules/zod/dist/esm/v3/types.js`)
-```js
+1. **Prototype chain differences**: 
+   - Zod v3: `["ZodString", "ZodType", "Object"]` 
+   - Zod v4: `["ZodString", "Object"]` (No `ZodType` in chain)
 
-   constructor(def) {
-        //...
-        this["~standard"] = {
-            version: 1,
-            vendor: "zod",
-            validate: (data) => this["~validate"](data),
-        };
-    }
-```
+2. **Property differences**:
+   - Zod v4 has `def` property
+   - Zod v3 has `_def` property
 
+3. **Method availability**:
+   - Zod v4 has many additional methods like `meta`, `format`, etc.
+   - These methods don't exist in Zod v3
 
-We will need to find some other property that is new to key off of to differentiate them.
+To solve the detection problem, we extracted the common detection logic into a helper function and added specific checks for each version:
 
-I built a test file `test/test-zod-detection.ts` to evaluate ways we can tell. The output of the script is:
-
-```
-5305 typemap ±(zod/v4) ✗  ➜ bun run src/test-zod-detection.ts            [20250614 07:42:24]
-
---- Zod v3 String ---
-Standard property: {
-  version: 1,
-  vendor: "zod",
-  validate: [Function: validate],
+```typescript
+// Common detection for any Zod-like object
+function IsZodVendor(type: unknown): boolean {
+  if (!t.ValueGuard.IsObject(type)) return false;
+  if (!t.ValueGuard.HasPropertyKey(type, '~standard')) return false;
+  
+  const standardProp = (type as any)['~standard'];
+  if (!t.ValueGuard.IsObject(standardProp)) return false;
+  if (!t.ValueGuard.HasPropertyKey(standardProp, 'vendor')) return false;
+  
+  return standardProp.vendor === 'zod';
 }
-Has _def: true
-Has _zod.def: undefined
-Constructor name: ZodString
-toString: [object Object]
-Prototype chain: [ "ZodString", "ZodType", "Object" ]
-Keys: [
-  "spa", "_def", "parse", "safeParse", "parseAsync", "safeParseAsync", "refine", "refinement", "superRefine",
-  "optional", "nullable", "nullish", "array", "promise", "or", "and", "transform", "brand", "default",
-  "catch", "describe", "pipe", "readonly", "isNullable", "isOptional", "~standard"
-]
-Symbol keys: []
 
---- Zod v4 String ---
-Standard property: {
-  validate: [Function: validate],
-  vendor: "zod",
-  version: 1,
+// Zod v3 detection
+export function IsZod(type: unknown): type is z.ZodTypeAny {
+  if (!IsZodVendor(type)) return false;
+  
+  const obj = type as Record<string, unknown>;
+  
+  return (
+    t.ValueGuard.HasPropertyKey(obj, '_def') &&
+    !t.ValueGuard.HasPropertyKey(obj, 'meta')
+  );
 }
-Has _def: true
-Has _zod.def: false
-Constructor name: ZodString
-toString: [object Object]
-Prototype chain: [ "ZodString", "Object" ]
-Keys: [
-  "~standard", "def", "check", "clone", "brand", "register", "parse", "safeParse", "parseAsync", "safeParseAsync",
-  "spa", "refine", "superRefine", "overwrite", "optional", "nullable", "nullish", "nonoptional", "array",
-  "or", "and", "transform", "default", "prefault", "catch", "pipe", "readonly", "describe", "meta", "isOptional",
-  "isNullable", "format", "minLength", "maxLength", "regex", "includes", "startsWith", "endsWith",
-  "min", "max", "length", "nonempty", "lowercase", "uppercase", "trim", "normalize", "toLowerCase",
-  "toUpperCase", "email", "url", "jwt", "emoji", "guid", "uuid", "uuidv4", "uuidv6", "uuidv7", "nanoid",
-  "cuid", "cuid2", "ulid", "base64", "base64url", "xid", "ksuid", "ipv4", "ipv6", "cidrv4", "cidrv6", "e164",
-  "datetime", "date", "time", "duration"
-]
-Symbol keys: []
+
+// Zod v4 detection
+export function IsZod4(type: unknown): type is z4.ZodTypeAny {
+  if (!IsZodVendor(type)) return false;
+  
+  const obj = type as Record<string, unknown>;
+  
+  return (
+    t.ValueGuard.HasPropertyKey(obj, 'def') &&
+    t.ValueGuard.HasPropertyKey(obj, 'meta')
+  );
+}
 ```
+
+This implementation:
+1. First checks if the object has the general Zod structure (vendor === 'zod')
+2. Then applies specific checks for each version:
+   - For Zod v3: Has `_def` property and does not have `meta` method
+   - For Zod v4: Has `def` property and has `meta` method
+
+We've created a test file `test/zod-detection-test.ts` to verify this approach works correctly for both versions.
 
 
 
@@ -168,7 +148,6 @@ Symbol keys: []
   export * from './zod4/zod4-from-syntax'
   export * from './zod4/zod4-from-typebox'
   export * from './zod4/zod4-from-valibot'
-  export * from './zod4/zod4-from-zod'
   export * from './zod4/zod4-from-zod4'
   export { type TZod4, Zod4 } from './zod4/zod4'
   ```
@@ -198,6 +177,27 @@ Symbol keys: []
   // ...other tests
   ```
 
+## 5. Testing and Validation
+
+### 5.1. Core Unit Tests
+
+- [x] Run existing unit tests to ensure backward compatibility
+- [ ] Add specific tests for Zod v4 detection and differentiation from Zod v3
+- [ ] Test edge cases, like handling objects with similar properties to Zod types
+
+### 5.2. End-to-End Testing
+
+- [ ] Create sample applications that use both Zod v3 and Zod v4 simultaneously
+- [ ] Test conversions between all supported type systems (TypeBox, Syntax, Valibot, Zod, Zod4)
+- [ ] Validate that type information is properly preserved during conversions
+
+## 6. Performance Optimization
+
+- [ ] Benchmark Zod v4 conversions against Zod v3 equivalents
+- [ ] Identify any performance bottlenecks in the conversion process
+- [ ] Optimize critical paths for better performance
+- [ ] Consider caching strategies for frequent conversions
+
 ## 7. Address Zod v4 API Changes
 
 For each of the Zod v4 API changes mentioned in the migration guide, make the necessary adjustments across all the files created above:
@@ -211,17 +211,20 @@ For each of the Zod v4 API changes mentioned in the migration guide, make the ne
 ### 7.2. SafeParse Return Type
 
 - [ ] Update handling of SafeParse result errors to account for errors no longer extending Error
+- [ ] Adapt error handling patterns for the new error structure
 
 ### 7.3. ZodError and Issue Types
 
 - [ ] Update issue format references to use the new streamlined issue formats
 - [ ] Update error map handling based on new precedence rules
+- [ ] Handle the simplified issue types in validation logic
 
 ### 7.4. String Methods
 
 - [ ] Update string validation to use top-level validators (e.g., `z.email()` instead of `z.string().email()`)
 - [ ] Update IP validation to use separate `z.ipv4()` and `z.ipv6()` validators
 - [ ] Update CIDR handling to use `z.cidrv4()` and `z.cidrv6()`
+- [ ] Implement new string formats like `z.jwt()`, `z.emoji()`, etc.
 
 ### 7.5. Other API Changes
 
@@ -229,22 +232,57 @@ For each of the Zod v4 API changes mentioned in the migration guide, make the ne
 - [ ] Update Coerce handling for unknown input types
 - [ ] Update Default value handling to match the new behavior
 - [ ] Adjust Object method handling (use `z.strictObject()` and `z.looseObject()`)
+- [ ] Implement support for `z.nonoptional()` method
+- [ ] Handle `z.prefault()` and other new methods
 
 ## 8. Documentation Updates
+
+### 8.1. User Documentation
 
 - [ ] Update README.md to include information about Zod v4 support
 - [ ] Add examples for Zod v4 usage
 - [ ] Document any differences in behavior between Zod v3 and Zod v4 implementations
+- [ ] Create a migration guide for users moving from Zod v3 to Zod v4 with TypeMap
 
-## Implementation Strategy
+### 8.2. API Documentation
+
+- [ ] Update API docs with new Zod4 types and functions
+- [ ] Document the detection mechanism for Zod v4 vs Zod v3
+- [ ] Create usage examples for all new Zod v4 features
+- [ ] Document any known limitations or edge cases
+
+## 9. Final Integration Steps
+
+### 9.1. Package Updates
+
+- [ ] Update package.json with correct peer dependencies
+- [ ] Include Zod v4 in the build and bundling process
+- [ ] Update the exports configuration for proper module resolution
+
+### 9.2. CI/CD Integration
+
+- [ ] Update GitHub Actions workflows to include Zod v4 tests
+- [ ] Add test coverage requirements for Zod v4 code
+- [ ] Add specific test suites for Zod v3/v4 interoperability
+
+### 9.3. Release Management
+
+- [ ] Determine versioning strategy (major vs minor version bump)
+- [ ] Plan a beta release cycle for early adopter feedback
+- [ ] Create release notes highlighting Zod v4 support
+
+## 10. Implementation Strategy
 
 1. Create core files first (zod4.ts and the conversion functions)
 2. Implement basic functionality (type conversion without advanced features)
 3. Add support for Zod v4 specific features
 4. Create and run tests to ensure proper functionality
-5. Document the implementation
+5. Optimize detection and conversion logic
+6. Document the implementation
+7. Release beta version for community feedback
+8. Finalize and release stable version
 
-## Implementation Notes
+## 11. Implementation Notes
 
 - All implementations should follow the patterns established in the existing codebase
 - Type safety must be maintained throughout
@@ -252,10 +290,52 @@ For each of the Zod v4 API changes mentioned in the migration guide, make the ne
 - Pay special attention to the import style difference (`import * as z from 'zod'` vs `import { z } from 'zod/v4'`)
 - Consider creating utility functions if there is significant shared code between Zod v3 and Zod v4 implementations
 
-## Possible Challenges
+## 12. Possible Challenges and Solutions
 
-- Handling type differences between Zod v3 and v4
-- Ensuring compatibility with TypeBox's type system
-- Supporting the new error customization approach
-- Handling the new top-level string validation functions
-- Maintaining backward compatibility while supporting new features
+### 12.1. Type Detection Challenges
+
+- **Challenge**: Reliably differentiating between Zod v3 and Zod v4 types
+- **Solution**: Use multiple property checks as implemented in `IsZod4`
+
+### 12.2. API Compatibility 
+
+- **Challenge**: Handling Zod v4's substantial API differences from Zod v3
+- **Solution**: Implement separate, independent converters for each version rather than direct conversions between them
+
+### 12.3. Performance Concerns
+
+- **Challenge**: Ensuring detection and conversion performance is optimized
+- **Solution**: Implement caching and optimize type checking logic
+
+### 12.4. Error Handling
+
+- **Challenge**: Supporting the new error customization approach
+- **Solution**: Create wrappers for error handling that adapt to both styles
+
+### 12.5. New Features
+
+- **Challenge**: Handling the new top-level string validation functions
+- **Solution**: Map these to appropriate representations in other type systems
+
+## 13. Timeline and Milestones
+
+- **Milestone 1**: Core implementation (Sections 1-4) - Completed
+- **Milestone 2**: Testing and optimization (Sections 5-6) - Week of June 21, 2025
+- **Milestone 3**: API changes and documentation (Sections 7-8) - Week of June 28, 2025
+- **Milestone 4**: Final integration and release (Sections 9) - Week of July 5, 2025
+
+## Project Scope
+
+### Direct Zod v3 and Zod v4 Conversions
+
+After careful consideration, direct conversions between Zod v3 and Zod v4 types have been deemed **out of scope** for this implementation. This decision is based on:
+
+1. The significant differences between Zod v3 and v4 APIs would make direct conversions complex and error-prone
+2. Users should instead utilize intermediate formats (like Syntax or TypeBox) for conversion if needed
+3. If direct conversions were simple, the Zod maintainers would likely have provided them already
+
+This means the following files are no longer needed and should be removed:
+- `/src/zod4/zod4-from-zod.ts` 
+- `/src/zod/zod-from-zod4.ts` (if exists)
+
+TypeMap will continue to support both Zod v3 and Zod v4 independently, allowing users to convert between each version and other supported type systems.

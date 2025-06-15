@@ -26,16 +26,28 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
+import { type TTypeBoxFromZod4, TypeBoxFromZod4 } from '../typebox/typebox-from-zod4'
+import { type TValibotFromTypeBox, ValibotFromTypeBox } from './valibot-from-typebox'
+
+import * as t from '@sinclair/typebox'
+import * as v from 'valibot'
 import { z } from 'zod/v4'
 
-/** Creates a Zod v4 type from Zod v4 */
+// ------------------------------------------------------------------
+// ValibotFromZod4
+// ------------------------------------------------------------------
+/** Creates a Valibot type from Zod v4 */
 // prettier-ignore
-export type TZod4FromZod4<Type extends z.ZodTypeAny,
-  Result extends z.ZodTypeAny = Type
+export type TValibotFromZod4<Type extends z.ZodTypeAny,
+  TypeBox extends t.TSchema = TTypeBoxFromZod4<Type>,
+  Result extends v.BaseSchema<any, any, any> = TValibotFromTypeBox<TypeBox> 
 > = Result
-
-/** Creates a Zod v4 type from Zod v4 */
+/** Creates a Valibot type from Zod v4 */
 // prettier-ignore
-export function Zod4FromZod4<Type extends z.ZodTypeAny>(type: Type): TZod4FromZod4<Type> {
-  return type as never
+export function ValibotFromZod4<Type extends z.ZodTypeAny,
+  Result extends v.BaseSchema<any, any, any> = TValibotFromZod4<Type>
+>(type: Type): Result {
+  const schema = TypeBoxFromZod4(type)
+  const result = ValibotFromTypeBox(schema)
+  return result as never
 }

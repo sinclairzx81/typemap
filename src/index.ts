@@ -45,6 +45,7 @@ export * from './syntax/syntax-from-syntax'
 export * from './syntax/syntax-from-typebox'
 export * from './syntax/syntax-from-valibot'
 export * from './syntax/syntax-from-zod'
+export * from './syntax/syntax-from-zod4'
 export { type TSyntax, Syntax } from './syntax/syntax'
 
 // ------------------------------------------------------------------
@@ -54,6 +55,7 @@ export * from './typebox/typebox-from-syntax'
 export * from './typebox/typebox-from-typebox'
 export * from './typebox/typebox-from-valibot'
 export * from './typebox/typebox-from-zod'
+export * from './typebox/typebox-from-zod4'
 export { type TTypeBox, TypeBox } from './typebox/typebox'
 
 // ------------------------------------------------------------------
@@ -63,6 +65,7 @@ export * from './valibot/valibot-from-syntax'
 export * from './valibot/valibot-from-typebox'
 export * from './valibot/valibot-from-valibot'
 export * from './valibot/valibot-from-zod'
+export * from './valibot/valibot-from-zod4'
 export { type TValibot, Valibot } from './valibot/valibot'
 
 // ------------------------------------------------------------------
@@ -73,3 +76,12 @@ export * from './zod/zod-from-typebox'
 export * from './zod/zod-from-valibot'
 export * from './zod/zod-from-zod'
 export { type TZod, Zod } from './zod/zod'
+
+// ------------------------------------------------------------------
+// Zod4
+// ------------------------------------------------------------------
+export * from './zod4/zod4-from-syntax'
+export * from './zod4/zod4-from-typebox'
+export * from './zod4/zod4-from-valibot'
+export * from './zod4/zod4-from-zod4'
+export { type TZod4, Zod4 } from './zod4/zod4'
