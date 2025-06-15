@@ -52,16 +52,27 @@ t.FormatRegistry.Set('cuid', (value) => check(z.cuid(), value))
 t.FormatRegistry.Set('cuid2', (value) => check(z.cuid2(), value))
 t.FormatRegistry.Set('date', (value) => check(z.iso.date(), value))
 t.FormatRegistry.Set('datetime', (value) => check(z.iso.datetime(), value))
-t.FormatRegistry.Set('time', (value) => check(z.iso.time(), value))
 t.FormatRegistry.Set('duration', (value) => check(z.iso.duration(), value))
+t.FormatRegistry.Set('e164', (value) => check(z.e164(), value));
 t.FormatRegistry.Set('email', (value) => check(z.email(), value))
 t.FormatRegistry.Set('emoji', (value) => check(z.emoji(), value))
+t.FormatRegistry.Set('guid', (value) => check(z.guid(), value))
 t.FormatRegistry.Set('ipv4', (value) => check(z.ipv4(), value))
 t.FormatRegistry.Set('ipv6', (value) => check(z.ipv6(), value))
+t.FormatRegistry.Set('json_string', (value) => check(z.json(), value))
+t.FormatRegistry.Set('json', (value) => check(z.json(), value))
+t.FormatRegistry.Set('jwt', (value) => check(z.jwt(), value))
+t.FormatRegistry.Set('ksuid', (value) => check(z.ksuid(), value))
+t.FormatRegistry.Set('lowercase', (value) => check(z.string().lowercase(), value))
 t.FormatRegistry.Set('nanoid', (value) => check(z.nanoid(), value))
+t.FormatRegistry.Set('time', (value) => check(z.iso.time(), value))
 t.FormatRegistry.Set('ulid', (value) => check(z.ulid(), value))
+t.FormatRegistry.Set('uppercase', (value) => check(z.string().uppercase(), value))
 t.FormatRegistry.Set('url', (value) => check(z.url(), value))
 t.FormatRegistry.Set('uuid', (value) => check(z.uuid(), value))
+t.FormatRegistry.Set('xid', (value) => check(z.xid(), value))
+// BTW, are these .Set() ops this going to fight the one in typebox-from-zod.ts?
+
 // ------------------------------------------------------------------
 // Any
 // ------------------------------------------------------------------
@@ -229,6 +240,7 @@ function FromStringLike(
     : bag?.format;
   const fmtPattern = IsStringFormatDef(def) ? def.pattern : undefined;
   const contentEncoding = bag?.contentEncoding;
+  /* Perhaps TypeBox has a better way to handle this, but I can only find one 'pattern' singular string */
   const pattern = combineRegExpHack(
     fmtPattern,
     ...checkPatterns,
@@ -288,19 +300,19 @@ function FromStringLike(
 // - For formats like `lowercase`, `uppercase`, `regex`, `starts_with`, `ends_with`, and `includes`, these are implemented as checks (see `$ZodCheckLowerCase`, `$ZodCheckUpperCase`, etc.), not as schemas in your main list.
 // - All other formats are implemented as schemas with Internals extending `$ZodStringFormatInternals`, and any special properties are listed above.
 
-/* Perhaps TypeBox has a better way to handle this, but I can only find one 'pattern' singular string */
-function getExtraPatterns(checks: z.core.$ZodCheck[]): string[]{
+function getExtraPatterns(checks: z.core.$ZodCheck[]): (string|undefined)[]{
   return checks.map(item => {
     const check = item._zod.def.check;
     if(check === 'regex') return (item._zod.def as z.core.$ZodCheckRegexDef).pattern?.source;
-    if(check === 'lowercase') return '^[^A-Z]*$'; // Matches non-uppercase letters
-    if(check === 'uppercase') return '^[^a-z]*$'; // Matches non-lowercase letters
+    // see packages/zod/src/v4/core/regexes.ts
+    if(check === 'lowercase') return '^[^A-Z]*$'; //regex for string with no uppercase letters
+    if(check === 'uppercase') return '^[^a-z]*$'; // regex for string with no lowercase letters
     if(check === 'starts_with') return `^${(item._zod.def as z.core.$ZodCheckStartsWithDef).prefix}`;
     if(check === 'ends_with') return `${(item._zod.def as z.core.$ZodCheckEndsWithDef).suffix}$`;
     if(check === 'includes') return `.*${(item._zod.def as z.core.$ZodCheckIncludesDef).includes}.*`;
     // TODO - warn or something if we hit an unknown check
     return undefined;
-  }).filter(x => x !== undefined ).filter(x=>!!x);
+  })
 }
 
 // ------------------------------------------------------------------
