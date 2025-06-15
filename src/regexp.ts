@@ -35,8 +35,8 @@ export function combineRegExpHack(...patterns: (string|RegExp|undefined)[]) : st
   if (validPatterns.length === 0) return undefined;
   if (validPatterns.length === 1) return validPatterns[0];
   const result = combinePatternsHack(validPatterns)
-  if(process.env.NODE_ENV !== 'production')
-    console.warn('Combining multiple patterns. This may not behave as expected.', [...validPatterns, '-->', result]); 
+//   if(process.env.NODE_ENV !== 'production')
+    // console.warn('Combining multiple patterns. This may not behave as expected.', [...validPatterns, '-->', result]); 
   return result
 }
 

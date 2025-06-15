@@ -30,6 +30,7 @@ import { type TZod4FromSyntax, Zod4FromSyntax } from './zod4-from-syntax'
 import { type TZod4FromTypeBox, Zod4FromTypeBox } from './zod4-from-typebox'
 import { type TZod4FromValibot, Zod4FromValibot } from './zod4-from-valibot'
 import { type TZod4FromZod4, Zod4FromZod4 } from './zod4-from-zod4'
+import { type TZod4FromZod, Zod4FromZod } from './zod4-from-zod'
 import { type TSyntaxOptions } from '../options'
 
 import { type TParameter, type TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
@@ -46,6 +47,7 @@ export type TZod4<Parameter extends TParameter, Type extends object | string, Re
   Type extends g.SyntaxType ? TZod4FromSyntax<TContextFromParameter<Parameter>, Type> :
   Type extends g.TypeBoxType ? TZod4FromTypeBox<Type> :
   Type extends g.ValibotType ? TZod4FromValibot<Type> :
+  Type extends g.ZodType ? TZod4FromZod<Type> :
   Type extends g.Zod4Type ? TZod4FromZod4<Type> :
   z.ZodNever
 )> = Result
@@ -64,6 +66,7 @@ export function Zod4(...args: any[]): never {
     g.IsSyntax(type) ? Zod4FromSyntax(ContextFromParameter(parameter), type, options) : 
     g.IsTypeBox(type) ? Zod4FromTypeBox(type) : 
     g.IsValibot(type) ? Zod4FromValibot(type) : 
+    g.IsZod(type) ? Zod4FromZod(type) : 
     g.IsZod4(type) ? Zod4FromZod4(type) : 
     z.never()
   ) as never

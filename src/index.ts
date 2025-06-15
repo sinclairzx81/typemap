@@ -75,6 +75,7 @@ export * from './zod/zod-from-syntax'
 export * from './zod/zod-from-typebox'
 export * from './zod/zod-from-valibot'
 export * from './zod/zod-from-zod'
+export * from './zod/zod-from-zod4'
 export { type TZod, Zod } from './zod/zod'
 
 // ------------------------------------------------------------------
@@ -84,4 +85,5 @@ export * from './zod4/zod4-from-syntax'
 export * from './zod4/zod4-from-typebox'
 export * from './zod4/zod4-from-valibot'
 export * from './zod4/zod4-from-zod4'
+export * from './zod4/zod4-from-zod'
 export { type TZod4, Zod4 } from './zod4/zod4'

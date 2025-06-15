@@ -30,6 +30,7 @@ import { type TZodFromSyntax, ZodFromSyntax } from './zod-from-syntax'
 import { type TZodFromTypeBox, ZodFromTypeBox } from './zod-from-typebox'
 import { type TZodFromValibot, ZodFromValibot } from './zod-from-valibot'
 import { type TZodFromZod, ZodFromZod } from './zod-from-zod'
+import { type TZodFromZod4, ZodFromZod4 } from './zod-from-zod4'
 import { type TSyntaxOptions } from '../options'
 
 import { type TParameter, type TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
@@ -47,6 +48,7 @@ export type TZod<Parameter extends TParameter, Type extends object | string, Res
   Type extends g.TypeBoxType ? TZodFromTypeBox<Type> :
   Type extends g.ValibotType ? TZodFromValibot<Type> :
   Type extends g.ZodType ? TZodFromZod<Type> :
+  Type extends g.Zod4Type ? TZodFromZod4<Type> :
   z.ZodNever
 )> = Result
 
@@ -65,6 +67,7 @@ export function Zod(...args: any[]): never {
     g.IsTypeBox(type) ? ZodFromTypeBox(type) : 
     g.IsValibot(type) ? ZodFromValibot(type) : 
     g.IsZod(type) ? ZodFromZod(type) : 
+    g.IsZod4(type) ? ZodFromZod4(type) : 
     z.never()
   ) as never
 }
