@@ -48,32 +48,38 @@ const result = validator['~standard'].validate({      // const result: StandardS
 
 TypeMap is a syntax frontend and compiler backend for the [TypeBox](https://github.com/sinclairzx81/typebox), [Valibot](https://github.com/fabian-hiller/valibot) and [Zod](https://github.com/colinhacks/zod) runtime type libraries. It offers a common TypeScript syntax for type construction, a runtime compiler for high-performance validation and type translation from one library to another.
 
+TypeMap supports both Zod v3 and Zod v4, with distinct APIs for each version, allowing projects to smoothly transition between versions as needed.
+
 TypeMap is written as an advanced type mapping system for the TypeBox project. It is designed to accelerate remote type libraries on TypeBox infrastructure as well enabling TypeBox to integrate with remote type library infrastructure via reverse type remapping. This project also offers high-performance validation for frameworks that orientate around the [Standard Schema](https://github.com/standard-schema/standard-schema) TypeScript interface.
 
 License: MIT
 
 ## Contents
 
-- [Install](#Install)
-- [Usage](#Usage)
-- [Overview](#Overview)
-- [Example](#Example)
-- [Mapping](#Section-Mapping)
-  - [Syntax](#Mapping-Syntax)
-  - [TypeBox](#Mapping-TypeBox)
-  - [Valibot](#Mapping-Valibot)
-  - [Zod](#Mapping-Zod)
-- [Syntax](#Section-Syntax)
-  - [Types](#Syntax-Types)
-  - [Options](#Syntax-Options)
-  - [Parameters](#Syntax-Parameters)
-  - [Generics](#Syntax-Generics)
-- [Static](#Section-Static)
-- [Json Schema](#Json-Schema)
-- [Tree Shake](#Tree-Shake)
-- [Compile](#Compile)
-- [Benchmark](#Benchmark)
-- [Contribute](#Contribute)
+- [Install](#install)
+- [Usage](#usage)
+- [Overview](#overview)
+- [Contents](#contents)
+- [Example](#example)
+- [Mapping](#mapping)
+  - [Syntax](#syntax)
+  - [TypeBox](#typebox)
+  - [Valibot](#valibot)
+  - [Zod](#zod)
+  - [Zod4](#zod4)
+- [Syntax](#syntax-1)
+  - [Types](#types)
+  - [Options](#options)
+  - [Parameters](#parameters)
+  - [Generics](#generics)
+- [Static](#static)
+- [Json Schema](#json-schema)
+- [Tree Shake](#tree-shake)
+- [Compile](#compile)
+- [Benchmark](#benchmark)
+  - [Test](#test)
+  - [Results](#results)
+- [Contribute](#contribute)
 
 ## Example
 
@@ -209,6 +215,21 @@ const S = Zod('string[]')                           // const S: z.ZodArray<...> 
 const T = Zod(t.Number())                           // const T: z.ZodNumber     (TypeBox)
 const V = Zod(v.string())                           // const V: z.ZodString     (Valibot)
 const Z = Zod(z.boolean())                          // const Z: z.ZodBoolean    (Zod)
+```
+
+<a name="Mapping-Zod4"></a>
+
+### Zod4
+
+Use the `Zod4` function to translate types and syntax into Zod v4 types:
+
+```typescript
+import { Zod4 } from '@sinclair/typemap'
+
+const S = Zod4('string[]')                          // const S: z.ZodArray<...> (Syntax)
+const T = Zod4(t.Number())                          // const T: z.ZodNumber     (TypeBox)
+const V = Zod4(v.string())                          // const V: z.ZodString     (Valibot)
+const Z = Zod4(z.boolean())                         // const Z: z.ZodBoolean    (Zod)
 ```
 
 <a name="Section-Syntax"></a>
@@ -369,6 +390,20 @@ const T = TypeBoxFromZod(z.object({                 // const T: TObject<{
 }))                                                 // }>
 ```
 
+For Zod v4, you can use the corresponding import:
+
+```typescript
+import { TypeBoxFromZod4 } from '@sinclair/typemap' // Use TypeBox & Zod v4, Tree Shake Valibot
+
+import { z } from 'zod/v4'
+
+const T = TypeBoxFromZod4(z.object({                // const T: TObject<{
+  x: z.number(),                                    //  x: TNumber;
+  y: z.number(),                                    //  y: TNumber;
+  z: z.number()                                     //  z: TNumber;
+}))                                                 // }>
+```
+
 ## Compile
 
 Use the `Compile` function to compile TypeBox, Valibot and Zod on TypeBox infrastructure ([Example](https://www.typescriptlang.org/play/?moduleResolution=99&module=199#code/JYWwDg9gTgLgBAbzgYQuYAbApgGjgLQgBM4BfOAMyjTgHIABAZ2ADsBjDAQ2CgHoYAnmCwhOYWgCgJvXijRhMWAsTgAVIVilsILRvABunDMCKcY0OAF456bAApCROwAMEEuB4AeALjgsAriAARlhQOO4eAr4BwaHhHnAAXtGBIVASpM4AlFlaOnpwAEoAjFZwhsam5lAAdMgAFlhsANZ2SD5wxXhRcABMeMlwAMxkWQlwMnAAgmxsWNhQZlhEUpMAyjCcLKZQJGtsjaLSvMdwNedwAO71wAdwjPUQ-hgk9Zz6SiFYLH6cIMt0DZbHYkABqRhMZmgkgk2l08EKvTKFUh1QA2rQAH56YGcXa0AC6NRRVSwbTgHS6cB6-SSvhGpCyQA))
@@ -391,6 +426,22 @@ const R1 = validator.Check({ x: 1, y: 2, z: 3 })    // Accelerated
 // ... which should have been named 'Standard Validator'
 
 const R2 = validator['~standard'].validate({ x: 1, y: 2, z: 3 })
+```
+
+You can also compile Zod v4 types:
+
+```typescript
+import { Compile, Zod4 } from '@sinclair/typemap'
+
+// Compile Zod v4 Type
+
+const validator = Compile(Zod4(`{
+   x: number,
+   y: number,
+   z: number
+}`))
+
+const R1 = validator.Check({ x: 1, y: 2, z: 3 })    // Accelerated with Zod v4
 ```
 
 ## Benchmark
