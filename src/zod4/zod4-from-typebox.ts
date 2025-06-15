@@ -27,26 +27,27 @@ THE SOFTWARE.
 ---------------------------------------------------------------------------*/
 
 import * as t from '@sinclair/typebox'
-import * as z from 'zod'
+import z4 from 'zod/dist/types/v4'
+import { z } from 'zod/v4'
 
 // ------------------------------------------------------------------
 // Constraint
 // ------------------------------------------------------------------
-type TConstraint<Input extends z.ZodTypeAny = z.ZodTypeAny, Output extends z.ZodTypeAny = Input> = (input: Input) => Output
+type TConstraint<Input extends z.ZodType = z.ZodType, Output extends z.ZodType = Input> = (input: Input) => Output
 
 // ------------------------------------------------------------------
 // Any
 // ------------------------------------------------------------------
 type TFromAny<Result = z.ZodAny> = Result
-function FromAny(_type: t.TAny): z.ZodTypeAny {
+function FromAny(_type: t.TAny): z.ZodType {
   return z.any()
 }
 // ------------------------------------------------------------------
 // Array
 // ------------------------------------------------------------------
 type TFromArray<Type extends t.TSchema, Result = z.ZodArray<TFromType<Type>>> = Result
-function FromArray(type: t.TArray): z.ZodTypeAny {
-  const constraints: TConstraint<z.ZodArray<z.ZodTypeAny, any>>[] = []
+function FromArray(type: t.TArray): z.ZodType {
+  const constraints: TConstraint<z.ZodArray<z.ZodType>>[] = []
   const { minItems, maxItems /* minContains, maxContains, contains */ } = type
   if (t.ValueGuard.IsNumber(minItems)) constraints.push((input) => input.min(minItems))
   if (t.ValueGuard.IsNumber(maxItems)) constraints.push((input) => input.max(maxItems))
@@ -57,43 +58,67 @@ function FromArray(type: t.TArray): z.ZodTypeAny {
 // BigInt
 // ------------------------------------------------------------------
 type TFromBigInt<Result = z.ZodBigInt> = Result
-function FromBigInt(_type: t.TBigInt): z.ZodTypeAny {
+function FromBigInt(_type: t.TBigInt): z.ZodType {
   return z.bigint()
 }
 // ------------------------------------------------------------------
 // Boolean
 // ------------------------------------------------------------------
 type TFromBoolean<Result = z.ZodBoolean> = Result
-function FromBoolean(_type: t.TBoolean): z.ZodTypeAny {
+function FromBoolean(_type: t.TBoolean): z.ZodType {
   return z.boolean()
 }
 // ------------------------------------------------------------------
 // Date
 // ------------------------------------------------------------------
 type TFromDate<Result = z.ZodDate> = Result
-function FromDate(_type: t.TDate): z.ZodTypeAny {
+function FromDate(_type: t.TDate): z.ZodType {
   return z.date()
 }
 // ------------------------------------------------------------------
 // Function
 // ------------------------------------------------------------------
+// note: Zod v4 does not support function types, so we use a workaround
+// z.custom<Parameters<T["implement"]>[0]>((fn) => schema.implement(fn))
+// https://github.com/colinhacks/zod/issues/4143#issuecomment-2845134912
 // prettier-ignore
-type TFromFunction<Parameters extends t.TSchema[], ReturnType extends t.TSchema, 
-  MappedParameters extends z.ZodTypeAny[] = TFromTypes<Parameters>
+type TFromFunction<Parameters extends t.TSchema[], ReturnType extends t.TSchema,
+  MappedParameters extends z.ZodType[] = TFromTypes<Parameters>
 > = (
-  MappedParameters extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | [] 
-    ? z.ZodFunction<z.ZodTuple<MappedParameters>, TFromType<ReturnType>>
+  MappedParameters extends [z.ZodType, ...z.ZodType[]] | [] 
+    ? z.ZodType<(...args: z.output<z.ZodTuple<MappedParameters, null>>) => z.output<TFromType<ReturnType>>>
     : z.ZodNever
 )
-function FromFunction(type: t.TFunction): z.ZodTypeAny {
-  const mappedParameters = FromTypes(type.parameters) as [] | [z.ZodTypeAny, ...z.ZodTypeAny[]]
-  return z.function(z.tuple(mappedParameters), FromType(type.returns))
+function FromFunction(type: t.TFunction): z.ZodType {
+  const mappedParameters = FromTypes(type.parameters)
+  const input = z.tuple(mappedParameters as [z.ZodType, ...z.ZodType[]])
+  const output = FromType(type.returns)
+  
+  return z.custom().transform((arg, ctx) => {
+    if (typeof arg !== 'function') {
+      ctx.addIssue({
+        code: "invalid_type",
+        expected: 'custom',
+        received: typeof arg,
+        input: arg
+      })
+      return z.NEVER
+    }
+    
+    // Use function schema internally for validation
+    const functionSchema = z.function({
+      input,
+      output
+    })
+    
+    return functionSchema.implement(arg as (...args: any[]) => any)
+  })
 }
 // ------------------------------------------------------------------
 // Integer
 // ------------------------------------------------------------------
 type TFromInteger<Result = z.ZodNumber> = Result
-function FromInteger(type: t.TInteger): z.ZodTypeAny {
+function FromInteger(type: t.TInteger): z.ZodType {
   const { exclusiveMaximum, exclusiveMinimum, minimum, maximum, multipleOf } = type
   const constraints: TConstraint<z.ZodNumber>[] = [(value) => value.int()]
   if (t.ValueGuard.IsNumber(exclusiveMinimum)) constraints.push((input) => input.min(exclusiveMinimum + 1))
@@ -107,12 +132,12 @@ function FromInteger(type: t.TInteger): z.ZodTypeAny {
 // Intersect
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromIntersect<Types extends t.TSchema[], Result extends z.ZodTypeAny = z.ZodUnknown> = (
+type TFromIntersect<Types extends t.TSchema[], Result extends z.ZodType = z.ZodUnknown> = (
   Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]]
     ? TFromIntersect<Right, z.ZodIntersection<TFromType<Left>, Result>>
     : Result
 )
-function FromIntersect(type: t.TIntersect): z.ZodTypeAny {
+function FromIntersect(type: t.TIntersect): z.ZodType {
   return type.allOf.reduce((result, left) => {
     return z.intersection(FromType(left), result) as never
   }, z.unknown()) as never
@@ -121,7 +146,7 @@ function FromIntersect(type: t.TIntersect): z.ZodTypeAny {
 // Literal
 // ------------------------------------------------------------------
 type TFromLiteral<Value extends t.TLiteralValue, Result = z.ZodLiteral<Value>> = Result
-function FromLiteral(type: t.TLiteral): z.ZodTypeAny {
+function FromLiteral(type: t.TLiteral): z.ZodType {
   return z.literal(type.const)
 }
 // ------------------------------------------------------------------
@@ -134,8 +159,8 @@ type TFromObject< Properties extends t.TProperties,
   }>,
 > = Result
 // prettier-ignore
-function FromObject(type: t.TObject): z.ZodTypeAny {
-  const constraints: TConstraint<z.ZodObject<any, any, any>>[] = []
+function FromObject(type: t.TObject): z.ZodType {
+  const constraints: TConstraint<z.ZodObject<any, any>>[] = []
   const { additionalProperties } = type
   if (additionalProperties === false) constraints.push((input) => input.strict())
   if (t.KindGuard.IsSchema(additionalProperties)) constraints.push((input) => input.catchall(FromType(additionalProperties)))
@@ -146,14 +171,14 @@ function FromObject(type: t.TObject): z.ZodTypeAny {
 // Promise
 // ------------------------------------------------------------------
 type TFromPromise<Type extends t.TSchema, Result = z.ZodPromise<TFromType<Type>>> = Result
-function FromPromise(type: t.TPromise): z.ZodTypeAny {
+function FromPromise(type: t.TPromise): z.ZodType {
   return z.promise(FromType(type.item))
 }
 // ------------------------------------------------------------------
 // Record
 // ------------------------------------------------------------------
 type TFromRegExp<Result = z.ZodString> = Result
-function FromRegExp(type: t.TRegExp): z.ZodTypeAny {
+function FromRegExp(type: t.TRegExp): z.ZodType {
   const constraints: TConstraint<z.ZodString>[] = [(input) => input.regex(new RegExp(type.source), type.flags)]
   const { minLength, maxLength } = type
   if (t.ValueGuard.IsNumber(maxLength)) constraints.push((input) => input.max(maxLength))
@@ -165,16 +190,15 @@ function FromRegExp(type: t.TRegExp): z.ZodTypeAny {
 // ------------------------------------------------------------------
 // prettier-ignore
 type TFromRecord<Key extends t.TSchema, Value extends t.TSchema> = (
-  TFromType<Key> extends infer ZodKey extends z.KeySchema 
+  TFromType<Key> extends infer ZodKey extends  z4.core.$ZodRecordKey
     ? z.ZodRecord<ZodKey, TFromType<Value>> 
     : z.ZodNever
 )
 // prettier-ignore
-function FromRecord(type: t.TRecord): z.ZodTypeAny {
+function FromRecord(type: t.TRecord): z.ZodType {
   const pattern = globalThis.Object.getOwnPropertyNames(type.patternProperties)[0]
   const value = FromType(type.patternProperties[pattern])
   return (
-    pattern === t.PatternBooleanExact ? z.record(z.boolean(), value) : 
     pattern === t.PatternNumberExact ? z.record(z.number(), value) : 
     pattern === t.PatternStringExact ? z.record(z.string(), value) : 
     z.record(z.string().regex(new RegExp(pattern)), value)
@@ -184,21 +208,21 @@ function FromRecord(type: t.TRecord): z.ZodTypeAny {
 // Never
 // ------------------------------------------------------------------
 type TFromNever<Result = z.ZodNever> = Result
-function FromNever(type: t.TNever): z.ZodTypeAny {
+function FromNever(type: t.TNever): z.ZodType {
   return z.never()
 }
 // ------------------------------------------------------------------
 // Never
 // ------------------------------------------------------------------
 type TFromNull<Result = z.ZodNull> = Result
-function FromNull(_type: t.TNull): z.ZodTypeAny {
+function FromNull(_type: t.TNull): z.ZodType {
   return z.null()
 }
 // ------------------------------------------------------------------
 // Number
 // ------------------------------------------------------------------
 type TFromNumber<Result = z.ZodNumber> = Result
-function FromNumber(type: t.TNumber): z.ZodTypeAny {
+function FromNumber(type: t.TNumber): z.ZodType {
   const { exclusiveMaximum, exclusiveMinimum, minimum, maximum, multipleOf } = type
   const constraints: TConstraint<z.ZodNumber>[] = []
   if (t.ValueGuard.IsNumber(exclusiveMinimum)) constraints.push((input) => input.min(exclusiveMinimum + 1))
@@ -213,102 +237,103 @@ function FromNumber(type: t.TNumber): z.ZodTypeAny {
 // ------------------------------------------------------------------
 type TFromString<Result = z.ZodString> = Result
 // prettier-ignore
-function FromString(type: t.TString): z.ZodTypeAny {
+function FromString(type: t.TString): z.ZodType {
   const constraints: TConstraint<z.ZodString>[] = []
   const { minLength, maxLength, pattern, format } = type
+  const input =  t.ValueGuard.IsString(format) ? 
+      format === 'base64' ? z.base64() : 
+      format === 'base64url' ? z.base64url() : 
+      format === 'cidrv4' ? z.cidrv4() :
+      format === 'cidrv6' ? z.cidrv6() : 
+      format === 'cidr' ? z.union([z.cidrv4(), z.cidrv6()]) : 
+      format === 'cuid' ? z.cuid() : 
+      format === 'cuid2' ? z.cuid2() :
+      format === 'date' ? z.date() : 
+      format === 'datetime' ? z.iso.datetime() : 
+      format === 'duration' ? z.iso.duration() : 
+      format === 'email' ? z.email() : 
+      format === 'emoji' ? z.emoji() : 
+      format === 'ipv4' ? z.ipv4() : 
+      format === 'ipv6' ? z.ipv6() : 
+      format === 'ip' ? z.union([z.ipv4(), z.ipv6()]) : 
+      format === 'jwt' ? z.jwt() : 
+      format === 'nanoid'  ? z.nanoid() : 
+      format === 'time' ? z.iso.time() : 
+      format === 'ulid' ? z.ulid() : 
+      format === 'url' ? z.url() : 
+      format === 'uuid' ? z.uuid() : 
+      z.string() : z.string();
+    
   if (t.ValueGuard.IsNumber(maxLength)) constraints.push((input) => input.max(maxLength))
   if (t.ValueGuard.IsNumber(minLength)) constraints.push((input) => input.min(minLength))
   if (t.ValueGuard.IsString(pattern)) constraints.push((input) => input.regex(new RegExp(pattern)))
-  if (t.ValueGuard.IsString(format))
-    constraints.push((input) =>
-      format === 'base64' ? input.base64() : 
-      format === 'base64url' ? input.base64url() : 
-      format === 'cidrv4' ? input.cidr({ version: 'v4' }) : 
-      format === 'cidrv6' ? input.cidr({ version: 'v6' }) : 
-      format === 'cidr' ? input.cidr() : 
-      format === 'cuid' ? input.cuid() : 
-      format === 'cuid2' ? input.cuid2() : 
-      format === 'date' ? input.date() : 
-      format === 'datetime' ? input.datetime() : 
-      format === 'duration' ? input.duration() : 
-      format === 'email' ? input.email() : 
-      format === 'emoji' ? input.emoji() : 
-      format === 'ipv4' ? input.ip({ version: 'v4' }) : 
-      format === 'ipv6' ? input.ip({ version: 'v6' }) : 
-      format === 'ip' ? input.ip() : 
-      format === 'jwt' ? input.jwt() : 
-      format === 'nanoid'  ? input.nanoid() : 
-      format === 'time' ? input.time() : 
-      format === 'ulid' ? input.ulid() : 
-      format === 'url' ? input.url() : 
-      format === 'uuid' ? input.uuid() : 
-      input,
-    )
-  return constraints.reduce((type, constraint) => constraint(type), z.string())
+    return input instanceof z.ZodString 
+     ? constraints.reduce((type, constraint) => constraint(type), input)
+    : input;
 }
 // ------------------------------------------------------------------
 // Symbol
 // ------------------------------------------------------------------
 type TFromSymbol<Result = z.ZodSymbol> = Result
-function FromSymbol(_type: t.TSymbol): z.ZodTypeAny {
+function FromSymbol(_type: t.TSymbol): z.ZodType {
   return z.symbol()
 }
 // ------------------------------------------------------------------
 // Tuple
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromTuple<Types extends t.TSchema[], Mapped extends z.ZodTypeAny[] = TFromTypes<Types>> = (
-  Mapped extends [z.ZodTypeAny, ...z.ZodTypeAny[]] | []
+type TFromTuple<Types extends t.TSchema[], Mapped extends z.ZodType[] = TFromTypes<Types>> = (
+  Mapped extends [z.ZodType, ...z.ZodType[]] | []
     ? z.ZodTuple<Mapped>
     : z.ZodNever
 )
-function FromTuple(type: t.TTuple): z.ZodTypeAny {
-  const mapped = FromTypes(type.items || []) as [] | [z.ZodTypeAny, ...z.ZodTypeAny[]]
-  return z.tuple(mapped)
+function FromTuple(type: t.TTuple): z.ZodType {
+  const mapped = FromTypes(type.items || []); 
+  return z.tuple(mapped as [z.ZodType, ...z.ZodType[]])
 }
 // ------------------------------------------------------------------
 // Undefined
 // ------------------------------------------------------------------
 type TFromUndefined<Result = z.ZodUndefined> = Result
-function FromUndefined(_type: t.TUndefined): z.ZodTypeAny {
+function FromUndefined(_type: t.TUndefined): z.ZodType {
   return z.undefined()
 }
 // ------------------------------------------------------------------
 // Union
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromUnion<Types extends t.TSchema[], Mapped extends z.ZodTypeAny[] = TFromTypes<Types>> = (
-  Mapped extends z.ZodUnionOptions ? z.ZodUnion<Mapped> : z.ZodNever
+type TFromUnion<Types extends t.TSchema[], Mapped extends z.ZodType[] = TFromTypes<Types>> = (
+  Mapped extends z.ZodUnion ? z.ZodUnion<Mapped> : z.ZodNever
 )
-function FromUnion(_type: t.TUnion): z.ZodTypeAny {
-  const mapped = FromTypes(_type.anyOf) as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]
+function FromUnion(_type: t.TUnion): z.ZodType {
+  const mapped = FromTypes(_type.anyOf) as [z.ZodType, z.ZodType, ...z.ZodType[]]
   return mapped.length >= 1 ? z.union(mapped) : z.never()
 }
 // ------------------------------------------------------------------
 // TUnknown
 // ------------------------------------------------------------------
 type TFromUnknown<Result = z.ZodUnknown> = Result
-function FromUnknown(_type: t.TUnknown): z.ZodTypeAny {
+function FromUnknown(_type: t.TUnknown): z.ZodType {
   return z.unknown()
 }
 // ------------------------------------------------------------------
 // Void
 // ------------------------------------------------------------------
 type TFromVoid<Result = z.ZodVoid> = Result
-function FromVoid(_type: t.TVoid): z.ZodTypeAny {
+function FromVoid(_type: t.TVoid): z.ZodType {
   return z.void()
 }
 // ------------------------------------------------------------------
 // Types
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromTypes<Types extends t.TSchema[], Result extends z.ZodTypeAny[] = []> = (
+type TFromTypes<Types extends t.TSchema[], Result extends z.ZodType[] = []> = (
   Types extends [infer Left extends t.TSchema, ...infer Right extends t.TSchema[]] 
     ? TFromTypes<Right, [...Result, TFromType<Left>]> 
     : Result
 )
-function FromTypes(types: t.TSchema[]): z.ZodTypeAny[] {
-  return types.map((type) => FromType(type))
+function FromTypes(types: t.TSchema[]): Readonly<z.ZodType[]> {
+  return types.map((type) => FromType(type)) as Readonly<z.ZodType[]>
 }
 // ------------------------------------------------------------------
 // Type
@@ -316,7 +341,7 @@ function FromTypes(types: t.TSchema[]): z.ZodTypeAny[] {
 // prettier-ignore
 type TFromType<Type extends t.TSchema,
   // Type Mapping
-  Mapped extends z.ZodTypeAny | z.ZodEffects<any> = (
+  Mapped extends z.ZodType | z.ZodNever = (
     Type extends t.TAny ? TFromAny :
     Type extends t.TArray<infer Type extends t.TSchema> ? TFromArray<Type> :
     Type extends t.TBigInt ? TFromBigInt :
@@ -345,7 +370,7 @@ type TFromType<Type extends t.TSchema,
   // Modifier Mapping
   IsReadonly extends boolean = Type extends t.TReadonly<t.TSchema> ? true : false,
   IsOptional extends boolean = Type extends t.TOptional<t.TSchema> ? true : false,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = (
+  Result extends z.ZodType | z.ZodNever = (
     [IsReadonly, IsOptional] extends [true, true] ? z.ZodReadonly<z.ZodOptional<Mapped>> :
     [IsReadonly, IsOptional] extends [false, true] ? z.ZodOptional<Mapped> :
     [IsReadonly, IsOptional] extends [true, false] ? z.ZodReadonly<Mapped> :
@@ -353,8 +378,8 @@ type TFromType<Type extends t.TSchema,
   )
 > = Result
 // prettier-ignore
-function FromType(type: t.TSchema): z.ZodTypeAny | z.ZodEffects<any> {
-  const constraints: TConstraint<z.ZodTypeAny>[] = []
+function FromType(type: t.TSchema): z.ZodType | z.ZodNever {
+  const constraints: TConstraint<z.ZodType>[] = []
   if(!t.ValueGuard.IsUndefined(type.description)) constraints.push(input => input.describe(type.description!))
   if(!t.ValueGuard.IsUndefined(type.default)) constraints.push(input => input.default(type.default))
   const mapped = constraints.reduce((type, constraint) => constraint(type), (
@@ -399,10 +424,10 @@ function FromType(type: t.TSchema): z.ZodTypeAny | z.ZodEffects<any> {
 // ------------------------------------------------------------------
 /** Creates a Zod type from TypeBox */
 // prettier-ignore
-export type TZodFromTypeBox<Type extends t.TSchema,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = TFromType<Type>
+export type TZod4FromTypeBox<Type extends t.TSchema,
+  Result extends z.ZodType | z.ZodNever = TFromType<Type>
 > = Result
-/** Creates a Zod type from TypeBox */
-export function ZodFromTypeBox<Type extends t.TSchema>(type: Type): TZodFromTypeBox<Type> {
+/** Creates a Zod v4 type from TypeBox */
+export function Zod4FromTypeBox<Type extends t.TSchema>(type: Type): TZod4FromTypeBox<Type> {
   return FromType(type) as never
 }
