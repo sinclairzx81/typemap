@@ -30,6 +30,7 @@ import { type TTypeBoxFromSyntax, TypeBoxFromSyntax } from './typebox-from-synta
 import { type TTypeBoxFromTypeBox, TypeBoxFromTypeBox } from './typebox-from-typebox'
 import { type TTypeBoxFromValibot, TypeBoxFromValibot } from './typebox-from-valibot'
 import { type TTypeBoxFromZod, TypeBoxFromZod } from './typebox-from-zod'
+import { type TTypeBoxFromZod4, TypeBoxFromZod4 } from './typebox-from-zod4'
 import { type TSyntaxOptions } from '../options'
 
 import * as g from '../guard'
@@ -71,6 +72,7 @@ export type TTypeBox<Parameter extends TParameter, Type extends object | string,
   Type extends g.SyntaxType ? TTypeBoxFromSyntax<TContextFromParameter<Parameter>, Type> :
   Type extends g.TypeBoxType ? TTypeBoxFromTypeBox<Type> :
   Type extends g.ValibotType ? TTypeBoxFromValibot<Type> :
+  Type extends g.Zod4Type ? TTypeBoxFromZod4<Type> :
   Type extends g.ZodType ? TTypeBoxFromZod<Type> :
   t.TNever
 )> = Result
@@ -86,6 +88,7 @@ export function TypeBox(...args: any[]): never {
     g.IsSyntax(type) ? TypeBoxFromSyntax(ContextFromParameter(parameter), type, options) :
     g.IsTypeBox(type) ? TypeBoxFromTypeBox(type) :
     g.IsValibot(type) ? TypeBoxFromValibot(type) :
+    g.IsZod4(type) ? TypeBoxFromZod4(type) :
     g.IsZod(type) ? TypeBoxFromZod(type) :
     t.Never()
   ) as never

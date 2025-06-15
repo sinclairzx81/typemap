@@ -176,7 +176,26 @@ function FromObject(type: z.ZodObject<any>): t.TSchema {
 // ------------------------------------------------------------------
 type TFromOptional<Type extends z.ZodType, Result = t.TOptional<TFromType<Type>>> = Result
 function FromOptional(type: z.ZodOptional): t.TSchema {
-  return t.Optional(FromType(type.def.innerType as z.ZodType))
+  // Get the inner type and convert it first
+  const innerType = type.def.innerType as z.ZodType;
+  
+  // Special handling for string format validators
+  const constructorName = innerType.constructor.name;
+  if (constructorName.startsWith('Zod') && 
+      constructorName !== 'ZodType' && 
+      constructorName !== 'ZodString' && 
+      (typeof (innerType as any).regex === 'object' || 
+       typeof (innerType as any).check === 'function' ||
+       innerType instanceof z.ZodStringFormat)) {
+    
+    // Extract format from the constructor name
+    const format = constructorName.replace(/^\$?Zod(ISO)?/, '').toLowerCase();
+    return t.Optional(t.String({ ...Options(type), format }));
+  }
+  
+  // Default handling for other types
+  const typebox = FromType(innerType);
+  return t.Optional(typebox);
 }
 // ------------------------------------------------------------------
 // Record
@@ -270,6 +289,45 @@ type TFromType<Type extends z.ZodType> =
   Type extends z.ZodDefault<infer T extends z.ZodType> ? TFromDefault<T> :
   t.TSchema
 
+// ------------------------------------------------------------------
+// String Formats
+// ------------------------------------------------------------------
+// Helper function to create string with format
+function StringWithFormat(type: z.ZodType, format: string): t.TSchema {
+  return t.String({ ...Options(type), format })
+}
+
+// Function to handle any string format validator
+function FromStringFormat(type: z.ZodType): t.TSchema {
+  // Get the constructor name which should contain the format name
+  const constructorName = type.constructor.name;
+  
+  // Extract format from constructor name, e.g. "ZodEmail" -> "email"
+  if (constructorName.startsWith('Zod') || constructorName.startsWith('$Zod')) {
+    // Remove "Zod" or "$Zod" prefix and convert to lowercase
+    const format = constructorName.replace(/^\$?Zod(ISO)?/, '').toLowerCase();
+    return StringWithFormat(type, format);
+  }
+  
+  // Fallback to just a string if we can't determine the format
+  return t.String(Options(type));
+}
+
+// ------------------------------------------------------------------
+// Transform & Pipe
+// ------------------------------------------------------------------
+function FromTransform(type: z.ZodTransform<any, any>): t.TSchema {
+  // Get the input type and pass it through the FromType function
+  const input = type.def.input as z.ZodType;
+  return FromType(input);
+}
+
+function FromPipe(type: z.ZodPipe<any, any>): t.TSchema {
+  // Get the input type and pass it through the FromType function
+  const input = type.def.in as z.ZodType;
+  return FromType(input);
+}
+
 // prettier-ignore
 function FromType(type: z.ZodType): t.TSchema {
   if (type instanceof z.ZodAny) return FromAny(type)
@@ -284,13 +342,35 @@ function FromType(type: z.ZodType): t.TSchema {
   if (type instanceof z.ZodNumber) return FromNumber(type)
   if (type instanceof z.ZodObject) return FromObject(type)
   if (type instanceof z.ZodOptional) return FromOptional(type)
+  if (type instanceof z.ZodPipe) return FromPipe(type)
   if (type instanceof z.ZodRecord) return FromRecord(type)
   if (type instanceof z.ZodString) return FromString(type)
+  if (type instanceof z.ZodTransform) return FromTransform(type)
   if (type instanceof z.ZodTuple) return FromTuple(type)
   if (type instanceof z.ZodUnion) return FromUnion(type)
   if (type instanceof z.ZodUnknown) return FromUnknown(type)
   if (type instanceof z.ZodUndefined) return FromUndefined(type)
   if (type instanceof z.ZodDefault) return FromDefault(type)
+
+  // Handle all string format validators registered with FormatRegistry
+  // Check if the type is an instance of a format validator by checking if its constructor name
+  // suggests it's a string format validator (e.g., ZodEmail, ZodUUID, etc.)
+  const constructorName = type.constructor.name;
+  if ((constructorName.startsWith('Zod') || constructorName.startsWith('$Zod')) && 
+      constructorName !== 'ZodType' && 
+      constructorName !== 'ZodString' &&
+      constructorName !== 'ZodNumber' &&
+      constructorName !== 'ZodObject' &&
+      constructorName !== 'ZodArray') {
+    // Try to handle it as a string format if it looks like one
+    // This should catch ZodEmail, ZodUUID, ZodURL, etc.
+    if (typeof (type as any).regex === 'object' || 
+        typeof (type as any).check === 'function' ||
+        type instanceof z.ZodStringFormat) {
+      return FromStringFormat(type);
+    }
+  }
+
   return t.Never()
 }
 

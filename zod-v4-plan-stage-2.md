@@ -66,14 +66,6 @@ The foundational implementation is already complete:
 - [ ] Add test coverage requirements for Zod v4 code
 - [ ] Prepare for release (beta and stable versions)
 
-## Timeline
-
-| Milestone | Description | Target Date |
-|-----------|-------------|-------------|
-| 1 | Complete Testing Enhancements | Week of June 21, 2025 |
-| 2 | API Adaptation for Zod v4 | Week of June 28, 2025 |
-| 3 | Documentation & Final Integration | Week of July 5, 2025 |
-
 ## Implementation Note
 
 Direct conversions between Zod v3 and Zod v4 types remain **out of scope**. Users should utilize intermediate formats (like Syntax or TypeBox) for conversion between Zod versions.
