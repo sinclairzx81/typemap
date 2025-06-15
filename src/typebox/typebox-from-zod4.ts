@@ -318,7 +318,7 @@ function FromStringFormat(type: z.ZodType): t.TSchema {
 // ------------------------------------------------------------------
 function FromTransform(type: z.ZodTransform<any, any>): t.TSchema {
   // Get the input type and pass it through the FromType function
-  const input = type.def.input as z.ZodType;
+  const input = type._zod.input as z.ZodType;
   return FromType(input);
 }
 
