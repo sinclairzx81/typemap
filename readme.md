@@ -477,7 +477,32 @@ Results show the approximate elapsed time to complete the given iterations
 └─────────┴────────────────┴────────────────────┴────────────┴────────────┘
 ```
 
+Using [bun]() and the latest (2025-06-14) versions of each library, the results show there is still an order-of-magnitude advantage to compiling.
 
+```ts
+┌───┬──────────────┬──────────────────┬────────────┬──────────┐
+│   │ library      │ using            │ iterations │ elapsed  │
+├───┼──────────────┼──────────────────┼────────────┼──────────┤
+│ 0 │ valibot      │ valibot          │ 10000000   │ 792 ms   │
+│ 1 │ valibot      │ typebox:value    │ 10000000   │ 1625 ms  │
+│ 2 │ valibot      │ typebox:compile  │ 10000000   │ 177 ms   │
+└───┴──────────────┴──────────────────┴────────────┴──────────┘
+┌───┬──────────────┬──────────────────┬────────────┬──────────┐
+│   │ library      │ using            │ iterations │ elapsed  │
+├───┼──────────────┼──────────────────┼────────────┼──────────┤
+│ 0 │ zod          │ zod              │ 10000000   │ 4553 ms  │
+│ 1 │ zod          │ typebox:value    │ 10000000   │ 1739 ms  │
+│ 2 │ zod          │ typebox:compile  │ 10000000   │ 214 ms   │
+└───┴──────────────┴──────────────────┴────────────┴──────────┘
+┌───┬──────────────┬──────────────────┬────────────┬──────────┐
+│   │ library      │ using            │ iterations │ elapsed  │
+├───┼──────────────┼──────────────────┼────────────┼──────────┤
+│ 0 │ zod v4       │ zod v4           │ 10000000   │ 1404 ms  │
+│ 1 │ zod v4       │ typemap:zod4     │ 10000000   │ 1214 ms  │
+│ 2 │ zod v4       │ typebox:value    │ 10000000   │ 2294 ms  │
+│ 3 │ zod v4       │ typebox:compile  │ 10000000   │ 310 ms   │
+└───┴──────────────┴──────────────────┴────────────┴──────────┘
+```
 
 ## Contribute
 
