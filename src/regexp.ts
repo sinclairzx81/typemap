@@ -25,11 +25,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
-
+export function combineRegExpHack(...patterns: (string|RegExp|undefined)[]) : string | undefined {
+    const strings = patterns.filter(p => p !== undefined)
+      .map(p => (p instanceof RegExp ? p.source : p as string));
+    // Filter out undefined patterns
+  const validPatterns = Array.from(new Set(strings.filter(p => !!p 
+    && p !== '.*' && p !== '^.*' && p !== '.*$' && p !== '^' && p !== '$'
+    && p !== '' && p !== '(.*)'))); // Remove empty strings
+  if (validPatterns.length === 0) return undefined;
+  if (validPatterns.length === 1) return validPatterns[0];
+  const result = combinePatternsHack(validPatterns)
+  console.warn('Combining multiple patterns. This may not behave as expected.', [...validPatterns, '-->', result]); 
+  return result
+}
 
 // Should probably remove this if TypeBox supports pattern arrays
 
-export function combinePatternsHack(patterns: string[]): string {
+function combinePatternsHack(patterns: string[]): string {
   // Use lookahead assertions to enforce that a string matches all patterns
   // This is more robust than trying to combine regex patterns directly
   

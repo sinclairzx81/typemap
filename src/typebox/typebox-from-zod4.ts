@@ -28,7 +28,7 @@ THE SOFTWARE.
 
 import * as t from '@sinclair/typebox'
 import { z } from 'zod/v4'
-
+import { combineRegExpHack } from '../regexp.js'
 // ------------------------------------------------------------------
 // Options
 // ------------------------------------------------------------------
@@ -179,24 +179,9 @@ type TFromOptional<Type extends z.ZodType, Result = t.TOptional<TFromType<Type>>
 function FromOptional(type: z.ZodOptional): t.TSchema {
   // Get the inner type and convert it first
   const innerType = type.def.innerType as z.ZodType;
-  
-  // Special handling for string format validators
-  const constructorName = innerType.constructor.name;
-  if (constructorName.startsWith('Zod') && 
-      constructorName !== 'ZodType' && 
-      constructorName !== 'ZodString' && 
-      (typeof (innerType as any).regex === 'object' || 
-       typeof (innerType as any).check === 'function' ||
-       innerType instanceof z.ZodStringFormat)) {
-    
-    // Extract format from the constructor name
-    const format = constructorName.replace(/^\$?Zod(ISO)?/, '').toLowerCase();
-    return t.Optional(t.String({ ...Options(type), format }));
-  }
-  
+
   // Default handling for other types
-  const typebox = FromType(innerType);
-  return t.Optional(typebox);
+  return t.Optional(FromType(innerType));
 }
 // ------------------------------------------------------------------
 // Record
@@ -308,44 +293,14 @@ function getExtraPatterns(checks: z.core.$ZodCheck[]): string[]{
   return checks.map(item => {
     const check = item._zod.def.check;
     if(check === 'regex') return (item._zod.def as z.core.$ZodCheckRegexDef).pattern?.source;
-    if(check === 'lowercase') return '^[^A-Z]*$'; // Matches lowercase letters
-    if(check === 'uppercase') return '^[^a-z]*$'; // Matches uppercase letters
+    if(check === 'lowercase') return '^[^A-Z]*$'; // Matches non-uppercase letters
+    if(check === 'uppercase') return '^[^a-z]*$'; // Matches non-lowercase letters
     if(check === 'starts_with') return `^${(item._zod.def as z.core.$ZodCheckStartsWithDef).prefix}`;
     if(check === 'ends_with') return `${(item._zod.def as z.core.$ZodCheckEndsWithDef).suffix}$`;
     if(check === 'includes') return `.*${(item._zod.def as z.core.$ZodCheckIncludesDef).includes}.*`;
     // TODO - warn or something if we hit an unknown check
     return undefined;
   }).filter(x => x !== undefined ).filter(x=>!!x);
-}
-function combineRegExpHack(...patterns: (string|RegExp|undefined)[]) : string | undefined {
-  // Filter out undefined patterns
-  const validPatterns = Array.from(new Set(patterns.filter(p => p !== undefined)
-      .map(p => (p instanceof RegExp ? p.source : p as string))));
-  if (validPatterns.length === 0) return undefined;
-  if (validPatterns.length === 1) return validPatterns[0];
-  const result = combinePatternsHack(validPatterns)
-  // console.warn('Combining multiple patterns into a single regex. This may not behave as expected.', validPatterns, result);  
-  return result
-}
-// In writing this implementation, it seems that the typebox-from-zod3 might not work right for example
-// z.ipv4().startsWith('192.168.')
-// we should test this... 
-// TODO - Verify behavior when there is both a startsWith and endsWith check
-function combinePatternsHack(patterns: string[]): string {
-  // regex does not support 'and'. but it does support 'or' and 'not', so we can use de Morgan's Law:
-  //      (A & B & C) = !(!A | !B | !C) 
-  // and combine patterns with zero-width negative lookahead
-  // const anyDoesNotMatch = patterns.map(p => `(?:(?!${p}).)*`).join('|');
-  // const allMatch = `^(?:(?!${anyDoesNotMatch}).)*$`;
-  // another approach is to use zero-width positive lookahead, but this is more complex
-  // but for this to work, each inner pattern must be anchored to the start and end of the string
-  const adjustedPatterns = patterns.map(p => {
-    const fromStart = !p.startsWith('^') && !p.startsWith('.*') ? '.*' : '';
-    const fromEnd = !p.endsWith('$') && !p.endsWith('.*') ? '.*' : '';
-    return fromStart||fromEnd ? `${fromStart}${p}${fromEnd}` : p;
-  });
-  const allMatch = `^${adjustedPatterns.map(p => `(?=${p})`).join('')}.*$`;
-  return allMatch;
 }
 
 // ------------------------------------------------------------------
