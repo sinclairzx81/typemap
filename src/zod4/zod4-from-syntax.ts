@@ -27,22 +27,22 @@ THE SOFTWARE.
 ---------------------------------------------------------------------------*/
 
 import { TTypeBoxFromSyntax, TypeBoxFromSyntax } from '../typebox/typebox-from-syntax'
-import { ZodFromTypeBox, TZodFromTypeBox } from './zod4-from-typebox'
+import { Zod4FromTypeBox, TZod4FromTypeBox } from './zod4-from-typebox'
 import * as t from '@sinclair/typebox'
-import * as z from 'zod'
+import { z } from 'zod/v4'
 
 // ------------------------------------------------------------------
-// ZodFromSyntax
+// Zod4FromSyntax
 // ------------------------------------------------------------------
-/** Creates a Zod type from Syntax */
+/** Creates a Zod v4 type from Syntax */
 // prettier-ignore
-export type TZodFromSyntax<Context extends t.TProperties, Type extends string,
+export type TZod4FromSyntax<Context extends t.TProperties, Type extends string,
   TypeBox extends t.TSchema = TTypeBoxFromSyntax<Context, Type>,
-  Result extends z.ZodTypeAny | z.ZodEffects<any> = TZodFromTypeBox<TypeBox>
+  Result extends z.ZodTypeAny | z.ZodNever = TZod4FromTypeBox<TypeBox>
 > = Result
-/** Creates a Zod type from Syntax */
-export function ZodFromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TZodFromSyntax<Context, Type> {
+/** Creates a Zod v4 type from Syntax */
+export function Zod4FromSyntax<Context extends t.TProperties, Type extends string>(context: Context, type: Type, options?: t.SchemaOptions): TZod4FromSyntax<Context, Type> {
   const typebox = TypeBoxFromSyntax(context, type, options)
-  const result = ZodFromTypeBox(typebox)
+  const result = Zod4FromTypeBox(typebox)
   return result as never
 }
