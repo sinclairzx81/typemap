@@ -477,7 +477,7 @@ Results show the approximate elapsed time to complete the given iterations
 └─────────┴────────────────┴────────────────────┴────────────┴────────────┘
 ```
 
-Using [bun]() and the latest (2025-06-14) versions of each library, the results show there is still an order-of-magnitude advantage to compiling.
+Using [bun](https://bun.sh) and the latest (2025-06-14) versions of each library, the results show there is still an order-of-magnitude advantage to compiling.
 
 ```ts
 ┌───┬──────────────┬──────────────────┬────────────┬──────────┐
