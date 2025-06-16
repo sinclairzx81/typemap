@@ -1,8 +1,9 @@
 import { Value } from '@sinclair/typebox/value'
-import { Compile, TypeBox } from '@sinclair/typemap'
+import { Compile, TypeBox, TypeBoxFromZod4, Zod4 } from '@sinclair/typemap'
 
 import * as v from 'valibot'
 import * as z from 'zod'
+import * as z4 from 'zod/v4'
 
 // ------------------------------------------------------------------
 // Benchmark
@@ -76,7 +77,50 @@ function valibot_using_compiler() {
   return benchmark('valibot', 'typebox:compile', () => T.Check({ x: 'hello', y: 42, z: true }))
 }
 
+// ------------------------------------------------------------------
+// Zod v4
+// ------------------------------------------------------------------
+function zod4() {
+  const T = z4.object({
+    x: z4.string(),
+    y: z4.number(),
+    z: z4.boolean(),
+  })
+  return benchmark('zod v4', 'zod v4', () => T.safeParse({ x: 'hello', y: 42, z: true }).success)
+}
+function zod4_using_value() {
+  const T = TypeBox(
+    z4.object({
+      x: z4.string(),
+      y: z4.number(),
+      z: z4.boolean(),
+    }),
+  )
+  return benchmark('zod v4', 'typebox:value', () => Value.Check(T, { x: 'hello', y: 42, z: true }))
+}
+function zod4_using_compiler() {
+  const T = Compile(
+    z4.object({
+      x: z4.string(),
+      y: z4.number(),
+      z: z4.boolean(),
+    }),
+  )
+  return benchmark('zod v4', 'typebox:compile', () => T.Check({ x: 'hello', y: 42, z: true }))
+}
+
+// Direct API comparison
+function zod4_using_library_api() {
+  const T = Zod4(`{
+    x: string,
+    y: number,
+    z: boolean
+  }`) 
+  return benchmark('zod v4', 'typemap:zod4', () => T.safeParse({ x: 'hello', y: 42, z: true }).success)
+}
+
 console.log('running benchmark')
 console.table([valibot(), valibot_using_value(), valibot_using_compiler()])
 console.table([zod(), zod_using_value(), zod_using_compiler()])
+console.table([zod4(), zod4_using_library_api(), zod4_using_value(), zod4_using_compiler(),])
 

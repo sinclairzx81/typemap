@@ -26,48 +26,48 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import { type TZodFromSyntax, ZodFromSyntax } from './zod-from-syntax'
-import { type TZodFromTypeBox, ZodFromTypeBox } from './zod-from-typebox'
-import { type TZodFromValibot, ZodFromValibot } from './zod-from-valibot'
-import { type TZodFromZod, ZodFromZod } from './zod-from-zod'
-import { type TZodFromZod4, ZodFromZod4 } from './zod-from-zod4'
+import { type TZod4FromSyntax, Zod4FromSyntax } from './zod4-from-syntax'
+import { type TZod4FromTypeBox, Zod4FromTypeBox } from './zod4-from-typebox'
+import { type TZod4FromValibot, Zod4FromValibot } from './zod4-from-valibot'
+import { type TZod4FromZod4, Zod4FromZod4 } from './zod4-from-zod4'
+import { type TZod4FromZod, Zod4FromZod } from './zod4-from-zod'
 import { type TSyntaxOptions } from '../options'
 
 import { type TParameter, type TContextFromParameter, ContextFromParameter } from '../typebox/typebox'
 
 import * as g from '../guard'
-import * as z from 'zod'
+import { z } from 'zod/v4'
 
 // ------------------------------------------------------------------
-// Zod
+// Zod4
 // ------------------------------------------------------------------
-/** Creates a Zod type by mapping from a remote Type */
+/** Creates a Zod v4 type by mapping from a remote Type */
 // prettier-ignore
-export type TZod<Parameter extends TParameter, Type extends object | string, Result extends z.ZodTypeAny | z.ZodEffects<any> = (
-  Type extends g.SyntaxType ? TZodFromSyntax<TContextFromParameter<Parameter>, Type> :
-  Type extends g.TypeBoxType ? TZodFromTypeBox<Type> :
-  Type extends g.ValibotType ? TZodFromValibot<Type> :
-  Type extends g.ZodType ? TZodFromZod<Type> :
-  Type extends g.Zod4Type ? TZodFromZod4<Type> :
+export type TZod4<Parameter extends TParameter, Type extends object | string, Result extends z.ZodTypeAny | z.ZodNever = (
+  Type extends g.SyntaxType ? TZod4FromSyntax<TContextFromParameter<Parameter>, Type> :
+  Type extends g.TypeBoxType ? TZod4FromTypeBox<Type> :
+  Type extends g.ValibotType ? TZod4FromValibot<Type> :
+  Type extends g.ZodType ? TZod4FromZod<Type> :
+  Type extends g.Zod4Type ? TZod4FromZod4<Type> :
   z.ZodNever
 )> = Result
 
-/** Creates a Zod type by mapping from a remote Type */
-export function Zod<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TZod<Parameter, Type>
-/** Creates a Zod type by mapping from a remote Type */
-export function Zod<Type extends string>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
-/** Creates a Zod type by mapping from a remote Type */
-export function Zod<Type extends object>(type: Type, options?: TSyntaxOptions): TZod<{}, Type>
-/** Creates a Zod type by mapping from a remote Type */
+/** Creates a Zod v4 type by mapping from a remote Type */
+export function Zod4<Parameter extends TParameter, Type extends string>(parameter: Parameter, type: Type, options?: TSyntaxOptions): TZod4<Parameter, Type>
+/** Creates a Zod v4 type by mapping from a remote Type */
+export function Zod4<Type extends string>(type: Type, options?: TSyntaxOptions): TZod4<{}, Type>
+/** Creates a Zod v4 type by mapping from a remote Type */
+export function Zod4<Type extends object>(type: Type, options?: TSyntaxOptions): TZod4<{}, Type>
+/** Creates a Zod v4 type by mapping from a remote Type */
 // prettier-ignore
-export function Zod(...args: any[]): never {
+export function Zod4(...args: any[]): never {
   const [parameter, type, options] = g.Signature(args)
   return (
-    g.IsSyntax(type) ? ZodFromSyntax(ContextFromParameter(parameter), type, options) : 
-    g.IsTypeBox(type) ? ZodFromTypeBox(type) : 
-    g.IsValibot(type) ? ZodFromValibot(type) : 
-    g.IsZod(type) ? ZodFromZod(type) : 
-    g.IsZod4(type) ? ZodFromZod4(type) : 
+    g.IsSyntax(type) ? Zod4FromSyntax(ContextFromParameter(parameter), type, options) : 
+    g.IsTypeBox(type) ? Zod4FromTypeBox(type) : 
+    g.IsValibot(type) ? Zod4FromValibot(type) : 
+    g.IsZod(type) ? Zod4FromZod(type) : 
+    g.IsZod4(type) ? Zod4FromZod4(type) : 
     z.never()
   ) as never
 }
