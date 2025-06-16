@@ -29,6 +29,7 @@ THE SOFTWARE.
 import * as t from '@sinclair/typebox'
 import { z } from 'zod/v4'
 import { combineRegExpHack } from '../regexp.js'
+
 // ------------------------------------------------------------------
 // Options
 // ------------------------------------------------------------------
@@ -40,6 +41,7 @@ function Options(type: z.ZodType): t.SchemaOptions {
 // Formats
 // ------------------------------------------------------------------
 const check = (type: z.ZodType, value: unknown) => type.safeParse(value).success
+
 // Register formats for Zod4 validators
 // Note: In Zod v4, string formats are top-level functions rather than methods
 // Types defined in zod/v4: 
@@ -77,8 +79,8 @@ t.FormatRegistry.Set('xid', (value) => check(z.xid(), value))
 // Any
 // ------------------------------------------------------------------
 type TFromAny<Result = t.TAny> = Result
-function FromAny(_type: z.ZodAny): t.TSchema {
-  return t.Any(Options(_type))
+function FromAny(type: z.ZodAny): t.TSchema {
+  return t.Any(Options(type))
 }
 // ------------------------------------------------------------------
 // Array
@@ -103,6 +105,34 @@ type TFromBoolean<Result = t.TBoolean> = Result
 function FromBoolean(type: z.ZodBoolean): t.TSchema {
   return t.Boolean(Options(type))
 }
+
+// ------------------------------------------------------------------
+// Catch (error capture with default)
+// ------------------------------------------------------------------
+type TFromCatch<Type extends z.ZodType,
+  Result = t.TOptional<TFromType<Type>>
+> = Result;
+
+function FromCatch(type: z.ZodCatch<any>): t.TSchema {
+  // Similar to default: treat as optional with default value
+  const inner = type.def.innerType as z.ZodType;
+  return t.Optional(FromType(inner));
+}
+
+// // ------------------------------------------------------------------
+// // Custom (including refinements)
+// // ------------------------------------------------------------------
+// type TFromCustom<Type extends z.ZodType,
+//   Result = TFromType<Type>
+// > = Result;
+
+// function FromCustom(type: z.ZodCustom<any>): t.TSchema {
+//   // Custom types in Zod4 are just regular types with a refinement
+//   // We can treat them as the inner type with no special handling
+//   const inner = type.def.fn;
+//   return t.Function(inner, Options(type));
+// }
+
 // ------------------------------------------------------------------
 // Date
 // ------------------------------------------------------------------
@@ -110,12 +140,42 @@ type TFromDate<Result = t.TDate> = Result
 function FromDate(type: z.ZodDate): t.TSchema {
   return t.Date(Options(type))
 }
+
+// ------------------------------------------------------------------
+// Default
+// ------------------------------------------------------------------
+type TFromDefault<Type extends z.ZodType, Result = TFromType<Type>> = Result
+function FromDefault(type: z.ZodDefault<any>): t.TSchema {
+  const inner = FromType(type.def.innerType as z.ZodType);
+    return t.Optional(inner, type.def.defaultValue)
+}
+
+// ------------------------------------------------------------------
+// Discriminated Union - Deprecated in Zod4
+// ------------------------------------------------------------------
+// type TFromDiscriminatedUnion<Types extends [z.ZodType, ...z.ZodType[]],
+//   Result = t.TUnion<{ [K in keyof Types]: TFromType<Types[K]> }>
+// > = Result;
+
+// function FromDiscriminatedUnion<Types extends [z.ZodType, ...z.ZodType[]]>(
+//   type: z.ZodDiscriminatedUnion<Types>
+// ): t.TSchema {
+//   const options = type.options.map(opt => FromType(opt));
+//   // z4 dropped discriminates, so just use a normal union
+//   return t.Union(options,Options(type));
+// }
+
 // ------------------------------------------------------------------
 // Enum
 // ------------------------------------------------------------------
+/** prettier-ignore */
+type TFromEnum<Variants extends z.core.util.EnumLike> 
+  = t.TUnion<{ [K in keyof Variants]: t.TLiteral<Variants[K]> }[keyof Variants][]>
+
 function FromEnum(type: z.ZodEnum): t.TSchema {
   return t.Enum(type.enum, Options(type))
 }
+
 // ------------------------------------------------------------------
 // Intersect
 // ------------------------------------------------------------------
@@ -125,6 +185,16 @@ function FromIntersect(type: z.ZodIntersection): t.TSchema {
   const right = FromType(type.def.right as z.ZodType)
   return t.Intersect([left, right], Options(type))
 }
+
+// ------------------------------------------------------------------
+// Lazy (Recursive Types)
+// ------------------------------------------------------------------
+type TFromLazy<Type extends z.ZodType, Result = t.TRecursive<TFromType<Type>>> = Result
+
+function FromLazy(type: z.ZodLazy<any>): t.TSchema {
+  return t.Recursive((() => FromType(type.def.getter() as z.ZodType)), Options(type));
+}
+
 // ------------------------------------------------------------------
 // Literal
 // ------------------------------------------------------------------
@@ -132,6 +202,41 @@ type TFromLiteral<Type extends string | number | boolean, Result = t.TLiteral<Ty
 function FromLiteral(type: z.ZodLiteral<any>): t.TSchema {
   return t.Literal(type.value, Options(type))
 }
+
+// ------------------------------------------------------------------
+// Map - a TypeBox Map<Key, Value> would be nice, but it's not JsonSchema
+// ------------------------------------------------------------------
+// type TFromMap<Key extends z.ZodType, Value extends z.ZodType,
+//   Result = t.Map<t.TTuple<[TFromType<Key>, TFromType<Value>]>>
+// > = Result;
+
+// function FromMap(type: z.ZodMap<any, any>): t.TSchema {
+//   const keySchema = FromType(type.def.keyType as z.ZodType);
+//   const valSchema = FromType(type.def.valueType as z.ZodType);
+//   return t.Array(t.Tuple([keySchema, valSchema]), Options(type));
+// }
+
+// ------------------------------------------------------------------
+// Never
+// ------------------------------------------------------------------
+type TFromNever = t.TNever
+function FromNever<Def extends z.ZodNever>(_def: Def): t.TSchema {
+  return t.Never()
+}
+
+// ------------------------------------------------------------------
+// Nullable
+// ------------------------------------------------------------------
+type TFromNullable<Type extends z.ZodType,
+  Result = t.TUnion<[TFromType<Type>, t.TNull]>
+> = Result;
+
+function FromNullable(type: z.ZodNullable<any>): t.TSchema {
+  const inner = FromType(type.def.innerType as z.ZodType);
+  return t.Union([inner, t.Null()], Options(type));
+}
+
+
 // ------------------------------------------------------------------
 // Null
 // ------------------------------------------------------------------
@@ -139,6 +244,7 @@ type TFromNull<Result = t.TNull> = Result
 function FromNull(type: z.ZodNull): t.TSchema {
   return t.Null(Options(type))
 }
+
 // ------------------------------------------------------------------
 // Number
 // ------------------------------------------------------------------
@@ -157,9 +263,15 @@ function FromNumber(type: z.ZodNumber): t.TSchema {
   }
   return t.Number({ ...Options(type), ...constraints })
 }
+
 // ------------------------------------------------------------------
 // Object
 // ------------------------------------------------------------------
+type TFromObject<Properties extends z.ZodRawShape> = t.Ensure<
+  t.TObject<{
+    [Key in keyof Properties]: TFromType<Properties[Key]>
+  }>
+>
 function FromObject(type: z.ZodObject<any>): t.TSchema {
   // Extract properties from Zod object type
   const properties: Record<string, t.TSchema> = {}
@@ -194,9 +306,43 @@ function FromOptional(type: z.ZodOptional): t.TSchema {
   // Default handling for other types
   return t.Optional(FromType(innerType));
 }
+
+// // ------------------------------------------------------------------
+// // Pipe -- Too complicate, never seen it used 
+// // ------------------------------------------------------------------
+// type TFromPipe<_I extends z.ZodType, O extends z.ZodType, Result = TFromType<O>> = Result;
+// function FromPipe(type: z.ZodPipe<any, any>): t.TSchema {
+//   // Get the input type and pass it through the FromType function
+//   const input = type.def.in as z.ZodType;
+//   return FromType(input);
+// }
+
+
+// ------------------------------------------------------------------
+// Promise
+// ------------------------------------------------------------------
+type TFromPromise<Type extends z.ZodType,
+  Result extends t.TSchema = t.TPromise<TFromType<Type>>
+> = Result;
+
+function FromPromise(type: z.ZodPromise<any>): t.TSchema {
+  return t.Promise(FromType(type.def.innerType as z.ZodType), Options(type));
+}
+
+
+// ------------------------------------------------------------------
+// Readonly
+// ------------------------------------------------------------------
+type TFromReadonly<Type extends z.ZodType, Result extends t.TSchema = t.TReadonly<TFromType<Type>>> = Result
+function FromReadonly<Type extends z.ZodReadonly>(type: Type): t.TSchema {
+  return t.Readonly(FromType(type.def.innerType as z.ZodType));
+}
+
 // ------------------------------------------------------------------
 // Record
 // ------------------------------------------------------------------
+type TFromRecord<Key extends z.core.$ZodRecordKey, Value extends z.ZodType> = t.Ensure<t.TRecordOrObject<TFromType<Key>, TFromType<Value>>>
+
 function FromRecord(type: z.ZodRecord): t.TSchema {
   // Handle key and value types
   const keyType = t.String()
@@ -204,6 +350,19 @@ function FromRecord(type: z.ZodRecord): t.TSchema {
   
   return t.Record(keyType, valueType, Options(type))
 }
+
+// // ------------------------------------------------------------------
+// // Set - Like Map, I don't think TypeBox has a Set type
+// // ------------------------------------------------------------------
+// type TFromSet<Type extends z.ZodType,
+//   Result = t.TArray<TFromType<Type>>
+// > = Result;
+
+// function FromSet(type: z.ZodSet<any>): t.TSchema {
+//   const itemSchema = FromType(type._def.valueType as z.ZodType);
+//   return t.Array(itemSchema, { ...Options(type), uniqueItems: true });
+// }
+
 // ------------------------------------------------------------------
 // String
 // ------------------------------------------------------------------
@@ -316,8 +475,59 @@ function getExtraPatterns(checks: z.core.$ZodCheck[]): (string|undefined)[]{
 }
 
 // ------------------------------------------------------------------
+// Symbol
+// ------------------------------------------------------------------
+type TFromSymbol<Result extends t.TSchema = t.TSymbol> = Result;
+
+function FromSymbol(type: z.ZodSymbol): t.TSchema {
+  return t.Symbol(Options(type));
+}
+
+
+// ------------------------------------------------------------------
+// Template Literal
+// ------------------------------------------------------------------
+// Helper to map Zod template literal part to TypeBox template literal kind
+// (You may need to expand this as you support more Zod part types)
+
+type TFromTemplateLiteralPart<Part extends z.core.$ZodTemplateLiteralPart> = t.Ensure<
+  Part extends z.ZodTemplateLiteral<infer T extends string> ? t.TTemplateLiteralSyntax<T> :
+  Part extends z.ZodString ? t.TString :
+  Part extends z.ZodNumber ? t.TNumber :
+  Part extends z.ZodBoolean ? t.TBoolean :
+  Part extends z.ZodLiteral<infer V extends t.TLiteralValue> ? t.TLiteral<V> :
+  // Part extends z.ZodTemplateLiteral ? TFromTemplateLiteral<Part> :
+  t.TTemplateLiteralKind>;
+type TFromTemplateLiteralParts<Parts extends z.core.$ZodTemplateLiteralPart[]> = 
+  { [K in keyof Parts]: TFromTemplateLiteralPart<Parts[K]> }[number][];
+
+type TFromTemplateLiteral<T extends z.ZodTemplateLiteral> =
+  t.TTemplateLiteral<TFromTemplateLiteralParts<T['def']['parts']>>;
+// z.templateLiteral
+function FromTemplateLiteral(type: z.ZodTemplateLiteral): t.TSchema {
+  const parts = type.def.parts.map(part => FromType(part as z.ZodType)) as t.TTemplateLiteralKind[];
+  return t.TemplateLiteral(parts, Options(type));
+}
+
+// ------------------------------------------------------------------
+// Transform
+// ------------------------------------------------------------------
+
+type TFromTransform<In extends z.ZodType, Out extends z.ZodType> = TFromType<Out>
+function FromTransform(type: z.ZodTransform<any, any>): t.TSchema {
+  // Get the input type and pass it through the FromType function
+  const output = type._zod.output as z.ZodType;
+  return FromType(output);
+}
+// ------------------------------------------------------------------
 // Tuple
 // ------------------------------------------------------------------
+type TFromTuple<Types extends z.ZodType[], Result extends t.TSchema[] = []> = (
+  Types extends [infer Left extends z.ZodType, ...infer Right extends z.ZodType[]]
+    ? TFromTuple<Right, [...Result, TFromType<Left>]>
+    : t.TTuple<Result>
+)
+
 function FromTuple(type: z.ZodTuple): t.TSchema {
   const items = type.def.items.map(item => FromType(item as z.ZodType))
   return t.Tuple(items, Options(type))
@@ -344,83 +554,96 @@ type TFromUndefined<Result = t.TUndefined> = Result
 function FromUndefined(type: z.ZodUndefined): t.TSchema {
   return t.Undefined(Options(type))
 }
+
 // ------------------------------------------------------------------
-// Default
+// Void
 // ------------------------------------------------------------------
-type TFromDefault<Type extends z.ZodType, Result = TFromType<Type>> = Result
-function FromDefault(type: z.ZodDefault<any>): t.TSchema {
-  const inner = FromType(type.unwrap())
-  // Note: we might need to extract the default value differently in Zod v4
-  return t.Optional(inner, type.def.defaultValue())
+type TFromVoid = t.TVoid
+function FromVoid<Type extends z.ZodVoid>(_def: Type): t.TSchema {
+  return t.Void()
 }
 // ------------------------------------------------------------------
 // Type
 // ------------------------------------------------------------------
 // prettier-ignore
-type TFromType<Type extends z.ZodType> = 
+type TFromType<Type extends z.core.$ZodType> = (
   Type extends z.ZodAny ? TFromAny :
-  Type extends z.ZodArray<infer T extends z.ZodType> ? TFromArray<T> :
+  Type extends z.ZodArray<infer U extends z.ZodType> ? TFromArray<U> :
   Type extends z.ZodBigInt ? TFromBigInt :
   Type extends z.ZodBoolean ? TFromBoolean :
+  Type extends z.ZodCatch<infer C extends z.ZodType> ? TFromCatch<C> :
+  // Type extends z.ZodCustom ? TFromCustom : // No idea how to handle in TypeBox
   Type extends z.ZodDate ? TFromDate :
-  Type extends z.ZodIntersection<infer L extends z.ZodType, infer R extends z.ZodType> ? TFromIntersect<L, R> :
-  Type extends z.ZodLiteral<infer T extends string | number | boolean> ? TFromLiteral<T> :
+  Type extends z.ZodDefault<infer D extends z.ZodType> ? TFromDefault<D> :
+  Type extends z.ZodDiscriminatedUnion<infer T extends [z.ZodType, ...z.ZodType[]]> ? TFromUnion<T> :
+  Type extends z.ZodEnum<infer E extends z.core.util.EnumLike> ? TFromEnum<E> :
+  Type extends z.ZodLazy<infer L extends z.ZodType> ? TFromLazy<L> :
+  Type extends z.ZodLiteral<infer V extends string | number | boolean> ? TFromLiteral<V> :
+  // Type extends z.ZodMap<infer K extends z.ZodType, infer V extends z.ZodType> ? TFromMap<K, V> : // no such jsonschema
+  Type extends z.ZodNever ? TFromNever :
   Type extends z.ZodNull ? TFromNull :
+  Type extends z.ZodNullable<infer N extends z.ZodType> ? TFromNullable<N> :
   Type extends z.ZodNumber ? TFromNumber :
-  Type extends z.ZodOptional<infer T extends z.ZodType> ? TFromOptional<T> :
+  Type extends z.ZodObject<infer O> ? TFromObject<O> :
+  Type extends z.ZodOptional<infer O extends z.ZodType> ? TFromOptional<O> :
+  // Type extends z.ZodPipe<infer I extends z.ZodType, infer O extends z.ZodType> ? TFromPipe<I, O> :
+  Type extends z.ZodPromise<infer P extends z.ZodType> ? TFromPromise<P> :
+  Type extends z.ZodRecord<infer K2 extends z.core.$ZodRecordKey, infer V2 extends z.ZodType> ? TFromRecord<K2, V2> :
+  // Type extends z.ZodSet<infer S extends z.ZodType> ? TFromSet<S> :
   Type extends z.ZodString ? TFromString :
+  Type extends z.ZodSymbol ? TFromSymbol :
+  Type extends z.ZodTemplateLiteral ? TFromTemplateLiteral<Type> :
+  Type extends z.ZodTransform<infer O extends z.ZodType, infer I extends z.ZodType> ? TFromTransform<I, O> : // suspicious  
+  Type extends z.ZodTuple<infer Types> ? TFromTuple<t.Assert<Types, z.ZodTypeAny[]>> :  
+  Type extends z.ZodUndefined ? TFromUndefined :
   Type extends z.ZodUnion<infer T extends [z.ZodType, ...z.ZodType[]]> ? TFromUnion<T> :
   Type extends z.ZodUnknown ? TFromUnknown :
-  Type extends z.ZodUndefined ? TFromUndefined :
-  Type extends z.ZodDefault<infer T extends z.ZodType> ? TFromDefault<T> :
-  t.TSchema
+  Type extends z.ZodVoid ? TFromVoid :
+  // Intersection (Ensure Last Due to Zod Differentiation Issue)
+  Type extends z.ZodIntersection<infer L extends z.ZodType, infer R extends z.ZodType> ? TFromIntersect<L, R> :
 
-
-// ------------------------------------------------------------------
-// Transform & Pipe
-// ------------------------------------------------------------------
-function FromTransform(type: z.ZodTransform<any, any>): t.TSchema {
-  // Get the input type and pass it through the FromType function
-  const input = type._zod.input as z.ZodType;
-  return FromType(input);
-}
-
-function FromPipe(type: z.ZodPipe<any, any>): t.TSchema {
-  // Get the input type and pass it through the FromType function
-  const input = type.def.in as z.ZodType;
-  return FromType(input);
-}
+  t.TNever
+)
 
 // prettier-ignore
 function FromType(type: z.ZodType): t.TSchema {
-  if(type instanceof z.ZodString 
+  if (type instanceof z.ZodString
     || type instanceof z.ZodStringFormat
     || IsStringInternals(type)) {
     return FromStringLike(type);
   }
-  
-  if (type instanceof z.ZodAny) return FromAny(type)
-  if (type instanceof z.ZodArray) return FromArray(type)
-  if (type instanceof z.ZodBigInt) return FromBigInt(type)
-  if (type instanceof z.ZodBoolean) return FromBoolean(type)
-  if (type instanceof z.ZodDate) return FromDate(type)
-  if (type instanceof z.ZodEnum) return FromEnum(type)
-  if (type instanceof z.ZodIntersection) return FromIntersect(type)
-  if (type instanceof z.ZodLiteral) return FromLiteral(type)
-  if (type instanceof z.ZodNull) return FromNull(type)
-  if (type instanceof z.ZodNumber) return FromNumber(type)
-  if (type instanceof z.ZodObject) return FromObject(type)
-  if (type instanceof z.ZodOptional) return FromOptional(type)
-  if (type instanceof z.ZodPipe) return FromPipe(type)
-  if (type instanceof z.ZodRecord) return FromRecord(type)
-  // if (type instanceof z.ZodString) return FromString(type)
-  if (type instanceof z.ZodTransform) return FromTransform(type)
-  if (type instanceof z.ZodTuple) return FromTuple(type)
-  if (type instanceof z.ZodUnion) return FromUnion(type)
-  if (type instanceof z.ZodUnknown) return FromUnknown(type)
-  if (type instanceof z.ZodUndefined) return FromUndefined(type)
-  if (type instanceof z.ZodDefault) return FromDefault(type)
-  return t.Never()
+  if (type instanceof z.ZodAny) return FromAny(type);
+  if (type instanceof z.ZodArray) return FromArray(type);
+  if (type instanceof z.ZodBigInt) return FromBigInt(type);
+  if (type instanceof z.ZodBoolean) return FromBoolean(type);
+  if (type instanceof z.ZodCatch) return FromCatch(type);
+  // if (type instanceof z.ZodCustom) return FromCustom(type);
+  if (type instanceof z.ZodDate) return FromDate(type);
+  if (type instanceof z.ZodDefault) return FromDefault(type);
+  if (type instanceof z.ZodDiscriminatedUnion) return FromUnion(type);
+  if (type instanceof z.ZodEnum) return FromEnum(type);
+  if (type instanceof z.ZodIntersection) return FromIntersect(type);
+  if (type instanceof z.ZodLazy) return FromLazy(type);
+  if (type instanceof z.ZodLiteral) return FromLiteral(type);
+  // if (type instanceof z.ZodMap) return FromMap(type);
+  if (type instanceof z.ZodNullable) return FromNullable(type);
+  if (type instanceof z.ZodNumber) return FromNumber(type);
+  if (type instanceof z.ZodObject) return FromObject(type);
+  if (type instanceof z.ZodOptional) return FromOptional(type);
+  // if (type instanceof z.ZodPipe) return FromPipe(type);
+  if (type instanceof z.ZodPromise) return FromPromise(type);
+  if (type instanceof z.ZodReadonly) return FromReadonly(type);
+  if (type instanceof z.ZodRecord) return FromRecord(type);
+  // if (type instanceof z.ZodSet) return FromSet(type);
+  if (type instanceof z.ZodSymbol) return FromSymbol(type);
+  if (type instanceof z.ZodTemplateLiteral) return FromTemplateLiteral(type);
+  if (type instanceof z.ZodTransform) return FromTransform(type);
+  if (type instanceof z.ZodTuple) return FromTuple(type);
+  if (type instanceof z.ZodUnion) return FromUnion(type);
+  if (type instanceof z.ZodUnknown) return FromUnknown(type);
+  if (type instanceof z.ZodUndefined) return FromUndefined(type);
+  if (type instanceof z.ZodVoid) return FromVoid(type);
+  return t.Never();
 }
 
 // ------------------------------------------------------------------
