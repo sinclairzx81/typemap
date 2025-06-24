@@ -65,7 +65,7 @@ export class StandardSchemaProps<Type extends t.TSchema, Static = t.Static<Type>
   // ----------------------------------------------------------------
   private __createIssues(value: unknown) {
     const errors = [...Value.Errors(this.__check.Schema(), value)]
-    const issues: s.StandardSchemaV1.Issue[] = errors.map((error) => ({ ...error, path: [error.path] }))
+    const issues: s.StandardSchemaV1.Issue[] = errors.map((error) => ({ ...error, path: error.path.split("/").slice(1) }))
     return { issues }
   }
   private __createValue(value: unknown) {
