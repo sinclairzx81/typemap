@@ -1,5 +1,6 @@
 import { Assert } from './assert'
 import { TypeBox, Valibot, Zod, Compile } from '@sinclair/typemap'
+import { ZodPathFromJsonPointer } from 'src/compile/path'
 
 describe('Compile', () => {
   // ----------------------------------------------------------------
@@ -51,5 +52,40 @@ describe('Compile', () => {
     const R = C['~standard'].validate(12345)
     Assert.IsTrue('issues' in R)
     Assert.IsTrue(R.issues!.length > 0)
+  })
+})
+
+describe('ZodPathFromJsonPointer', () => {
+  it('Should convert empty string', () => {
+    const jsonPointer = ''
+    Assert.IsEqual(ZodPathFromJsonPointer(jsonPointer), [])
+  })
+  it('Should convert whole object path', () => {
+    const jsonPointer = '/'
+    Assert.IsEqual(ZodPathFromJsonPointer(jsonPointer), [''])
+  })
+  it('Should convert nested object path', () => {
+    const jsonPointer = '/a/b'
+    Assert.IsEqual(ZodPathFromJsonPointer(jsonPointer), ['a', 'b'])
+  })
+  it('Should convert array path', () => {
+    const jsonPointer = '/a/0'
+    Assert.IsEqual(ZodPathFromJsonPointer(jsonPointer), ['a', 0])
+  })
+  it('Should convert keys which looks like array index', () => {
+    const jsonPointer = '/a/"0"'
+    Assert.IsEqual(ZodPathFromJsonPointer(jsonPointer), ['a', '"0"'])
+  })
+  it('Should convert keys with / escape', () => {
+    const jsonPointer = '/a~1b'
+    Assert.IsEqual(ZodPathFromJsonPointer(jsonPointer), ['a/b'])
+  })
+  it('Should convert keys with ~ escape', () => {
+    const jsonPointer = '/m~0n'
+    Assert.IsEqual(ZodPathFromJsonPointer(jsonPointer), ['m~n'])
+  })
+  it('Should convert keys with ~ and / escape', () => {
+    const jsonPointer = '/m~01n'
+    Assert.IsEqual(ZodPathFromJsonPointer(jsonPointer), ['m~1n'])
   })
 })

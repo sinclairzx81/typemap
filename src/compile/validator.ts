@@ -29,6 +29,7 @@ THE SOFTWARE.
 import { TypeCheck, ValueErrorIterator } from '@sinclair/typebox/compiler'
 import { Value } from '@sinclair/typebox/value'
 import * as t from '@sinclair/typebox'
+import { ZodPathFromJsonPointer } from './path'
 import * as s from './standard'
 
 // ------------------------------------------------------------------
@@ -65,7 +66,7 @@ export class StandardSchemaProps<Type extends t.TSchema, Static = t.Static<Type>
   // ----------------------------------------------------------------
   private __createIssues(value: unknown) {
     const errors = [...Value.Errors(this.__check.Schema(), value)]
-    const issues: s.StandardSchemaV1.Issue[] = errors.map((error) => ({ ...error, path: error.path.split("/").slice(1) }))
+    const issues: s.StandardSchemaV1.Issue[] = errors.map((error) => ({ ...error, path: ZodPathFromJsonPointer(error.path) }))
     return { issues }
   }
   private __createValue(value: unknown) {
